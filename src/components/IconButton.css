@@ -1,0 +1,50 @@
+.icon-action {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font: inherit;
+  height: 2.35rem;
+  justify-content: center;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+  width: 2.35rem;
+}
+
+.icon-action:hover {
+  transform: translateY(-1px);
+}
+
+.icon-action--primary,
+.icon-action--confirm {
+  background: linear-gradient(135deg, var(--primary), var(--coral));
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.icon-action--edit {
+  background: #f1dfc5;
+  border-color: rgba(128, 82, 38, 0.28);
+  color: #80521f;
+}
+
+.icon-action--danger {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.26);
+  color: var(--rose);
+}
+
+.icon-action--gold {
+  background: #fff4cf;
+  border-color: rgba(181, 129, 25, 0.22);
+  color: #94601d;
+}
+
+.icon-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}

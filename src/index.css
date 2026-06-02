@@ -1,0 +1,117 @@
+:root {
+  --app-bg: #fff3df;
+  --app-bg-cool: #dff8ff;
+  --surface: rgba(255, 252, 245, 0.84);
+  --surface-solid: #ffffff;
+  --ink: #172026;
+  --muted: #66717d;
+  --line: rgba(41, 49, 61, 0.12);
+  --primary: #00a7c8;
+  --primary-dark: #056274;
+  --primary-soft: #d8f8ff;
+  --coral: #ff6b4a;
+  --coral-soft: #ffe1d8;
+  --lime: #a3e635;
+  --lime-soft: #ecfccb;
+  --teal: #00a884;
+  --teal-soft: #d9fff4;
+  --rose: #f43f5e;
+  --amber: #f59e0b;
+  --paper: #fffaf0;
+  --paper-edge: #e8ddc8;
+  --shadow-soft: 0 18px 45px rgba(24, 32, 46, 0.1);
+  --shadow-deep: 0 32px 90px rgba(31, 41, 55, 0.18);
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --task-font: 'Avenir Next', 'Nunito Sans', Figtree, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  font-family: Figtree, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme='dark'] {
+  --app-bg: #10151b;
+  --app-bg-cool: #17242c;
+  --surface: rgba(28, 35, 43, 0.86);
+  --surface-solid: #1a222b;
+  --ink: #f4efe5;
+  --muted: #b8c1c8;
+  --line: rgba(244, 239, 229, 0.16);
+  --primary: #33c7df;
+  --primary-dark: #9defff;
+  --primary-soft: rgba(51, 199, 223, 0.16);
+  --coral: #ff8166;
+  --coral-soft: rgba(255, 129, 102, 0.18);
+  --lime: #b7ee63;
+  --lime-soft: rgba(183, 238, 99, 0.14);
+  --teal: #40d9bb;
+  --teal-soft: rgba(64, 217, 187, 0.14);
+  --rose: #fb7185;
+  --amber: #f8c052;
+  --paper: #2f271d;
+  --paper-edge: #5f4c34;
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.28);
+  --shadow-deep: 0 32px 90px rgba(0, 0, 0, 0.38);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(0, 167, 200, 0.2), transparent 28rem),
+    radial-gradient(circle at 82% 12%, rgba(255, 107, 74, 0.2), transparent 26rem),
+    radial-gradient(circle at 50% 90%, rgba(163, 230, 53, 0.18), transparent 28rem),
+    linear-gradient(135deg, var(--app-bg) 0%, var(--app-bg-cool) 100%);
+  color: var(--ink);
+  margin: 0;
+  min-width: 320px;
+  min-height: 100svh;
+  overflow-x: hidden;
+}
+
+:root[data-theme='dark'] .surface,
+:root[data-theme='dark'] .smart-toolbar,
+:root[data-theme='dark'] .diary-create-strip,
+:root[data-theme='dark'] .toolbar-field,
+:root[data-theme='dark'] .recent-note,
+:root[data-theme='dark'] .kanban-column,
+:root[data-theme='dark'] .column-task-form,
+:root[data-theme='dark'] .task-card,
+:root[data-theme='dark'] .theme-toggle,
+:root[data-theme='dark'] .profile-menu__panel,
+:root[data-theme='dark'] .profile-menu__trigger {
+  background: rgba(28, 35, 43, 0.78);
+  border-color: rgba(244, 239, 229, 0.14);
+}
+
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] textarea {
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] .btn-subtle,
+:root[data-theme='dark'] .icon-action,
+:root[data-theme='dark'] .icon-button {
+  background: rgba(244, 239, 229, 0.08);
+  border-color: rgba(244, 239, 229, 0.16);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100svh;
+}

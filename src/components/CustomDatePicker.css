@@ -1,0 +1,110 @@
+.custom-date {
+  position: relative;
+}
+
+.custom-date__trigger {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-family: var(--task-font);
+  font-weight: 850;
+  gap: 0.5rem;
+  min-height: 2.65rem;
+  justify-content: flex-start;
+  padding: 0.65rem 0.9rem;
+  width: 100%;
+}
+
+.custom-date__trigger svg {
+  color: var(--primary-dark);
+}
+
+.custom-date__panel {
+  background: rgba(255, 252, 245, 0.98);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 55px rgba(82, 64, 35, 0.18);
+  display: grid;
+  gap: 0.8rem;
+  left: 0;
+  min-width: min(19rem, calc(100vw - 2rem));
+  padding: 0.9rem;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  z-index: 70;
+}
+
+.custom-date__header {
+  align-items: center;
+  color: var(--primary-dark);
+  display: flex;
+  gap: 0.6rem;
+  justify-content: space-between;
+  text-transform: capitalize;
+}
+
+.custom-date__header button {
+  align-items: center;
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+  border-radius: 999px;
+  color: var(--primary-dark);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.custom-date__weekdays,
+.custom-date__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.custom-date__weekdays {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.custom-date__grid button {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 850;
+  min-height: 2.1rem;
+}
+
+.custom-date__grid button.is-muted {
+  color: #b4a58e;
+}
+
+.custom-date__grid button.is-selected {
+  background: linear-gradient(135deg, var(--primary), var(--coral));
+  border-color: transparent;
+  color: #ffffff;
+}
+
+@media (max-width: 420px) {
+  .custom-date__panel {
+    left: 50%;
+    min-width: min(18rem, calc(100vw - 2rem));
+    transform: translateX(-50%);
+  }
+}
+
+:root[data-theme='dark'] .custom-date__panel {
+  background: rgba(28, 35, 43, 0.98);
+}

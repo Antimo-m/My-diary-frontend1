@@ -1,0 +1,81 @@
+.diary-page-card {
+  background: linear-gradient(180deg, #ffffff, var(--paper));
+  border: 1px solid rgba(232, 221, 200, 0.9);
+  border-radius: 26px;
+  box-shadow: 0 22px 50px rgba(76, 59, 35, 0.13);
+  overflow: hidden;
+  position: relative;
+}
+
+.diary-page-card::after {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), transparent);
+  content: '';
+  inset: 0 auto 0 1.2rem;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
+}
+
+.diary-card-link {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.diary-card-cover {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, #ecebff, #dff7f3);
+  overflow: hidden;
+}
+
+.diary-card-cover img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.diary-card-cover-fallback {
+  background: #fff8ea;
+  object-fit: cover;
+}
+
+.diary-card-body {
+  padding: 1.1rem 1.1rem 3.7rem;
+}
+
+.diary-card-body h2 {
+  font-size: 1.25rem;
+  font-weight: 900;
+  margin: 0 0 0.35rem;
+}
+
+.diary-card-body time {
+  color: var(--amber);
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 900;
+  margin-bottom: 0.75rem;
+}
+
+.diary-card-body p {
+  color: #586174;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.diary-card-actions {
+  align-items: center;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  position: absolute;
+  right: 1rem;
+  z-index: 2;
+}

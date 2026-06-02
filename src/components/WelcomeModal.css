@@ -1,0 +1,20 @@
+.welcome-modal__icon {
+  align-items: center;
+  background: linear-gradient(135deg, var(--primary), var(--coral));
+  border-radius: 20px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 1.5rem;
+  height: 3.5rem;
+  justify-content: center;
+  width: 3.5rem;
+}
+
+.welcome-modal__check {
+  align-items: center;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 0.86rem;
+  font-weight: 900;
+  gap: 0.55rem;
+}
