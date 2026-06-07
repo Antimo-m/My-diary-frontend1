@@ -3,7 +3,7 @@ import apiClient from './apiClient'
 export async function listDiaryNotes(params = {}) {
   const response = await apiClient.get('/diary-notes', { params })
 
-  return response.data.data
+  return response.data
 }
 
 export async function getDiaryNote(id) {

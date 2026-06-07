@@ -24,6 +24,13 @@
   color: var(--primary-dark);
 }
 
+.custom-date__trigger:focus-visible,
+.custom-date__header button:focus-visible,
+.custom-date__grid button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 62%, white);
+  outline-offset: 3px;
+}
+
 .custom-date__panel {
   background: rgba(255, 252, 245, 0.98);
   border: 1px solid var(--line);
@@ -107,4 +114,12 @@
 
 :root[data-theme='dark'] .custom-date__panel {
   background: rgba(28, 35, 43, 0.98);
+}
+
+:root[data-theme='dark'] .custom-date__grid button.is-muted {
+  color: #7f8993;
+}
+
+:root[data-theme='dark'] .custom-date__header button {
+  background: rgba(51, 199, 223, 0.14);
 }

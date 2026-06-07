@@ -1,23 +1,34 @@
-import { DndContext, PointerSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
-import { useEffect, useState } from 'react'
-import { FiAlertTriangle, FiCalendar, FiCheck, FiEdit3, FiMove, FiPlus, FiRotateCcw, FiSearch, FiTrash2 } from 'react-icons/fi'
+import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { useEffect, useRef, useState } from 'react'
+import { FiAlertTriangle, FiCalendar, FiCheck, FiEdit3, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
+import AppToast from '../components/AppToast'
 import ColorPaletteInput from '../components/ColorPaletteInput'
 import CustomDatePicker from '../components/CustomDatePicker'
 import IconButton from '../components/IconButton'
+import KanbanHub from '../components/KanbanHub'
+import KanbanTaskForm from '../components/KanbanTaskForm'
+import { KanbanColumn, LabelPill } from '../components/KanbanBoardParts'
 import Modal from '../components/Modal'
 import UserMessage from '../components/UserMessage'
+import { useI18n } from '../i18n/useI18n'
 import {
   createColumn,
   createLabel,
+  createProject,
   createTask,
   deleteColumn,
   deleteLabel,
+  deleteProject,
   deleteTask,
   getKanbanBoard,
+  getKanbanProject,
+  listKanbanProjects,
   moveTask,
+  toggleTaskComplete,
   updateColumn,
   updateLabel,
+  updateProject,
   updateTask,
 } from '../services/kanbanApi'
 import { getApiError } from '../utils/apiErrors'
@@ -31,17 +42,41 @@ const emptyTaskForm = {
   due_time: '',
   reminder_option: 'none',
   custom_reminder_at: '',
-  color: '#00a7c8',
+  color: '#d6a43a',
   label_ids: [],
 }
-const reminderOptions = [
-  { value: 'none', label: 'Nessun promemoria' },
-  { value: 'custom', label: 'Scegli data e ora' },
-]
-const emptyColumnForm = { title: '', color: '#06b6d4' }
-const emptyLabelForm = { name: '', color: '#00a7c8' }
-const reminderAfterDueMessage = 'Il promemoria non puo essere successivo alla scadenza dell attivita.'
-const reminderWithoutDueDateMessage = 'Imposta prima la scadenza dell attivita.'
+const emptyColumnForm = { title: '', color: '#d6a43a' }
+const emptyLabelForm = { name: '', color: '#d6a43a' }
+const emptyProjectForm = { name: '', icon: 'folder' }
+
+function initialKanbanRoute() {
+  const projectMatch = window.location.pathname.match(/^\/kanban\/project\/(\d+)/)
+
+  if (projectMatch) {
+    return { mode: 'project', projectId: Number(projectMatch[1]) }
+  }
+
+  if (window.location.pathname === '/kanban/daily') {
+    return { mode: 'daily', projectId: null }
+  }
+
+  return { mode: 'home', projectId: null }
+}
+
+function clockPart(value) {
+  return value ? value.slice(0, 5) : ''
+}
+
+function localDateTimeLabel(value, localeTag) {
+  if (!value) {
+    return ''
+  }
+
+  const date = value.slice(0, 10)
+  const time = value.slice(11, 16)
+
+  return `${new Date(`${date}T00:00:00`).toLocaleDateString(localeTag)}${time ? `, ${time}` : ''}`
+}
 
 function buildDueDateTime({ due_date, due_time }) {
   if (!due_date) {
@@ -51,200 +86,24 @@ function buildDueDateTime({ due_date, due_time }) {
   return new Date(`${due_date}T${due_time || '23:59'}`)
 }
 
-function reminderValidationMessage(taskForm) {
+function reminderValidationMessage(taskForm, t) {
   if (taskForm.reminder_option !== 'custom') {
     return ''
   }
 
-  if (!taskForm.due_date) {
-    return reminderWithoutDueDateMessage
-  }
-
   if (!taskForm.custom_reminder_at) {
-    return 'Scegli data e ora del promemoria.'
+    return t('task.selectReminder')
   }
 
   const reminderAt = new Date(taskForm.custom_reminder_at)
   const dueAt = buildDueDateTime(taskForm)
 
-  return dueAt && reminderAt > dueAt ? reminderAfterDueMessage : ''
+  return dueAt && reminderAt > dueAt ? t('task.reminderHint') : ''
 }
 
-function LabelPill({ action, label }) {
-  return (
-    <span className="label-pill" style={{ '--label-color': label.color }}>
-      <span className="label-dot" aria-hidden="true" />
-      <span>{label.name}</span>
-      {action}
-    </span>
-  )
-}
-
-function TaskCard({ column, onDelete, onEdit, task }) {
-  const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggable({
-    id: `task-${task.id}`,
-    data: { columnId: column.id, task },
-  })
-
-  return (
-    <article
-      className={`task-card ${isDragging ? 'is-dragging' : ''}`}
-      ref={setNodeRef}
-      style={{
-        '--task-color': task.color ?? column.color,
-        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-      }}
-    >
-      <button className="task-drag-handle" type="button" aria-label={`Trascina ${task.title}`} {...attributes} {...listeners}>
-        <FiMove aria-hidden="true" />
-      </button>
-      <div className="task-card-content">
-        <h3>{task.title}</h3>
-        {task.description ? <p>{task.description}</p> : null}
-        {task.due_date ? (
-          <span className="task-deadline" title="La data rappresenta la scadenza dell'attivita.">
-            <FiCalendar aria-hidden="true" />
-            Scadenza {new Date(task.due_date).toLocaleDateString('it-IT')}
-          </span>
-        ) : null}
-        <div className="task-card-labels">
-          {task.labels.map((label) => (
-            <LabelPill label={label} key={`${task.id}-${label.id}`} />
-          ))}
-        </div>
-      </div>
-      <div className="task-card-actions">
-        <button className="task-action task-action--edit" type="button" onClick={() => onEdit(column, task)} aria-label="Modifica attivita">
-          <FiEdit3 aria-hidden="true" />
-        </button>
-        <button className="task-action task-action--danger" type="button" onClick={() => onDelete(task)} aria-label="Elimina attivita">
-          <FiTrash2 aria-hidden="true" />
-        </button>
-      </div>
-    </article>
-  )
-}
-
-function KanbanColumn({ activeTaskColumnId, board, closeTaskForm, column, editingTask, loading, onDeleteColumn, onDeleteTask, onEditColumn, onEditTask, onOpenTaskForm, onSubmitTask, onToggleTaskLabel, taskForm, updateTaskField, setTaskForm }) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: `column-${column.id}`,
-    data: { columnId: column.id },
-  })
-
-  return (
-    <section className={`kanban-column ${isOver ? 'is-over' : ''}`} ref={setNodeRef} style={{ '--column-color': column.color }}>
-      <header className="kanban-column-header">
-        <div>
-          <h2>{column.title}</h2>
-          <span className="kanban-count">{column.tasks.length}</span>
-        </div>
-        <div className="column-actions">
-          <IconButton variant="edit" onClick={() => onEditColumn(column)} label="Modifica colonna"><FiEdit3 /></IconButton>
-          <IconButton variant="danger" onClick={() => onDeleteColumn(column)} label="Elimina colonna"><FiTrash2 /></IconButton>
-        </div>
-      </header>
-
-      <div className="kanban-dropzone">
-        {column.tasks.length ? (
-          column.tasks.map((task) => (
-            <TaskCard column={column} key={task.id} onDelete={onDeleteTask} onEdit={onEditTask} task={task} />
-          ))
-        ) : (
-          <div className="kanban-empty">Trascina qui una attivita oppure creane una nuova.</div>
-        )}
-
-        {activeTaskColumnId === column.id ? (
-          <form className="column-task-form task-composer" onSubmit={onSubmitTask}>
-            <header className="task-composer__header">
-              <span className="eyebrow">{editingTask ? 'Modifica attivita' : 'Nuova attivita'}</span>
-              <strong>{editingTask ? 'Aggiorna i dettagli' : 'Organizza un nuovo impegno'}</strong>
-            </header>
-
-            <section className="task-composer__section">
-              <label className="task-field task-field--title">
-                <span>Titolo</span>
-                <input name="title" value={taskForm.title} onChange={updateTaskField} placeholder="Es. Preparare la riunione" required />
-              </label>
-              <label className="task-field">
-                <span>Note</span>
-                <textarea name="description" value={taskForm.description} onChange={updateTaskField} placeholder="Aggiungi dettagli utili, link o appunti veloci" rows="4" />
-              </label>
-            </section>
-
-            <section className="task-composer__section">
-              <div className="task-section-title">
-                <FiCalendar aria-hidden="true" />
-                <span>Scadenza e promemoria</span>
-              </div>
-              <div className="task-editor__row">
-                <label className="deadline-field">
-                  <span>Data scadenza</span>
-                  <CustomDatePicker label="Scadenza attivita" value={taskForm.due_date} onChange={(value) => setTaskForm((current) => ({ ...current, due_date: value }))} />
-                </label>
-                <label className="deadline-field">
-                  <span>Ora scadenza</span>
-                  <input className="time-input" name="due_time" type="time" value={taskForm.due_time} onChange={updateTaskField} aria-label="Ora scadenza attivita" />
-                </label>
-              </div>
-              <div className="task-editor__row task-editor__row--stacked">
-                <label className="deadline-field">
-                  <span>Promemoria email</span>
-                  <select name="reminder_option" value={taskForm.reminder_option} onChange={updateTaskField}>
-                    {reminderOptions.map((option) => (
-                      <option value={option.value} key={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
-                {taskForm.reminder_option === 'custom' ? (
-                  <label className="deadline-field">
-                    <span>Data e ora promemoria</span>
-                    <input className="datetime-input" name="custom_reminder_at" type="datetime-local" value={taskForm.custom_reminder_at} onChange={updateTaskField} required />
-                    <small>Scegli un orario precedente alla scadenza dell attivita.</small>
-                  </label>
-                ) : null}
-              </div>
-            </section>
-
-            <section className="task-composer__section">
-              <ColorPaletteInput label="Colore attivita" value={taskForm.color} onChange={(value) => setTaskForm((current) => ({ ...current, color: value }))} />
-              {board.labels.length ? (
-                <div className="task-editor__labels" aria-label="Etichette attivita">
-                  {board.labels.map((label) => (
-                    <label className="label-check" style={{ '--label-color': label.color }} key={`task-label-${column.id}-${label.id}`}>
-                      <input
-                        type="checkbox"
-                        checked={taskForm.label_ids.includes(label.id)}
-                        onChange={() => onToggleTaskLabel(label.id)}
-                      />
-                      <span className="label-pill">
-                        <span className="label-dot" aria-hidden="true" />
-                        <span>{label.name}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              ) : null}
-            </section>
-            <div className="task-editor__actions">
-              <button className="btn btn-primary" type="submit" disabled={loading}>
-                <FiCheck aria-hidden="true" />
-                {editingTask ? 'Aggiorna' : 'Aggiungi'}
-              </button>
-              <button className="btn btn-cancel" type="button" onClick={closeTaskForm}>Annulla</button>
-            </div>
-          </form>
-        ) : (
-          <button className="add-task-in-column" type="button" onClick={() => onOpenTaskForm(column)}>
-            <FiPlus aria-hidden="true" />
-            Aggiungi attivita
-          </button>
-        )}
-      </div>
-    </section>
-  )
-}
-
-function KanbanPage({ authLoading, onLogin, onRegister, user }) {
+function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
+  const { localeTag, t, timeZone } = useI18n()
+  const [kanbanRoute, setKanbanRoute] = useState(initialKanbanRoute)
   const [activeTaskColumnId, setActiveTaskColumnId] = useState(null)
   const [board, setBoard] = useState({ columns: [], labels: [], date: today })
   const [columnDeleteTarget, setColumnDeleteTarget] = useState(null)
@@ -259,22 +118,54 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
   const [labelEditTarget, setLabelEditTarget] = useState(null)
   const [labelForm, setLabelForm] = useState(emptyLabelForm)
   const [loading, setLoading] = useState(false)
-  const [reminderModalMessage, setReminderModalMessage] = useState('')
+  const [projectForm, setProjectForm] = useState(emptyProjectForm)
+  const [projectEditForm, setProjectEditForm] = useState(emptyProjectForm)
+  const [projectEditTarget, setProjectEditTarget] = useState(null)
+  const [projectDeleteTarget, setProjectDeleteTarget] = useState(null)
+  const [projects, setProjects] = useState([])
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [validationToast, setValidationToast] = useState('')
+  const [successToast, setSuccessToast] = useState('')
   const [taskDeleteTarget, setTaskDeleteTarget] = useState(null)
+  const [taskDetailTarget, setTaskDetailTarget] = useState(null)
   const [taskForm, setTaskForm] = useState(emptyTaskForm)
+  const boardRef = useRef(null)
+  const pendingColumnFocusId = useRef(null)
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 130, tolerance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 90, tolerance: 8 } }),
   )
 
-  const loadBoard = async (nextDate = date) => {
+  const navigateKanban = (mode, projectId = null) => {
+    const path = mode === 'project' ? `/kanban/project/${projectId}` : mode === 'daily' ? '/kanban/daily' : '/kanban'
+    window.history.pushState({}, '', path)
+    setKanbanRoute({ mode, projectId })
+  }
+
+  const loadProjects = async () => {
+    try {
+      setProjects(await listKanbanProjects())
+    } catch (requestError) {
+      setProjects([])
+      setError(getApiError(requestError, t('kanban.projectsLoadError')))
+    }
+  }
+
+  const loadBoard = async (nextDate = date, route = kanbanRoute) => {
     setLoading(true)
     setError('')
 
     try {
-      setBoard(await getKanbanBoard(nextDate))
+      if (route.mode === 'project' && route.projectId) {
+        const projectBoard = await getKanbanProject(route.projectId)
+        setSelectedProject(projectBoard.project)
+        setBoard({ columns: projectBoard.columns, labels: projectBoard.labels, date: nextDate })
+      } else {
+        setSelectedProject(null)
+        setBoard(await getKanbanBoard(nextDate))
+      }
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a caricare la Kanban.'))
+      setError(getApiError(requestError, t('kanban.loadError')))
     } finally {
       setLoading(false)
     }
@@ -282,19 +173,54 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
 
   useEffect(() => {
     if (user) {
-      void Promise.resolve().then(() => loadBoard())
+      void Promise.resolve().then(async () => {
+        await loadProjects()
+        if (kanbanRoute.mode !== 'home') {
+          await loadBoard(date, kanbanRoute)
+        }
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, kanbanRoute.mode, kanbanRoute.projectId])
+
+  useEffect(() => {
+    if (!validationToast) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => setValidationToast(''), 4000)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [validationToast])
+
+  useEffect(() => {
+    if (!successToast) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => setSuccessToast(''), 3500)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [successToast])
+
+  useEffect(() => {
+    if (!pendingColumnFocusId.current || !board.columns.length) {
+      return
+    }
+
+    const columnElement = boardRef.current?.querySelector(`[data-column-id="${pendingColumnFocusId.current}"]`)
+    pendingColumnFocusId.current = null
+    columnElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' })
+  }, [board.columns])
 
   if (authLoading) {
-    return <section className="page-container loading-state">Verifico la sessione...</section>
+    return <section className="page-container loading-state">{t('auth.wait')}</section>
   }
 
   if (!user) {
     return (
       <section className="page-container">
-        <AuthPanel onLogin={onLogin} onRegister={onRegister} />
+        <AuthPanel onForgotPassword={onForgotPassword} onLogin={onLogin} onRegister={onRegister} onResetPassword={onResetPassword} />
       </section>
     )
   }
@@ -309,6 +235,75 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
     await loadBoard(today)
   }
 
+  const submitProject = async (event) => {
+    event.preventDefault()
+    setError('')
+
+    try {
+      const project = await createProject(projectForm)
+      setProjectForm(emptyProjectForm)
+      await loadProjects()
+      navigateKanban('project', project.id)
+      setSuccessToast(t('kanban.projectCreated'))
+    } catch (requestError) {
+      setError(getApiError(requestError))
+    }
+  }
+
+  const openEditProject = (project) => {
+    setProjectEditTarget(project)
+    setProjectEditForm({ name: project.name ?? '', icon: project.icon ?? 'folder' })
+  }
+
+  const closeEditProject = () => {
+    setProjectEditTarget(null)
+    setProjectEditForm(emptyProjectForm)
+  }
+
+  const submitProjectEdit = async (event) => {
+    event.preventDefault()
+
+    if (!projectEditTarget) {
+      return
+    }
+
+    setError('')
+
+    try {
+      const updatedProject = await updateProject(projectEditTarget.id, projectEditForm)
+      setProjects((current) => current.map((project) => (project.id === updatedProject.id ? { ...project, ...updatedProject } : project)))
+      if (selectedProject?.id === updatedProject.id) {
+        setSelectedProject((current) => ({ ...current, ...updatedProject }))
+      }
+      closeEditProject()
+      setSuccessToast(t('kanban.projectUpdated'))
+    } catch (requestError) {
+      setError(getApiError(requestError))
+    }
+  }
+
+  const confirmDeleteProject = async () => {
+    if (!projectDeleteTarget) {
+      return
+    }
+
+    setError('')
+
+    try {
+      await deleteProject(projectDeleteTarget.id)
+      setProjects((current) => current.filter((project) => project.id !== projectDeleteTarget.id))
+      if (kanbanRoute.mode === 'project' && kanbanRoute.projectId === projectDeleteTarget.id) {
+        navigateKanban('home')
+        setBoard({ columns: [], labels: [], date })
+        setSelectedProject(null)
+      }
+      setProjectDeleteTarget(null)
+      setSuccessToast(t('kanban.projectDeleted'))
+    } catch (requestError) {
+      setError(getApiError(requestError))
+    }
+  }
+
   const openCreateColumn = () => {
     setColumnEditTarget(null)
     setColumnForm(emptyColumnForm)
@@ -317,7 +312,7 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
 
   const openEditColumn = (column) => {
     setColumnEditTarget(column)
-    setColumnForm({ title: column.title, color: column.color ?? '#06b6d4' })
+    setColumnForm({ title: column.title, color: column.color ?? '#d6a43a' })
     setIsColumnModalOpen(true)
   }
 
@@ -335,13 +330,18 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
       if (columnEditTarget) {
         await updateColumn(columnEditTarget.id, columnForm)
       } else {
-        await createColumn(columnForm)
+        const createdColumn = await createColumn({
+          ...columnForm,
+          ...(kanbanRoute.mode === 'project' ? { project_id: kanbanRoute.projectId } : {}),
+        })
+        pendingColumnFocusId.current = createdColumn.id
       }
 
       closeColumnModal()
       await loadBoard()
+      setSuccessToast(columnEditTarget ? t('kanban.columnUpdated') : t('kanban.columnCreated'))
     } catch (requestError) {
-      setError(getApiError(requestError, columnEditTarget ? 'Non riesco ad aggiornare la colonna.' : 'Non riesco a creare la colonna.'))
+      setError(getApiError(requestError))
     }
   }
 
@@ -354,28 +354,41 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
       await deleteColumn(columnDeleteTarget.id)
       setColumnDeleteTarget(null)
       await loadBoard()
+      setSuccessToast(t('kanban.columnDeleted'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a eliminare la colonna.'))
+      setError(getApiError(requestError))
     }
   }
 
   const openTaskForm = (column, task = null) => {
+    setTaskDetailTarget(null)
     setActiveTaskColumnId(column.id)
     setEditingTask(task)
     setTaskForm(task ? {
       title: task.title ?? '',
       description: task.description ?? '',
       due_date: task.due_date ?? '',
-      due_time: task.due_time ?? '',
+      due_time: clockPart(task.due_time),
       reminder_option: task.reminder_option ?? 'none',
       custom_reminder_at: task.custom_reminder_at ?? '',
-      color: task.color ?? column.color ?? '#00a7c8',
+      color: task.color ?? column.color ?? '#d6a43a',
       label_ids: task.labels?.map((label) => label.id) ?? [],
     } : {
       ...emptyTaskForm,
-      due_date: date,
-      color: column.color ?? '#00a7c8',
+      color: column.color ?? '#d6a43a',
     })
+  }
+
+  const openTaskDetail = (task) => {
+    setTaskDetailTarget(task)
+  }
+
+  const editTaskFromDetail = (task) => {
+    const taskColumn = board.columns.find((column) => column.id === task.kanban_column_id)
+
+    if (taskColumn) {
+      openTaskForm(taskColumn, task)
+    }
   }
 
   const closeTaskForm = () => {
@@ -390,7 +403,6 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
       ...current,
       [name]: value,
       ...(name === 'reminder_option' && value === 'none' ? { custom_reminder_at: '' } : {}),
-      ...(name === 'custom_reminder_at' && value && !current.due_date ? { due_date: value.slice(0, 10) } : {}),
     }))
   }
 
@@ -411,16 +423,16 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
     setError('')
 
     try {
-      const validationMessage = reminderValidationMessage(taskForm)
+      const validationMessage = reminderValidationMessage(taskForm, t)
 
       if (validationMessage) {
-        setReminderModalMessage(validationMessage)
+        setValidationToast(validationMessage)
         return
       }
 
       const payload = {
         ...taskForm,
-        task_date: date,
+        ...(kanbanRoute.mode === 'project' ? { project_id: kanbanRoute.projectId } : { task_date: date }),
         kanban_column_id: activeTaskColumnId,
       }
 
@@ -432,8 +444,9 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
 
       closeTaskForm()
       await loadBoard()
+      setSuccessToast(editingTask ? t('kanban.taskUpdated') : t('kanban.taskCreated'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a salvare il task.'))
+      setValidationToast(getApiError(requestError))
     }
   }
 
@@ -445,9 +458,11 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
     try {
       await deleteTask(taskDeleteTarget.id)
       setTaskDeleteTarget(null)
+      setTaskDetailTarget(null)
       await loadBoard()
+      setSuccessToast(t('kanban.taskDeleted'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a eliminare il task.'))
+      setError(getApiError(requestError))
     }
   }
 
@@ -455,7 +470,15 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
     const task = active.data.current?.task
     const targetColumnId = over?.data.current?.columnId
 
-    if (!task || !targetColumnId || task.kanban_column_id === targetColumnId) {
+    if (!task || !targetColumnId) {
+      return
+    }
+
+    await moveTaskToColumn(task, targetColumnId)
+  }
+
+  const moveTaskToColumn = async (task, targetColumnId) => {
+    if (!task || task.kanban_column_id === targetColumnId) {
       return
     }
 
@@ -472,8 +495,9 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
         status: task.status,
       })
       await loadBoard()
+      setSuccessToast(t('kanban.taskMoved'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a spostare il task.'))
+      setError(getApiError(requestError))
     }
   }
 
@@ -485,7 +509,7 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
 
   const openEditLabel = (label) => {
     setLabelEditTarget(label)
-    setLabelForm({ name: label.name, color: label.color ?? '#00a7c8' })
+    setLabelForm({ name: label.name, color: label.color ?? '#d6a43a' })
     setIsLabelModalOpen(true)
   }
 
@@ -508,8 +532,9 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
 
       closeLabelModal()
       await loadBoard()
+      setSuccessToast(labelEditTarget ? t('kanban.labelUpdated') : t('kanban.labelCreated'))
     } catch (requestError) {
-      setError(getApiError(requestError, labelEditTarget ? 'Non riesco ad aggiornare etichetta.' : 'Non riesco a creare etichetta.'))
+      setError(getApiError(requestError))
     }
   }
 
@@ -522,41 +547,86 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
       await deleteLabel(labelDeleteTarget.id)
       setLabelDeleteTarget(null)
       await loadBoard()
+      setSuccessToast(t('kanban.labelDeleted'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a eliminare etichetta.'))
+      setError(getApiError(requestError))
     }
   }
+
+  const optimisticallyPatchTask = (taskId, patch) => {
+    setBoard((currentBoard) => ({
+      ...currentBoard,
+      columns: currentBoard.columns.map((column) => ({
+        ...column,
+        tasks: column.tasks.map((task) => (task.id === taskId ? { ...task, ...patch } : task)),
+      })),
+    }))
+  }
+
+  const handleToggleTaskComplete = async (task) => {
+    const nextCompleted = !task.is_completed
+    optimisticallyPatchTask(task.id, {
+      is_completed: nextCompleted,
+      completed_at: nextCompleted ? new Date().toISOString() : null,
+    })
+
+    try {
+      const updatedTask = await toggleTaskComplete(task.id)
+      optimisticallyPatchTask(task.id, updatedTask)
+      setSuccessToast(nextCompleted ? t('kanban.taskCompleted') : t('kanban.taskReopened'))
+    } catch (requestError) {
+      setError(getApiError(requestError))
+      await loadBoard()
+    }
+  }
+
+  const activeBoardTitle = kanbanRoute.mode === 'project'
+    ? selectedProject?.name ?? t('kanban.customProjects')
+    : kanbanRoute.mode === 'daily'
+      ? t('kanban.dailyTitle')
+      : t('kanban.homeTitle')
 
   return (
     <section className="kanban-page page-container">
       <header className="page-header kanban-topbar">
         <div>
-          <p className="eyebrow">Board personale</p>
-          <h1 className="page-title">Kanban</h1>
-          <p className="page-subtitle">Qui puoi organizzare la tua giornata.</p>
+          <p className="eyebrow">{kanbanRoute.mode === 'home' ? t('kanban.boardPersonal') : t('kanban.activeBoard')}</p>
+          <h1 className="page-title">{activeBoardTitle}</h1>
+          <p className="page-subtitle">{kanbanRoute.mode === 'project' ? t('kanban.projectSubtitle') : t('kanban.subtitle')}</p>
         </div>
 
       </header>
 
       <UserMessage tone="error">{error}</UserMessage>
-
-      <div className="mobile-kanban-actions">
-        <button className="fab-action" type="button" onClick={openCreateColumn} aria-label="Aggiungi colonna">
-          <FiPlus aria-hidden="true" />
-        </button>
+      <AppToast>{successToast}</AppToast>
+      <div className={`kanban-toast ${validationToast ? 'is-visible' : ''}`} aria-live="polite">
+        <UserMessage tone="error">{validationToast}</UserMessage>
       </div>
 
-      <form className="smart-toolbar list-filter-toolbar kanban-filter-toolbar" onSubmit={submitDate} aria-label="Cambia data Kanban">
-        <label className="toolbar-field journal-date-field">
-          <CustomDatePicker label="Data Kanban" value={date} onChange={setDate} />
-        </label>
-        <IconButton variant="gold" type="submit" label="Cambia data"><FiSearch /></IconButton>
-        <IconButton variant="edit" type="button" onClick={resetDate} label="Ripristina filtri"><FiRotateCcw /></IconButton>
-      </form>
+      {kanbanRoute.mode === 'home' ? (
+        <KanbanHub
+          onCreateProject={submitProject}
+          onDeleteProject={setProjectDeleteTarget}
+          onEditProject={openEditProject}
+          onOpenDaily={() => navigateKanban('daily')}
+          onOpenProject={(projectId) => navigateKanban('project', projectId)}
+          projectForm={projectForm}
+          projects={projects}
+          setProjectForm={setProjectForm}
+          t={t}
+        />
+      ) : null}
 
-      <div className="label-toolbar surface">
+      {kanbanRoute.mode !== 'home' ? (
+        <>
+          <div className="kanban-mode-actions">
+            <button className="btn btn-subtle" type="button" onClick={() => navigateKanban('home')}>{t('kanban.backToHub')}</button>
+            {kanbanRoute.mode === 'project' ? <button className="btn btn-outline" type="button" onClick={() => navigateKanban('daily')}>{t('kanban.daily')}</button> : null}
+          </div>
+
+      <div className="label-toolbar">
         <div>
-          <h2>Etichette</h2>
+          <h2>{t('kanban.labels')}</h2>
           <div className="label-chip-list">
             {board.labels.map((label) => (
               <LabelPill
@@ -564,70 +634,133 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
                 label={label}
                 action={(
                   <>
-                    <button className="chip-action chip-action--edit" type="button" onClick={() => openEditLabel(label)} aria-label={`Modifica ${label.name}`}><FiEdit3 /></button>
-                    <button className="chip-action chip-action--danger" type="button" onClick={() => setLabelDeleteTarget(label)} aria-label={`Elimina ${label.name}`}><FiTrash2 /></button>
+                    <button className="chip-action chip-action--edit" type="button" onClick={() => openEditLabel(label)} aria-label={`${t('common.save')} ${label.name}`}><FiEdit3 /></button>
+                    <button className="chip-action chip-action--danger" type="button" onClick={() => setLabelDeleteTarget(label)} aria-label={`${t('kanban.delete')} ${label.name}`}><FiTrash2 /></button>
                   </>
                 )}
               />
             ))}
           </div>
         </div>
-        <button className="fab-action label-add-button" type="button" onClick={openCreateLabel} aria-label="Crea etichetta">
+        <button className="fab-action label-add-button" type="button" onClick={openCreateLabel} aria-label={t('kanban.createLabel')}>
+          <FiPlus aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className="kanban-board-toolbar">
+        <div>
+          <p className="eyebrow">{t('kanban.columns')}</p>
+          <h2>{t('kanban.organize')}</h2>
+        </div>
+      </div>
+
+      {kanbanRoute.mode === 'daily' ? (
+      <form className="smart-toolbar list-filter-toolbar kanban-filter-toolbar" onSubmit={submitDate} aria-label={t('kanban.changeDate')}>
+        <label className="toolbar-field journal-date-field">
+          <CustomDatePicker label={t('kanban.changeDate')} value={date} onChange={setDate} />
+        </label>
+        <IconButton variant="gold" type="submit" label={t('kanban.changeDate')}><FiSearch /></IconButton>
+        <IconButton variant="edit" type="button" onClick={resetDate} label={t('kanban.resetFilters')}><FiRotateCcw /></IconButton>
+      </form>
+      ) : null}
+
+      <div className="kanban-add-column-row">
+        <button className="fab-action" type="button" onClick={openCreateColumn} aria-label={t('kanban.addColumn')}>
           <FiPlus aria-hidden="true" />
         </button>
       </div>
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="kanban-board" aria-label="Kanban della giornata">
-          {loading && !board.columns.length ? <div className="surface">Caricamento board...</div> : null}
+        <div className="kanban-board" aria-label={t('kanban.boardAria')} ref={boardRef}>
+          {loading && !board.columns.length ? <div className="surface">{t('kanban.loadingBoard')}</div> : null}
           {board.columns.map((column) => (
             <KanbanColumn
-              activeTaskColumnId={activeTaskColumnId}
-              board={board}
-              closeTaskForm={closeTaskForm}
               column={column}
-              editingTask={editingTask}
               key={column.id}
-              loading={loading}
               onDeleteColumn={setColumnDeleteTarget}
-              onDeleteTask={setTaskDeleteTarget}
               onEditColumn={openEditColumn}
-              onEditTask={openTaskForm}
+              onOpenTaskDetail={openTaskDetail}
               onOpenTaskForm={openTaskForm}
-              onSubmitTask={submitTask}
-              onToggleTaskLabel={toggleTaskLabel}
-              setTaskForm={setTaskForm}
-              taskForm={taskForm}
-              updateTaskField={updateTaskField}
+              onToggleTaskComplete={handleToggleTaskComplete}
             />
           ))}
-          <button className="kanban-column add-column-card" type="button" onClick={openCreateColumn}>
-            <span><FiPlus aria-hidden="true" /></span>
-            Aggiungi Colonna
-          </button>
         </div>
       </DndContext>
+        </>
+      ) : null}
+
+      {activeTaskColumnId ? (
+        <Modal labelledBy="task-form-title" onClose={closeTaskForm}>
+          <KanbanTaskForm
+            board={board}
+            closeTaskForm={closeTaskForm}
+            editingTask={editingTask}
+            loading={loading}
+            onSubmitTask={submitTask}
+            onToggleTaskLabel={toggleTaskLabel}
+            setTaskForm={setTaskForm}
+            taskForm={taskForm}
+            titleId="task-form-title"
+            updateTaskField={updateTaskField}
+          />
+        </Modal>
+      ) : null}
+
+      {taskDetailTarget ? (
+        <Modal labelledBy="task-detail-title" onClose={() => setTaskDetailTarget(null)}>
+          <div className="task-detail-modal" style={{ '--task-color': taskDetailTarget.color ?? '#d6a43a' }}>
+            <div className="task-detail-modal__header">
+              <p className="eyebrow">{t('kanban.detail')}</p>
+              <h2 id="task-detail-title">{taskDetailTarget.title}</h2>
+            </div>
+            {taskDetailTarget.description ? <p className="task-detail-modal__description">{taskDetailTarget.description}</p> : null}
+            <div className="task-detail-modal__meta">
+              {taskDetailTarget.due_date ? (
+                <span className="task-deadline">
+                  <FiCalendar aria-hidden="true" />
+                  {t('kanban.due')} {new Date(taskDetailTarget.due_date).toLocaleDateString(localeTag, { timeZone })}
+                  {taskDetailTarget.due_time ? `, ${clockPart(taskDetailTarget.due_time)}` : ''}
+                </span>
+              ) : <span>{t('kanban.noDue')}</span>}
+              {taskDetailTarget.custom_reminder_at ? <span>{t('kanban.reminder')}: {localDateTimeLabel(taskDetailTarget.custom_reminder_at, localeTag)}</span> : null}
+              {taskDetailTarget.reminder_sent_at ? <span>{t('kanban.emailSent')}: {localDateTimeLabel(taskDetailTarget.reminder_sent_at, localeTag)}</span> : null}
+            </div>
+            {taskDetailTarget.labels.length ? (
+              <div className="task-card-labels">
+                {taskDetailTarget.labels.map((label) => (
+                  <LabelPill label={label} key={`detail-${taskDetailTarget.id}-${label.id}`} />
+                ))}
+              </div>
+            ) : null}
+            <div className="modal-actions">
+              <IconButton variant="edit" type="button" onClick={() => editTaskFromDetail(taskDetailTarget)} label={t('task.update')}><FiEdit3 /></IconButton>
+              <IconButton variant="danger" type="button" onClick={() => setTaskDeleteTarget(taskDetailTarget)} label={t('kanban.deleteActivity')}><FiTrash2 /></IconButton>
+              <IconButton variant="gold" type="button" onClick={() => setTaskDetailTarget(null)} label={t('common.close')}><FiX /></IconButton>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       {isColumnModalOpen ? (
         <Modal labelledBy="column-modal-title" onClose={closeColumnModal}>
           <div>
-            <p className="eyebrow">{columnEditTarget ? 'Modifica colonna' : 'Nuova colonna'}</p>
-            <h2 id="column-modal-title">{columnEditTarget ? 'Rinomina colonna' : 'Crea colonna'}</h2>
+            <p className="eyebrow">{columnEditTarget ? t('kanban.saveColumn') : t('kanban.addColumn')}</p>
+            <h2 id="column-modal-title">{columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}</h2>
           </div>
           <form className="modal-form" onSubmit={submitColumn}>
             <label>
-              Nome
+              {t('kanban.name')}
               <input
                 value={columnForm.title}
                 onChange={(event) => setColumnForm((current) => ({ ...current, title: event.target.value }))}
-                placeholder="Cose da fare domani"
+                placeholder={t('kanban.columnPlaceholder')}
                 required
               />
             </label>
-            <ColorPaletteInput label="Colore colonna" value={columnForm.color} onChange={(value) => setColumnForm((current) => ({ ...current, color: value }))} />
+            <ColorPaletteInput label={t('kanban.columnColor')} value={columnForm.color} onChange={(value) => setColumnForm((current) => ({ ...current, color: value }))} />
             <div className="modal-actions">
-              <button className="btn btn-primary" type="submit"><FiCheck aria-hidden="true" />{columnEditTarget ? 'Salva' : 'Crea'}</button>
-              <button className="btn btn-cancel" type="button" onClick={closeColumnModal}>Annulla</button>
+              <IconButton variant="confirm" type="submit" label={columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}><FiCheck /></IconButton>
+              <IconButton variant="danger" type="button" onClick={closeColumnModal} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
         </Modal>
@@ -636,27 +769,27 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
       {isLabelModalOpen ? (
         <Modal labelledBy="label-modal-title" onClose={closeLabelModal}>
           <div>
-            <p className="eyebrow">{labelEditTarget ? 'Modifica etichetta' : 'Nuova etichetta'}</p>
-            <h2 id="label-modal-title">{labelEditTarget ? 'Aggiorna etichetta' : 'Crea etichetta'}</h2>
+            <p className="eyebrow">{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</p>
+            <h2 id="label-modal-title">{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</h2>
           </div>
           <form className="modal-form" onSubmit={submitLabel}>
             <label>
-              Nome
+              {t('kanban.name')}
               <input
                 value={labelForm.name}
                 onChange={(event) => setLabelForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="Focus, Casa, Urgente..."
+                placeholder={t('kanban.labelPlaceholder')}
                 required
               />
             </label>
             <div className="label-preview" style={{ '--label-color': labelForm.color }}>
               <span className="label-dot" aria-hidden="true" />
-              <span>{labelForm.name || 'Anteprima etichetta'}</span>
+              <span>{labelForm.name || t('kanban.createLabel')}</span>
             </div>
-            <ColorPaletteInput label="Colore etichetta" value={labelForm.color} onChange={(value) => setLabelForm((current) => ({ ...current, color: value }))} />
+            <ColorPaletteInput label={t('kanban.labels')} value={labelForm.color} onChange={(value) => setLabelForm((current) => ({ ...current, color: value }))} />
             <div className="modal-actions">
-              <button className="btn btn-primary" type="submit"><FiCheck aria-hidden="true" />Salva</button>
-              <button className="btn btn-cancel" type="button" onClick={closeLabelModal}>Annulla</button>
+              <IconButton variant="confirm" type="submit" label={t('kanban.saveLabel')}><FiCheck /></IconButton>
+              <IconButton variant="danger" type="button" onClick={closeLabelModal} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
         </Modal>
@@ -666,13 +799,13 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
         <Modal labelledBy="delete-column-title" onClose={() => setColumnDeleteTarget(null)}>
           <div className="danger-modal-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
-            <p className="eyebrow">Eliminazione colonna</p>
-            <h2 id="delete-column-title">Eliminare “{columnDeleteTarget.title}”?</h2>
-            <p className="modal-copy">La colonna e le sue attivita verranno rimosse definitivamente.</p>
+            <p className="eyebrow">{t('kanban.deleteColumn')}</p>
+            <h2 id="delete-column-title">{t('kanban.columnDeleteTitle')}</h2>
+            <p className="modal-copy">{t('kanban.columnDeleteCopy')}</p>
           </div>
           <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteColumn}><FiTrash2 aria-hidden="true" />Elimina</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setColumnDeleteTarget(null)}>Annulla</button>
+            <button className="btn btn-danger" type="button" onClick={confirmDeleteColumn}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
+            <button className="btn btn-cancel" type="button" onClick={() => setColumnDeleteTarget(null)}>{t('common.cancel')}</button>
           </div>
         </Modal>
       ) : null}
@@ -681,13 +814,13 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
         <Modal labelledBy="delete-task-title" onClose={() => setTaskDeleteTarget(null)}>
           <div className="danger-modal-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
-            <p className="eyebrow">Eliminazione attivita</p>
-            <h2 id="delete-task-title">Eliminare “{taskDeleteTarget.title}”?</h2>
-            <p className="modal-copy">Questa operazione non puo essere annullata.</p>
+            <p className="eyebrow">{t('kanban.deleteActivity')}</p>
+            <h2 id="delete-task-title">{t('kanban.deleteTaskTitle')} “{taskDeleteTarget.title}”?</h2>
+            <p className="modal-copy">{t('kanban.deleteTaskCopy')}</p>
           </div>
           <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteTask}><FiTrash2 aria-hidden="true" />Elimina</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setTaskDeleteTarget(null)}>Annulla</button>
+            <button className="btn btn-danger" type="button" onClick={confirmDeleteTask}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
+            <button className="btn btn-cancel" type="button" onClick={() => setTaskDeleteTarget(null)}>{t('common.cancel')}</button>
           </div>
         </Modal>
       ) : null}
@@ -696,30 +829,56 @@ function KanbanPage({ authLoading, onLogin, onRegister, user }) {
         <Modal labelledBy="delete-label-title" onClose={() => setLabelDeleteTarget(null)}>
           <div className="danger-modal-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
-            <p className="eyebrow">Eliminazione etichetta</p>
-            <h2 id="delete-label-title">Eliminare “{labelDeleteTarget.name}”?</h2>
-            <p className="modal-copy">L'etichetta verra rimossa dalle attivita associate.</p>
+            <p className="eyebrow">{t('kanban.deleteLabel')}</p>
+            <h2 id="delete-label-title">{t('kanban.deleteLabelTitle')} “{labelDeleteTarget.name}”?</h2>
+            <p className="modal-copy">{t('kanban.labelDeleteCopy')}</p>
           </div>
           <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteLabel}><FiTrash2 aria-hidden="true" />Elimina</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setLabelDeleteTarget(null)}>Annulla</button>
+            <button className="btn btn-danger" type="button" onClick={confirmDeleteLabel}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
+            <button className="btn btn-cancel" type="button" onClick={() => setLabelDeleteTarget(null)}>{t('common.cancel')}</button>
           </div>
         </Modal>
       ) : null}
 
-      {reminderModalMessage ? (
-        <Modal labelledBy="reminder-validation-title" onClose={() => setReminderModalMessage('')}>
+      {projectEditTarget ? (
+        <Modal labelledBy="project-edit-title" onClose={closeEditProject}>
+          <div>
+            <p className="eyebrow">{t('kanban.editProject')}</p>
+            <h2 id="project-edit-title">{t('kanban.renameProject')}</h2>
+          </div>
+          <form className="modal-form" onSubmit={submitProjectEdit}>
+            <label>
+              {t('kanban.name')}
+              <input
+                value={projectEditForm.name}
+                onChange={(event) => setProjectEditForm((current) => ({ ...current, name: event.target.value }))}
+                placeholder={t('kanban.projectNamePlaceholder')}
+                required
+              />
+            </label>
+            <div className="modal-actions">
+              <IconButton variant="confirm" type="submit" label={t('kanban.saveProject')}><FiCheck /></IconButton>
+              <IconButton variant="danger" type="button" onClick={closeEditProject} label={t('common.cancel')}><FiX /></IconButton>
+            </div>
+          </form>
+        </Modal>
+      ) : null}
+
+      {projectDeleteTarget ? (
+        <Modal labelledBy="delete-project-title" onClose={() => setProjectDeleteTarget(null)}>
           <div className="danger-modal-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
-            <p className="eyebrow">Promemoria</p>
-            <h2 id="reminder-validation-title">Controlla l orario</h2>
-            <p className="modal-copy">{reminderModalMessage}</p>
+            <p className="eyebrow">{t('kanban.deleteProject')}</p>
+            <h2 id="delete-project-title">{t('kanban.deleteProjectTitle')} “{projectDeleteTarget.name}”?</h2>
+            <p className="modal-copy">{t('kanban.deleteProjectCopy')}</p>
           </div>
           <div className="modal-actions">
-            <button className="btn btn-primary" type="button" onClick={() => setReminderModalMessage('')}>Ho capito</button>
+            <button className="btn btn-danger" type="button" onClick={confirmDeleteProject}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
+            <button className="btn btn-cancel" type="button" onClick={() => setProjectDeleteTarget(null)}>{t('common.cancel')}</button>
           </div>
         </Modal>
       ) : null}
+
     </section>
   )
 }

@@ -1,0 +1,60 @@
+.custom-time {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.sr-only {
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+  clip: rect(0, 0, 0, 0);
+}
+
+.custom-time__control {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  display: inline-flex;
+  font: inherit;
+  font-family: var(--task-font);
+  font-weight: 850;
+  gap: 0.5rem;
+  height: 2.75rem;
+  justify-content: flex-start;
+  padding: 0.65rem 0.9rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.custom-time__control svg {
+  color: var(--primary-dark);
+  flex: 0 0 auto;
+}
+
+.custom-time__control input {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 850;
+  min-width: 0;
+  outline: 0;
+  width: 100%;
+}
+
+.custom-time__control:focus-within {
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+:root[data-theme='dark'] .custom-time__control {
+  background: rgba(18, 24, 31, 0.72);
+  border-color: rgba(244, 239, 229, 0.16);
+  color: var(--ink);
+}

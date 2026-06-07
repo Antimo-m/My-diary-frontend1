@@ -15,6 +15,12 @@ const apiClient = axios.create({
   },
 })
 
+apiClient.interceptors.request.use((config) => {
+  config.headers['Accept-Language'] = localStorage.getItem('my-diary-locale') || document.documentElement.lang || 'it'
+
+  return config
+})
+
 function readCookie(name) {
   return document.cookie
     .split('; ')
@@ -29,6 +35,7 @@ export async function ensureCsrfCookie() {
     withCredentials: true,
     headers: {
       Accept: 'application/json',
+      'Accept-Language': localStorage.getItem('my-diary-locale') || document.documentElement.lang || 'it',
       'X-Requested-With': 'XMLHttpRequest',
     },
   })

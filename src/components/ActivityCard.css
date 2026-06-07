@@ -1,0 +1,93 @@
+.activity-card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(31, 41, 55, 0.08);
+  border-left: 4px solid var(--task-color, var(--primary));
+  border-radius: 12px;
+  contain: layout paint;
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.65rem;
+  position: relative;
+  touch-action: manipulation;
+  transition: opacity 140ms ease, transform 180ms ease, box-shadow 180ms ease;
+  will-change: transform;
+}
+
+.activity-card.is-dragging {
+  box-shadow: 0 18px 40px rgba(23, 32, 38, 0.26);
+  opacity: 0.96;
+  z-index: 90;
+}
+
+.activity-card.is-completed {
+  opacity: 0.78;
+}
+
+.activity-card.is-completed h3 {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.activity-card__drag,
+.activity-card__check {
+  align-items: center;
+  border-radius: 12px;
+  display: inline-flex;
+  height: 2.2rem;
+  justify-content: center;
+  width: 2.2rem;
+}
+
+.activity-card__drag {
+  background: color-mix(in srgb, var(--task-color, var(--primary)) 16%, white);
+  border: 1px solid color-mix(in srgb, var(--task-color, var(--primary)) 28%, transparent);
+  color: color-mix(in srgb, var(--task-color, var(--primary)) 72%, #172026);
+  cursor: grab;
+  touch-action: none;
+}
+
+.activity-card__open {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.activity-card__open h3 {
+  color: var(--ink);
+  font-family: var(--task-font);
+  font-size: 0.96rem;
+  font-weight: 850;
+  margin: 0 0 0.15rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.activity-card__check {
+  align-self: start;
+  background: transparent;
+  border: 1.5px solid #aeb6bf;
+  color: #7d8791;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.activity-card__check[aria-pressed='true'] {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+:root[data-theme='dark'] .activity-card {
+  background: rgba(18, 24, 31, 0.62);
+  border-color: rgba(244, 239, 229, 0.14);
+}

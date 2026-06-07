@@ -1,0 +1,17 @@
+{
+  "name": "My Diary",
+  "short_name": "My Diary",
+  "description": "Diario personale e Kanban per organizzare la giornata.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff3df",
+  "theme_color": "#00a7c8",
+  "icons": [
+    {
+      "src": "/my-diary-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

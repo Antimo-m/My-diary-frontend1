@@ -1,0 +1,240 @@
+.stats-dashboard {
+  display: grid;
+  gap: 1rem;
+}
+
+.stats-dashboard__controls {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.stats-dashboard__board-select {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(246, 236, 216, 0.58));
+  border: 1px solid rgba(130, 102, 64, 0.16);
+  border-radius: 14px;
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.75rem;
+}
+
+.stats-dashboard__board-select span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.stats-dashboard__board-select select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(130, 102, 64, 0.18);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 800;
+  min-height: 2.65rem;
+  padding: 0 0.85rem;
+}
+
+.stats-dashboard__board-select select {
+  max-width: 100%;
+}
+
+.stats-dashboard__period {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0.35rem;
+}
+
+.stats-dashboard__period button {
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  color: var(--muted);
+  font-weight: 900;
+  min-height: 2.4rem;
+}
+
+.stats-dashboard__period button.active {
+  background: #efe0c5;
+  color: #6f4b21;
+}
+
+.stats-dashboard__board-select select:focus-visible,
+.stats-dashboard__period button:focus-visible {
+  outline: 3px solid rgba(214, 164, 58, 0.25);
+  outline-offset: 2px;
+}
+
+.stats-dashboard__hero,
+.stats-card {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.92), rgba(255, 246, 230, 0.78)),
+    repeating-linear-gradient(0deg, rgba(117, 91, 56, 0.035) 0 1px, transparent 1px 18px);
+  border: 1px solid rgba(218, 202, 174, 0.72);
+  border-radius: 22px;
+  box-shadow: 0 20px 42px rgba(76, 59, 35, 0.1);
+  padding: 1rem;
+}
+
+.stats-dashboard__hero {
+  text-align: center;
+}
+
+.stats-dashboard__hero h2,
+.stats-card h3 {
+  font-family: 'Iowan Old Style', Georgia, serif;
+  margin: 0.25rem 0 0;
+}
+
+.stats-dashboard__hero p,
+.stats-card > span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.stats-dashboard__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.stats-card {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.stats-card__heading {
+  text-align: center;
+}
+
+.stats-card__metric {
+  color: #7b5423;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: clamp(2.4rem, 8vw, 4.4rem);
+  line-height: 1;
+  text-align: center;
+}
+
+.stats-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+}
+
+.stats-pills span {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(123, 84, 35, 0.12);
+  border-radius: 999px;
+  color: #6f4b21;
+  font-weight: 900;
+  padding: 0.46rem 0.68rem;
+}
+
+.stats-card--advice {
+  background:
+    linear-gradient(135deg, rgba(23, 114, 132, 0.12), rgba(255, 253, 247, 0.9)),
+    repeating-linear-gradient(0deg, rgba(23, 114, 132, 0.04) 0 1px, transparent 1px 18px);
+}
+
+.stats-card--advice p {
+  color: var(--text-primary);
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: clamp(1.1rem, 4vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0 auto;
+  max-width: 42rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .stats-dashboard {
+    gap: 0.8rem;
+  }
+
+  .stats-dashboard__controls {
+    gap: 0.65rem;
+  }
+
+  .stats-dashboard__period {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-dashboard__period button {
+    min-height: 2.2rem;
+  }
+
+  .stats-dashboard__hero,
+  .stats-card {
+    border-radius: 14px;
+    padding: 0.82rem;
+  }
+
+  .stats-card__metric {
+    font-size: 2.45rem;
+  }
+
+  .stats-card .recharts-responsive-container {
+    min-height: 190px;
+  }
+
+  .stats-pills {
+    justify-content: stretch;
+  }
+
+  .stats-pills span {
+    border-radius: 12px;
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
+@media (min-width: 900px) {
+  .stats-dashboard__controls {
+    align-items: center;
+    grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 1.15fr);
+  }
+
+  .stats-dashboard__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats-card--wide {
+    grid-column: span 2;
+  }
+}
+
+:root[data-theme='dark'] .stats-dashboard__period,
+:root[data-theme='dark'] .stats-dashboard__board-select,
+:root[data-theme='dark'] .stats-dashboard__hero,
+:root[data-theme='dark'] .stats-card {
+  background: rgba(28, 35, 43, 0.78);
+  border-color: rgba(244, 239, 229, 0.14);
+}
+
+:root[data-theme='dark'] .stats-dashboard__board-select select {
+  background: rgba(244, 239, 229, 0.08);
+  border-color: rgba(244, 239, 229, 0.14);
+  color: #e0e0e0;
+}
+
+:root[data-theme='dark'] .stats-dashboard__period button.active {
+  background: rgba(214, 164, 58, 0.18);
+  color: #f0cf84;
+}
+
+:root[data-theme='dark'] .stats-card__metric {
+  color: #f0cf84;
+}
+
+:root[data-theme='dark'] .stats-card--advice {
+  background: rgba(20, 43, 50, 0.8);
+}

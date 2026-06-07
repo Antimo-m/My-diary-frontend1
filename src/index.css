@@ -4,27 +4,33 @@
   --surface: rgba(255, 252, 245, 0.84);
   --surface-solid: #ffffff;
   --ink: #172026;
+  --text-primary: #172026;
+  --bg-secondary: rgba(255, 252, 245, 0.84);
   --muted: #66717d;
   --line: rgba(41, 49, 61, 0.12);
-  --primary: #00a7c8;
-  --primary-dark: #056274;
-  --primary-soft: #d8f8ff;
-  --coral: #ff6b4a;
-  --coral-soft: #ffe1d8;
+  --primary: #d6a43a;
+  --primary-dark: #7b5423;
+  --primary-soft: #fff4cf;
+  --coral: #a87624;
+  --coral-soft: #f5e4bc;
   --lime: #a3e635;
   --lime-soft: #ecfccb;
   --teal: #00a884;
   --teal-soft: #d9fff4;
   --rose: #f43f5e;
-  --amber: #f59e0b;
+  --amber: #f8c052;
   --paper: #fffaf0;
   --paper-edge: #e8ddc8;
+  --nav-bg: rgba(255, 255, 255, 0.78);
+  --nav-border: rgba(255, 255, 255, 0.74);
+  --nav-panel: #ffffff;
   --shadow-soft: 0 18px 45px rgba(24, 32, 46, 0.1);
   --shadow-deep: 0 32px 90px rgba(31, 41, 55, 0.18);
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 28px;
   --task-font: 'Avenir Next', 'Nunito Sans', Figtree, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --diary-hand-font: 'Snell Roundhand', 'Noteworthy', 'Bradley Hand', 'Segoe Script', 'Segoe Print', cursive;
   color: var(--ink);
   font-family: Figtree, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-synthesis: none;
@@ -39,13 +45,15 @@
   --surface: rgba(28, 35, 43, 0.86);
   --surface-solid: #1a222b;
   --ink: #f4efe5;
+  --text-primary: #e0e0e0;
+  --bg-secondary: rgba(28, 35, 43, 0.86);
   --muted: #b8c1c8;
   --line: rgba(244, 239, 229, 0.16);
-  --primary: #33c7df;
-  --primary-dark: #9defff;
-  --primary-soft: rgba(51, 199, 223, 0.16);
-  --coral: #ff8166;
-  --coral-soft: rgba(255, 129, 102, 0.18);
+  --primary: #d6a43a;
+  --primary-dark: #f0cf84;
+  --primary-soft: rgba(214, 164, 58, 0.18);
+  --coral: #a87624;
+  --coral-soft: rgba(214, 164, 58, 0.14);
   --lime: #b7ee63;
   --lime-soft: rgba(183, 238, 99, 0.14);
   --teal: #40d9bb;
@@ -54,6 +62,9 @@
   --amber: #f8c052;
   --paper: #2f271d;
   --paper-edge: #5f4c34;
+  --nav-bg: rgba(12, 17, 23, 0.92);
+  --nav-border: rgba(244, 239, 229, 0.12);
+  --nav-panel: #151d25;
   --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.28);
   --shadow-deep: 0 32px 90px rgba(0, 0, 0, 0.38);
 }
@@ -64,8 +75,8 @@
 
 body {
   background:
-    radial-gradient(circle at 12% 8%, rgba(0, 167, 200, 0.2), transparent 28rem),
-    radial-gradient(circle at 82% 12%, rgba(255, 107, 74, 0.2), transparent 26rem),
+    radial-gradient(circle at 12% 8%, rgba(214, 164, 58, 0.2), transparent 28rem),
+    radial-gradient(circle at 82% 12%, rgba(168, 118, 36, 0.18), transparent 26rem),
     radial-gradient(circle at 50% 90%, rgba(163, 230, 53, 0.18), transparent 28rem),
     linear-gradient(135deg, var(--app-bg) 0%, var(--app-bg-cool) 100%);
   color: var(--ink);
@@ -73,6 +84,15 @@ body {
   min-width: 320px;
   min-height: 100svh;
   overflow-x: hidden;
+}
+
+::placeholder {
+  color: color-mix(in srgb, var(--muted) 76%, transparent);
+  opacity: 1;
+}
+
+:root[data-theme='dark'] ::placeholder {
+  color: rgba(224, 224, 224, 0.58);
 }
 
 :root[data-theme='dark'] .surface,
@@ -83,15 +103,16 @@ body {
 :root[data-theme='dark'] .kanban-column,
 :root[data-theme='dark'] .column-task-form,
 :root[data-theme='dark'] .task-card,
-:root[data-theme='dark'] .theme-toggle,
 :root[data-theme='dark'] .profile-menu__panel,
 :root[data-theme='dark'] .profile-menu__trigger {
   background: rgba(28, 35, 43, 0.78);
   border-color: rgba(244, 239, 229, 0.14);
+  color: var(--text-primary);
 }
 
 :root[data-theme='dark'] input,
-:root[data-theme='dark'] textarea {
+:root[data-theme='dark'] textarea,
+:root[data-theme='dark'] select {
   color-scheme: dark;
 }
 
@@ -102,6 +123,70 @@ body {
   border-color: rgba(244, 239, 229, 0.16);
 }
 
+:root[data-theme='dark'] .auth-panel__switch,
+:root[data-theme='dark'] .custom-date__trigger,
+:root[data-theme='dark'] .auth-form input,
+:root[data-theme='dark'] .profile-form input,
+:root[data-theme='dark'] .profile-form select,
+:root[data-theme='dark'] .notification-panel select,
+:root[data-theme='dark'] .modal-form input:not([type='color']),
+:root[data-theme='dark'] .modal-form textarea,
+:root[data-theme='dark'] .diary-book input,
+:root[data-theme='dark'] .diary-book textarea,
+:root[data-theme='dark'] .label-modal-form input:not([type='color']),
+:root[data-theme='dark'] .column-task-form input:not([type='color']),
+:root[data-theme='dark'] .column-task-form select,
+:root[data-theme='dark'] .column-task-form textarea {
+  background: rgba(18, 24, 31, 0.72);
+  border-color: rgba(244, 239, 229, 0.16);
+  color: var(--ink);
+}
+
+:root[data-theme='dark'] .diary-book__page {
+  background:
+    linear-gradient(90deg, rgba(255, 240, 210, 0.08), transparent 12%),
+    linear-gradient(180deg, #30281f, #241d17);
+  border-color: var(--paper-edge);
+}
+
+:root[data-theme='dark'] .photo-uploader,
+:root[data-theme='dark'] .diary-photo-frame {
+  background: linear-gradient(180deg, #3a3025, #292119);
+  border-color: rgba(255, 220, 164, 0.18);
+  color: #f3cf93;
+}
+
+:root[data-theme='dark'] .diary-dedication,
+:root[data-theme='dark'] .book-note-body {
+  color: #f4e3c4;
+}
+
+:root[data-theme='dark'] .book-cover-fallback {
+  background: rgba(244, 239, 229, 0.08);
+  color: #f3cf93;
+}
+
+:root[data-theme='dark'] .custom-date__grid button,
+:root[data-theme='dark'] .label-pill,
+:root[data-theme='dark'] .label-preview,
+:root[data-theme='dark'] .task-card,
+:root[data-theme='dark'] .task-composer__section,
+:root[data-theme='dark'] .add-task-in-column,
+:root[data-theme='dark'] .kanban-count {
+  background: rgba(18, 24, 31, 0.62);
+  border-color: rgba(244, 239, 229, 0.14);
+  color: var(--ink);
+}
+
+:root[data-theme='dark'] .task-card-content p {
+  color: var(--muted);
+}
+
+:root[data-theme='dark'] .task-deadline,
+:root[data-theme='dark'] .diary-page-turner span {
+  color: #f8c052;
+}
+
 button,
 input {
   font: inherit;
@@ -110,6 +195,16 @@ input {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role='button']:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 62%, white);
+  outline-offset: 3px;
 }
 
 #root {

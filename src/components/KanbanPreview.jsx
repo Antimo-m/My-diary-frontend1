@@ -1,17 +1,18 @@
 import { FiPlus } from 'react-icons/fi'
+import { useI18n } from '../i18n/useI18n'
 import './KanbanPreview.css'
 
-const columns = [
-  { title: 'Da fare', color: '#00a7c8' },
-  { title: 'In corso', color: '#ff6b4a' },
-  { title: 'Completato', color: '#00a884' },
-]
-
 function KanbanPreview({ tasks = [] }) {
+  const { t } = useI18n()
+  const columns = [
+    { title: t('kanban.todo'), color: '#d6a43a' },
+    { title: t('kanban.doing'), color: '#a87624' },
+    { title: t('kanban.done'), color: '#00a884' },
+  ]
   const filledTasks = tasks.length ? tasks : []
 
   return (
-    <div className="kanban-board" aria-label="Anteprima Kanban">
+    <div className="kanban-board" aria-label={t('kanban.preview')}>
       {columns.map((column, index) => (
         <section className="kanban-column" style={{ '--column-color': column.color }} key={column.title}>
           <header className="kanban-column-header">
@@ -32,8 +33,8 @@ function KanbanPreview({ tasks = [] }) {
               ))
             ) : (
               <div className="kanban-empty">
-                <span>Nessuna attivita</span>
-                <button className="inline-plus-button" type="button" aria-label="Aggiungi attivita"><FiPlus aria-hidden="true" /></button>
+                <span>{t('kanban.noActivities')}</span>
+                <button className="inline-plus-button" type="button" aria-label={t('kanban.addTask')}><FiPlus aria-hidden="true" /></button>
               </div>
             )}
           </div>

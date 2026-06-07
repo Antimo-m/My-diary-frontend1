@@ -1,29 +1,73 @@
-import { useState } from 'react'
-import { FiBell, FiCheck } from 'react-icons/fi'
+import { useMemo, useState } from 'react'
+import { FiBarChart2, FiBookOpen, FiCheck, FiDatabase, FiGrid, FiMail } from 'react-icons/fi'
+import { useI18n } from '../i18n/useI18n'
 import Modal from './Modal'
 import './WelcomeModal.css'
 
+const checklist = [
+  { icon: FiMail, key: 'onboarding.email' },
+  { icon: FiBookOpen, key: 'onboarding.diary' },
+  { icon: FiGrid, key: 'onboarding.kanban' },
+  { icon: FiBarChart2, key: 'onboarding.analysis' },
+  { icon: FiDatabase, key: 'onboarding.privacy' },
+]
+
 function WelcomeModal({ onClose }) {
+  const { t } = useI18n()
+  const [checkedItems, setCheckedItems] = useState(() => new Set(['onboarding.email']))
   const [dontShowAgain, setDontShowAgain] = useState(false)
+  const progress = useMemo(() => Math.round((checkedItems.size / checklist.length) * 100), [checkedItems])
+
+  const toggleItem = (key) => {
+    setCheckedItems((current) => {
+      const next = new Set(current)
+
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
+
+      return next
+    })
+  }
 
   return (
     <Modal labelledBy="welcome-modal-title" onClose={() => onClose(dontShowAgain)}>
-      <div className="welcome-modal__icon" aria-hidden="true"><FiBell /></div>
+      <div className="welcome-modal__icon" aria-hidden="true"><FiCheck /></div>
       <div>
-        <p className="eyebrow">Primo accesso</p>
-        <h2 id="welcome-modal-title">Benvenuto nell'app</h2>
-        <p className="modal-copy">
-          L'app supporta notifiche email: riceverai aggiornamenti sui tuoi eventi e potrai impostare promemoria personalizzati per le attivita.
-        </p>
+        <p className="eyebrow">{t('onboarding.eyebrow')}</p>
+        <h2 id="welcome-modal-title">{t('onboarding.title')}</h2>
+        <p className="modal-copy">{t('onboarding.copy')}</p>
       </div>
+
+      <div className="welcome-progress" aria-label={t('onboarding.progress')}>
+        <span style={{ width: `${progress}%` }} />
+      </div>
+
+      <div className="welcome-checklist">
+        {checklist.map((item) => {
+          const Icon = item.icon
+          const isChecked = checkedItems.has(item.key)
+
+          return (
+            <button className={isChecked ? 'is-checked' : ''} key={item.key} type="button" onClick={() => toggleItem(item.key)}>
+              <Icon aria-hidden="true" />
+              <span>{t(item.key)}</span>
+              <FiCheck aria-hidden="true" />
+            </button>
+          )
+        })}
+      </div>
+
       <label className="welcome-modal__check">
         <input type="checkbox" checked={dontShowAgain} onChange={(event) => setDontShowAgain(event.target.checked)} />
-        Non mostrare piu
+        {t('onboarding.dontShow')}
       </label>
       <div className="modal-actions">
         <button className="btn btn-primary" type="button" onClick={() => onClose(dontShowAgain)}>
           <FiCheck aria-hidden="true" />
-          Continua
+          {t('common.continue')}
         </button>
       </div>
     </Modal>

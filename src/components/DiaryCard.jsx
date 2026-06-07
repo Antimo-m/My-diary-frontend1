@@ -1,28 +1,31 @@
 import { FiEdit3, FiTrash2 } from 'react-icons/fi'
-import openDiaryDefault from '../assets/open-diary-default.svg'
+import { useI18n } from '../i18n/useI18n'
+import { textPreview } from '../utils/textPreview'
 import IconButton from './IconButton'
 import './DiaryCard.css'
 
 function DiaryCard({ note, onDelete, onEdit, onOpen }) {
+  const { t } = useI18n()
+
   return (
-    <article className="diary-page-card">
-      <button className="diary-card-link" type="button" onClick={() => onOpen(note)}>
-        <div className="diary-card-cover">
-        {note.cover_image_url ? (
-          <img src={note.cover_image_url} alt={`Cover della pagina ${note.title}`} />
-        ) : (
-          <img className="diary-card-cover-fallback" src={openDiaryDefault} alt="Diario aperto" />
-        )}
-        </div>
-        <div className="diary-card-body">
+    <article className="journal-entry">
+      <button className="journal-entry__content" type="button" onClick={() => onOpen(note)}>
+        <span className="journal-entry__thumb">
+          {note.cover_image_url ? (
+            <img src={note.cover_image_url} alt={`${t('diary.coverOf')} ${note.title}`} />
+          ) : (
+            <span aria-hidden="true">MD</span>
+          )}
+        </span>
+        <time>{note.formatted_date}</time>
+        <span>
           <h2>{note.title}</h2>
-          <time>{note.formatted_date}</time>
-          <p>{note.excerpt}</p>
-        </div>
+          <p>{textPreview(note.excerpt || note.body || t('diary.emptyBody'), 95)}</p>
+        </span>
       </button>
-      <div className="diary-card-actions">
-        <IconButton variant="edit" onClick={() => onEdit(note)} label="Modifica pagina"><FiEdit3 /></IconButton>
-        <IconButton variant="danger" onClick={() => onDelete(note)} label="Elimina pagina"><FiTrash2 /></IconButton>
+      <div className="journal-entry__actions">
+        <IconButton variant="edit" onClick={() => onEdit(note)} label={t('diary.pageUpdated')}><FiEdit3 /></IconButton>
+        <IconButton variant="danger" onClick={() => onDelete(note)} label={t('diary.deletePage')}><FiTrash2 /></IconButton>
       </div>
     </article>
   )

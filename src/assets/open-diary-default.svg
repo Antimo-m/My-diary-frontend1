@@ -22,7 +22,7 @@
     <path d="M460 180c13 16 27 16 40 0v282c-13 17-27 17-40 0V180Z" fill="#dcc7a8"/>
     <path d="M196 216h198M196 262h210M196 308h178M196 354h214" stroke="#8da1aa" stroke-width="10" stroke-linecap="round" opacity=".28"/>
     <path d="M557 222h192M557 268h214M557 314h165M557 360h200" stroke="#8da1aa" stroke-width="10" stroke-linecap="round" opacity=".28"/>
-    <path d="M245 412c38-30 82-33 132-10" fill="none" stroke="#00a7c8" stroke-width="12" stroke-linecap="round" opacity=".5"/>
-    <circle cx="678" cy="409" r="34" fill="#ff6b4a" opacity=".55"/>
+    <path d="M245 412c38-30 82-33 132-10" fill="none" stroke="#d6a43a" stroke-width="12" stroke-linecap="round" opacity=".5"/>
+    <circle cx="678" cy="409" r="34" fill="#a87624" opacity=".55"/>
   </g>
 </svg>

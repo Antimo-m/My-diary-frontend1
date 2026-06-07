@@ -1,155 +1,159 @@
 import { useEffect, useState } from 'react'
-import { FiBell, FiCheck, FiMoon, FiSun, FiUser } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import UserMessage from '../components/UserMessage'
+import { useI18n } from '../i18n/useI18n'
 import { updateProfile } from '../services/profileApi'
 import { getApiError } from '../utils/apiErrors'
 import './ProfilePage.css'
 
-const supportedReminderPreference = (value) => (['none', 'custom'].includes(value) ? value : 'none')
-
-function ProfilePage({ authLoading, onLogin, onRegister, onUserUpdate, theme, setTheme, user }) {
+function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, onUserUpdate, user }) {
+  const { locale, setLocale, t, timeZone } = useI18n()
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [name, setName] = useState(user?.name ?? '')
-  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(user?.email_notifications_enabled ?? true)
-  const [defaultTaskReminder, setDefaultTaskReminder] = useState(supportedReminderPreference(user?.default_task_reminder))
+  const [success, setSuccess] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({
+    name: '',
+    email_notifications_enabled: true,
+    default_task_reminder: 'none',
+    locale,
+    timezone: timeZone,
+  })
 
   useEffect(() => {
-    void Promise.resolve().then(() => {
-      setName(user?.name ?? '')
-      setEmailNotificationsEnabled(user?.email_notifications_enabled ?? true)
-      setDefaultTaskReminder(supportedReminderPreference(user?.default_task_reminder))
+    if (!user) {
+      return
+    }
+
+    setForm({
+      name: user.name ?? '',
+      email_notifications_enabled: Boolean(user.email_notifications_enabled),
+      default_task_reminder: user.default_task_reminder ?? 'none',
+      locale: user.locale ?? locale,
+      timezone: user.timezone ?? timeZone,
     })
-  }, [user])
+  }, [locale, timeZone, user])
 
   if (authLoading) {
-    return <section className="page-container loading-state">Verifico la sessione...</section>
+    return <section className="page-container loading-state">{t('auth.wait')}</section>
   }
 
   if (!user) {
     return (
       <section className="page-container">
-        <AuthPanel onLogin={onLogin} onRegister={onRegister} />
+        <AuthPanel onForgotPassword={onForgotPassword} onLogin={onLogin} onRegister={onRegister} onResetPassword={onResetPassword} />
       </section>
     )
   }
 
-  const submitProfile = async (event) => {
-    event.preventDefault()
-    setLoading(true)
-    setError('')
-
-    try {
-      onUserUpdate(await updateProfile({ name }))
-    } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco ad aggiornare il profilo.'))
-    } finally {
-      setLoading(false)
-    }
+  const updateField = (event) => {
+    const { checked, name, type, value } = event.target
+    setForm((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
   }
 
-  const submitPreferences = async (event) => {
+  const chooseLocale = (nextLocale) => {
+    setForm((current) => ({ ...current, locale: nextLocale }))
+    setLocale(nextLocale)
+  }
+
+  const submitProfile = async (event) => {
     event.preventDefault()
-    setLoading(true)
     setError('')
+    setSuccess('')
+    setSaving(true)
 
     try {
-      onUserUpdate(await updateProfile({
-        email_notifications_enabled: emailNotificationsEnabled,
-        default_task_reminder: defaultTaskReminder,
-      }))
+      const updatedUser = await updateProfile(form)
+      onUserUpdate?.(updatedUser)
+      setLocale(updatedUser.locale ?? form.locale)
+      setSuccess(t('profile.saved'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco ad aggiornare le preferenze.'))
+      setError(getApiError(requestError, t('profile.updateError')))
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
   return (
     <section className="profile-page page-container">
-      <header className="page-header">
+      <header className="page-header profile-page__header">
         <div>
-          <p className="eyebrow">Profilo</p>
-          <h1 className="page-title">Profilo</h1>
-          <p className="page-subtitle">Gestisci account, tema e notifiche.</p>
+          <p className="eyebrow">{t('profile.info')}</p>
+          <h1 className="page-title">{t('common.profile')}</h1>
+          <p className="page-subtitle">{t('profile.subtitle')}</p>
         </div>
       </header>
 
       <UserMessage tone="error">{error}</UserMessage>
+      <UserMessage tone="success">{success}</UserMessage>
 
-      <div className="profile-grid">
-        <section className="surface profile-card">
-          <div className="profile-avatar" aria-hidden="true"><FiUser /></div>
-          <div>
-            <p className="eyebrow">Dettagli</p>
-            <h2>{user.name}</h2>
-            <p>{user.email}</p>
-            <small>Registrazione: {user.created_at ? new Date(user.created_at).toLocaleDateString('it-IT') : 'Non disponibile'}</small>
-          </div>
-        </section>
-
-        <form className="surface profile-form" onSubmit={submitProfile}>
-          <div>
-            <p className="eyebrow">Modifica nome</p>
-            <h2>Informazioni profilo</h2>
-          </div>
-          <label>
-            Nome
-            <input value={name} onChange={(event) => setName(event.target.value)} maxLength="255" required />
-          </label>
-          <button className="btn btn-primary" type="submit" disabled={loading}>
-            <FiCheck aria-hidden="true" />
-            {loading ? 'Salvataggio...' : 'Salva profilo'}
-          </button>
-        </form>
-
-        <section className="surface preference-panel">
-          <div>
-            <p className="eyebrow">Preferenze</p>
-            <h2>Tema</h2>
-          </div>
-          <div className="theme-toggle" role="group" aria-label="Seleziona tema">
-            <button className={theme === 'light' ? 'active' : ''} type="button" onClick={() => setTheme('light')}>
-              <FiSun aria-hidden="true" />
-              Light
-            </button>
-            <button className={theme === 'dark' ? 'active' : ''} type="button" onClick={() => setTheme('dark')}>
-              <FiMoon aria-hidden="true" />
-              Dark
-            </button>
-          </div>
-        </section>
-
-        <form className="surface preference-panel notification-panel" onSubmit={submitPreferences}>
-          <div className="preference-heading">
-            <div className="profile-avatar profile-avatar--small" aria-hidden="true"><FiBell /></div>
+      <form className="profile-settings" onSubmit={submitProfile}>
+        <section className="profile-settings__card">
+          <div className="profile-settings__identity">
+            <span aria-hidden="true">{(user.name || user.email || 'MD').slice(0, 2).toUpperCase()}</span>
             <div>
-              <p className="eyebrow">Notifiche Email</p>
-              <h2>Promemoria attivita</h2>
+              <strong>{user.name}</strong>
+              <small>{user.email}</small>
             </div>
           </div>
-          <label className="setting-toggle">
-            <input
-              type="checkbox"
-              checked={emailNotificationsEnabled}
-              onChange={(event) => setEmailNotificationsEnabled(event.target.checked)}
-            />
-            Attiva notifiche email
-          </label>
+
           <label>
-            Promemoria predefinito
-            <select value={defaultTaskReminder} onChange={(event) => setDefaultTaskReminder(event.target.value)}>
-              <option value="none">Nessun promemoria</option>
-              <option value="custom">Scegli orario esatto nel task</option>
+            <span>{t('profile.editName')}</span>
+            <input name="name" value={form.name} onChange={updateField} />
+          </label>
+
+          <label>
+            <span>{t('profile.timezone')}</span>
+            <input name="timezone" value={form.timezone} onChange={updateField} />
+          </label>
+        </section>
+
+        <section className="profile-settings__card">
+          <div className="profile-settings__section-title">
+            <p className="eyebrow">{t('profile.details')}</p>
+            <h2>{t('profile.activityReminders')}</h2>
+          </div>
+
+          <label className="profile-toggle-row">
+            <span>
+              <strong>{t('profile.emailNotifications')}</strong>
+              <small>{t('profile.emailNotificationsHint')}</small>
+            </span>
+            <input
+              checked={form.email_notifications_enabled}
+              name="email_notifications_enabled"
+              onChange={updateField}
+              type="checkbox"
+            />
+          </label>
+
+          <label>
+            <span>{t('profile.defaultReminder')}</span>
+            <select name="default_task_reminder" value={form.default_task_reminder} onChange={updateField}>
+              <option value="none">{t('task.noReminder')}</option>
+              <option value="custom">{t('profile.customReminder')}</option>
             </select>
           </label>
-          <button className="btn btn-primary" type="submit" disabled={loading}>
-            <FiCheck aria-hidden="true" />
-            Salva preferenze
-          </button>
-        </form>
-      </div>
+
+          <div className="profile-language-control">
+            <span>{t('language.label')}</span>
+            <div role="group" aria-label={t('language.label')}>
+              <button className={form.locale === 'it' ? 'active' : ''} type="button" onClick={() => chooseLocale('it')}>
+                IT
+              </button>
+              <button className={form.locale === 'en' ? 'active' : ''} type="button" onClick={() => chooseLocale('en')}>
+                EN
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <button className="btn btn-primary profile-settings__submit" type="submit" disabled={saving}>
+          {saving ? t('auth.wait') : t('profile.saveProfile')}
+        </button>
+      </form>
     </section>
   )
 }

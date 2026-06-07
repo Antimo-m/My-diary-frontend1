@@ -7,13 +7,16 @@ const presetColors = [
   { name: 'Verde', value: '#22c55e' },
   { name: 'Blu', value: '#2563eb' },
   { name: 'Rosso', value: '#ef4444' },
-  { name: 'Arancione', value: '#f97316' },
+  { name: 'Ambra', value: '#f8c052' },
   { name: 'Viola', value: '#8b5cf6' },
   { name: 'Grigio', value: '#64748b' },
   { name: 'Nero', value: '#172026' },
 ]
 
 function ColorPaletteInput({ label = 'Colore', onChange, value }) {
+  const currentValue = value || '#d6a43a'
+  const isPresetColor = presetColors.some((color) => color.value.toLowerCase() === currentValue.toLowerCase())
+
   return (
     <fieldset className="color-palette">
       <legend>{label}</legend>
@@ -28,11 +31,10 @@ function ColorPaletteInput({ label = 'Colore', onChange, value }) {
             aria-label={color.name}
           />
         ))}
+        <label className={`color-swatch color-swatch--custom ${isPresetColor ? '' : 'active'}`} style={{ '--swatch-color': currentValue }} title="Colore personalizzato">
+          <input type="color" value={currentValue} onChange={(event) => onChange(event.target.value)} aria-label="Colore personalizzato" />
+        </label>
       </div>
-      <label className="custom-color-field">
-        Personalizzato
-        <input type="color" value={value || '#00a7c8'} onChange={(event) => onChange(event.target.value)} />
-      </label>
     </fieldset>
   )
 }

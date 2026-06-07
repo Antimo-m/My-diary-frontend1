@@ -1,22 +1,25 @@
+import { textPreview } from '../utils/textPreview'
+import { useI18n } from '../i18n/useI18n'
 import './PreviewPanel.css'
 
 function PreviewPanel({ overview }) {
+  const { t } = useI18n()
   const columns = overview.today_columns ?? []
   const recentNote = overview.recent_notes?.[0] ?? null
   const hasTasks = columns.some((column) => column.tasks?.length)
 
   return (
-    <section className="preview-panel elevated-panel" aria-label="Anteprima diario e Kanban">
+    <section className="preview-panel elevated-panel" aria-label="Diary and Kanban preview">
       <div className="preview-panel__header">
-        <span>Oggi</span>
+        <span>{t('home.today')}</span>
         <span className="date-badge">{overview.app?.formatted_today}</span>
       </div>
 
       {recentNote ? (
         <article className="preview-note">
-          <span className="preview-note__label">Nota</span>
+          <span className="preview-note__label">{t('home.note')}</span>
           <h2>{recentNote.title}</h2>
-          <p>{recentNote.excerpt}</p>
+          <p>{textPreview(recentNote.excerpt || recentNote.body, 155)}</p>
         </article>
       ) : null}
 
@@ -37,18 +40,18 @@ function PreviewPanel({ overview }) {
                     </article>
                   ))
                 ) : (
-                  <p>Nessuna attivita</p>
+                  <p>{t('home.emptyTasks')}</p>
                 )}
               </div>
             </section>
           ))
         ) : (
-          <div className="preview-empty-state">Non hai attivita in programma per oggi.</div>
+          <div className="preview-empty-state">{t('home.emptyTasks')}</div>
         )}
       </div>
 
       {columns.length && !hasTasks ? (
-        <div className="preview-empty-state">Non hai attivita in programma per oggi.</div>
+        <div className="preview-empty-state">{t('home.emptyTasks')}</div>
       ) : null}
     </section>
   )

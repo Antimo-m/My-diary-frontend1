@@ -20,6 +20,20 @@ export async function register(payload) {
   return response.data.user
 }
 
+export async function requestPasswordReset(email) {
+  await ensureCsrfCookie()
+  const response = await apiClient.post('/forgot-password', { email })
+
+  return response.data
+}
+
+export async function resetPassword(payload) {
+  await ensureCsrfCookie()
+  const response = await apiClient.post('/reset-password', payload)
+
+  return response.data
+}
+
 export async function logout() {
   await ensureCsrfCookie()
   await apiClient.post('/logout')

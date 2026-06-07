@@ -1,0 +1,210 @@
+.diary-walkthrough {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
+.diary-walkthrough__book {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.86), transparent 24%),
+    linear-gradient(145deg, rgba(244, 227, 196, 0.78), rgba(217, 231, 211, 0.7));
+  border: 1px solid rgba(143, 110, 64, 0.16);
+  border-radius: 24px;
+  box-shadow: 0 28px 60px rgba(82, 64, 36, 0.14);
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 19rem;
+  overflow: hidden;
+  padding: 0.85rem;
+  position: relative;
+}
+
+.diary-walkthrough__page {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(255, 246, 230, 0.86)),
+    repeating-linear-gradient(0deg, rgba(117, 91, 56, 0.04) 0 1px, transparent 1px 18px);
+  border: 1px solid rgba(137, 107, 68, 0.14);
+  box-shadow: 0 18px 40px rgba(92, 70, 39, 0.12);
+  display: grid;
+  gap: 0.6rem;
+  min-height: 17rem;
+  padding: 1rem;
+}
+
+.diary-walkthrough__page--left {
+  border-radius: 18px 18px 8px 8px;
+}
+
+.diary-walkthrough__page--right {
+  border-radius: 8px 8px 18px 18px;
+  display: none;
+}
+
+.diary-walkthrough__date,
+.diary-walkthrough__page p {
+  color: #8f7654;
+  font-size: 0.76rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.diary-walkthrough__page strong {
+  color: #53391f;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 1.25rem;
+}
+
+.diary-walkthrough__photo {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.84), transparent 20%),
+    linear-gradient(135deg, #cfd9ec, #f0cf84 58%, #9bb98c);
+  border: 0.55rem solid #fffdf7;
+  box-shadow: 0 12px 24px rgba(70, 53, 31, 0.16);
+  min-height: 7rem;
+  transform: rotate(-1.5deg);
+}
+
+.diary-walkthrough__page--right > span {
+  background: rgba(123, 84, 35, 0.18);
+  border-radius: 999px;
+  display: block;
+  height: 0.7rem;
+}
+
+.diary-walkthrough__page--right > span:nth-child(2) {
+  width: 82%;
+}
+
+.diary-walkthrough__page--right > span:nth-child(3) {
+  width: 68%;
+}
+
+.diary-walkthrough__page--right > span:nth-child(4) {
+  width: 88%;
+}
+
+.diary-walkthrough__entries {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: auto;
+}
+
+.diary-walkthrough__entries button {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(137, 107, 68, 0.14);
+  border-radius: 12px;
+  color: #6f4b21;
+  font-size: 0.72rem;
+  font-weight: 900;
+  min-height: 2.2rem;
+}
+
+.diary-walkthrough__cursor {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(137, 107, 68, 0.16);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px rgba(77, 58, 31, 0.2);
+  color: #8a5c1f;
+  display: inline-flex;
+  height: 2.7rem;
+  justify-content: center;
+  left: 74%;
+  position: absolute;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  transition: left 0.55s ease, top 0.55s ease, transform 0.55s ease;
+  width: 2.7rem;
+}
+
+.diary-walkthrough__book.is-create .diary-walkthrough__cursor {
+  left: 28%;
+  top: 18%;
+}
+
+.diary-walkthrough__book.is-text .diary-walkthrough__page--right > span {
+  background: rgba(214, 164, 58, 0.28);
+}
+
+.diary-walkthrough__book.is-text .diary-walkthrough__cursor {
+  left: 67%;
+  top: 32%;
+}
+
+.diary-walkthrough__book.is-image .diary-walkthrough__photo {
+  transform: rotate(-1.5deg) scale(1.04);
+}
+
+.diary-walkthrough__book.is-image .diary-walkthrough__cursor {
+  left: 31%;
+  top: 55%;
+}
+
+.diary-walkthrough__book.is-organize .diary-walkthrough__entries button:first-child {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.diary-walkthrough__book.is-organize .diary-walkthrough__cursor {
+  left: 67%;
+  top: 76%;
+}
+
+.diary-walkthrough__book.is-reread .diary-walkthrough__page--left {
+  transform: rotate(-0.8deg);
+}
+
+.diary-walkthrough__book.is-reread .diary-walkthrough__cursor {
+  left: 48%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.diary-walkthrough__caption {
+  text-align: center;
+}
+
+.diary-walkthrough__caption h2 {
+  color: var(--text-primary);
+  font-family: 'Iowan Old Style', Georgia, serif;
+  margin: 0.3rem 0;
+}
+
+.diary-walkthrough__caption p:last-of-type {
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 34rem;
+}
+
+:root[data-theme='dark'] .diary-walkthrough__book,
+:root[data-theme='dark'] .diary-walkthrough__page {
+  background: rgba(22, 29, 36, 0.9);
+  border-color: rgba(244, 239, 229, 0.14);
+}
+
+:root[data-theme='dark'] .diary-walkthrough__page strong {
+  color: #f0cf84;
+}
+
+@media (min-width: 760px) {
+  .diary-walkthrough__book {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 23rem;
+  }
+
+  .diary-walkthrough__page {
+    min-height: 21rem;
+  }
+
+  .diary-walkthrough__page--left {
+    border-radius: 18px 8px 8px 18px;
+  }
+
+  .diary-walkthrough__page--right {
+    border-radius: 8px 18px 18px 8px;
+    display: grid;
+  }
+}

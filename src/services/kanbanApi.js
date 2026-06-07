@@ -1,9 +1,37 @@
 import apiClient from './apiClient'
 
 export async function getKanbanBoard(date) {
-  const response = await apiClient.get('/kanban/board', { params: { date } })
+  const response = await apiClient.get('/kanban/daily', { params: { date } })
 
   return response.data
+}
+
+export async function getKanbanProject(id) {
+  const response = await apiClient.get(`/kanban/project/${id}`)
+
+  return response.data
+}
+
+export async function listKanbanProjects() {
+  const response = await apiClient.get('/kanban/projects')
+
+  return response.data.data
+}
+
+export async function createProject(payload) {
+  const response = await apiClient.post('/projects', payload)
+
+  return response.data.data
+}
+
+export async function updateProject(id, payload) {
+  const response = await apiClient.put(`/projects/${id}`, payload)
+
+  return response.data.data
+}
+
+export async function deleteProject(id) {
+  await apiClient.delete(`/projects/${id}`)
 }
 
 export async function createColumn(payload) {
@@ -42,6 +70,12 @@ export async function moveTask(id, payload) {
 
 export async function deleteTask(id) {
   await apiClient.delete(`/kanban/tasks/${id}`)
+}
+
+export async function toggleTaskComplete(id) {
+  const response = await apiClient.post(`/activities/${id}/toggle-complete`)
+
+  return response.data.data
 }
 
 export async function createLabel(payload) {

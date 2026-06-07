@@ -18,10 +18,21 @@
   transform: translateY(-1px);
 }
 
-.icon-action--primary,
-.icon-action--confirm {
+.icon-action:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 62%, white);
+  outline-offset: 3px;
+}
+
+.icon-action--primary {
   background: linear-gradient(135deg, var(--primary), var(--coral));
   border-color: transparent;
+  color: #ffffff;
+}
+
+.icon-action--confirm {
+  background: linear-gradient(135deg, #d6a43a, #a87624);
+  border-color: rgba(168, 118, 36, 0.2);
+  box-shadow: 0 12px 26px rgba(168, 118, 36, 0.18);
   color: #ffffff;
 }
 

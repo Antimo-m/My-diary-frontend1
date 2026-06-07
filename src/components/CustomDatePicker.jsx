@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { useI18n } from '../i18n/useI18n'
 import './CustomDatePicker.css'
 
 function toDate(value) {
@@ -19,9 +20,31 @@ function toIso(date) {
 }
 
 function CustomDatePicker({ label = 'Data', onChange, value }) {
+  const { localeTag, t, timeZone } = useI18n()
+  const pickerRef = useRef(null)
   const selectedDate = toDate(value)
   const [isOpen, setIsOpen] = useState(false)
   const [visibleMonth, setVisibleMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined
+    }
+
+    const closeOnOutsideInteraction = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsideInteraction)
+    document.addEventListener('focusin', closeOnOutsideInteraction)
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideInteraction)
+      document.removeEventListener('focusin', closeOnOutsideInteraction)
+    }
+  }, [isOpen])
 
   const days = useMemo(() => {
     const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1)
@@ -35,11 +58,11 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
     })
   }, [visibleMonth])
 
-  const monthLabel = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' }).format(visibleMonth)
+  const monthLabel = new Intl.DateTimeFormat(localeTag, { month: 'long', timeZone, year: 'numeric' }).format(visibleMonth)
   const selectedIso = value || ''
   const selectedLabel = selectedIso
-    ? new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }).format(toDate(selectedIso))
-    : 'Seleziona data'
+    ? new Intl.DateTimeFormat(localeTag, { day: '2-digit', month: 'short', timeZone, year: 'numeric' }).format(toDate(selectedIso))
+    : t('date.selectDate')
 
   const selectDate = (date) => {
     onChange(toIso(date))
@@ -47,7 +70,7 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
   }
 
   return (
-    <div className="custom-date">
+    <div className="custom-date" ref={pickerRef}>
       <button className="custom-date__trigger" type="button" onClick={() => setIsOpen((current) => !current)} aria-expanded={isOpen}>
         <FiCalendar aria-hidden="true" />
         <span>{selectedLabel}</span>
@@ -57,11 +80,11 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
       {isOpen ? (
         <div className="custom-date__panel" role="dialog" aria-label={label}>
           <div className="custom-date__header">
-            <button type="button" onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))} aria-label="Mese precedente">
+            <button type="button" onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))} aria-label={t('date.previousMonth')}>
               <FiChevronLeft />
             </button>
             <strong>{monthLabel}</strong>
-            <button type="button" onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))} aria-label="Mese successivo">
+            <button type="button" onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))} aria-label={t('date.nextMonth')}>
               <FiChevronRight />
             </button>
           </div>

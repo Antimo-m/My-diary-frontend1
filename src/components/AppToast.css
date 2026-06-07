@@ -1,0 +1,29 @@
+.app-toast {
+  bottom: 1rem;
+  max-width: min(28rem, calc(100vw - 2rem));
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 1rem;
+  transform: translateY(0.6rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+  z-index: 90;
+}
+
+.app-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.app-toast .user-message {
+  box-shadow: var(--shadow-deep);
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .app-toast {
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+}

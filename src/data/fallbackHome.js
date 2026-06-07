@@ -9,8 +9,10 @@ export const fallbackHome = {
   stats: {
     notes: 0,
     today_tasks: 0,
+    projects: 0,
   },
   recent_notes: [],
+  recent_projects: [],
   today_tasks: [],
   today_columns: [],
   preview_columns: [],
