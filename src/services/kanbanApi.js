@@ -6,8 +6,8 @@ export async function getKanbanBoard(date) {
   return response.data
 }
 
-export async function getKanbanProject(id) {
-  const response = await apiClient.get(`/kanban/project/${id}`)
+export async function getKanbanProject(identifier) {
+  const response = await apiClient.get(`/kanban/project/${encodeURIComponent(identifier)}`)
 
   return response.data
 }
@@ -24,14 +24,14 @@ export async function createProject(payload) {
   return response.data.data
 }
 
-export async function updateProject(id, payload) {
-  const response = await apiClient.put(`/projects/${id}`, payload)
+export async function updateProject(identifier, payload) {
+  const response = await apiClient.put(`/projects/${encodeURIComponent(identifier)}`, payload)
 
   return response.data.data
 }
 
-export async function deleteProject(id) {
-  await apiClient.delete(`/projects/${id}`)
+export async function deleteProject(identifier) {
+  await apiClient.delete(`/projects/${encodeURIComponent(identifier)}`)
 }
 
 export async function createColumn(payload) {

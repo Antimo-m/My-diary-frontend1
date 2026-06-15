@@ -1,70 +1,73 @@
 import { useEffect, useState } from 'react'
-import { FiEdit3, FiImage, FiLayers, FiPlus, FiRepeat } from 'react-icons/fi'
+import { FiArchive, FiCheck, FiEdit3, FiPlus } from 'react-icons/fi'
+import useMediaQuery from '../hooks/useMediaQuery'
 import './DiaryWalkthrough.css'
 
 const diarySteps = [
-  { icon: FiPlus, key: 'create', titleKey: 'diary.demo.createTitle', captionKey: 'diary.demo.createCaption' },
-  { icon: FiEdit3, key: 'text', titleKey: 'diary.demo.textTitle', captionKey: 'diary.demo.textCaption' },
-  { icon: FiImage, key: 'image', titleKey: 'diary.demo.imageTitle', captionKey: 'diary.demo.imageCaption' },
-  { icon: FiLayers, key: 'organize', titleKey: 'diary.demo.organizeTitle', captionKey: 'diary.demo.organizeCaption' },
-  { icon: FiRepeat, key: 'reread', titleKey: 'diary.demo.rereadTitle', captionKey: 'diary.demo.rereadCaption' },
+  { icon: FiPlus, key: 'create', titleKey: 'diary.quickStartCreate' },
+  { icon: FiCheck, key: 'save', titleKey: 'diary.quickStartSave' },
+  { icon: FiArchive, key: 'find', titleKey: 'diary.quickStartFind' },
 ]
 
 function DiaryWalkthrough({ t }) {
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [activeStep, setActiveStep] = useState(0)
   const currentStep = diarySteps[activeStep]
-  const StepIcon = currentStep.icon
 
   useEffect(() => {
+    if (reduceMotion) return undefined
+
     const intervalId = window.setInterval(() => {
       setActiveStep((current) => (current + 1) % diarySteps.length)
-    }, 3500)
+    }, 2600)
 
     return () => window.clearInterval(intervalId)
-  }, [])
+  }, [reduceMotion])
 
   return (
-    <section className="diary-walkthrough" aria-label={t('diary.demoAria')}>
-      <div className={`diary-walkthrough__book is-${currentStep.key}`}>
-        <div className="diary-walkthrough__page diary-walkthrough__page--left">
-          <span className="diary-walkthrough__date">{t('diary.demo.date')}</span>
-          <strong>{t('diary.demo.pageTitle')}</strong>
-          <div className="diary-walkthrough__photo" />
-          <p>{t('diary.demo.dedication')}</p>
+    <aside className="diary-walkthrough" aria-label={t('diary.quickStartAria')}>
+      <div className={`diary-walkthrough__clip is-${currentStep.key}`} aria-hidden="true">
+        <div className="diary-mini-page">
+          <span className="diary-mini-page__date">08 / 06</span>
+          <strong>{t('diary.quickStartCreate')}</strong>
+          <span className="diary-mini-page__line" />
+          <span className="diary-mini-page__line diary-mini-page__line--short" />
+          <FiEdit3 className="diary-mini-page__cursor" />
+          <FiCheck className="diary-mini-page__saved" />
         </div>
-        <div className="diary-walkthrough__page diary-walkthrough__page--right">
+        <div className="diary-mini-archive">
           <span />
           <span />
           <span />
-          <span />
-          <div className="diary-walkthrough__entries">
-            <button type="button">{t('diary.demo.entryOne')}</button>
-            <button type="button">{t('diary.demo.entryTwo')}</button>
-          </div>
-        </div>
-        <div className="diary-walkthrough__cursor" aria-hidden="true">
-          <StepIcon />
         </div>
       </div>
 
-      <div className="diary-walkthrough__caption">
-        <p className="eyebrow">{t('diary.demoLabel')}</p>
-        <h2>{t(currentStep.titleKey)}</h2>
-        <p>{t(currentStep.captionKey)}</p>
-        <div className="walkthrough-steps" role="tablist" aria-label={t('diary.demoSteps')}>
-          {diarySteps.map((step, index) => (
-            <button
-              aria-label={t(step.titleKey)}
-              aria-selected={activeStep === index}
-              className={activeStep === index ? 'active' : ''}
-              key={step.key}
-              onClick={() => setActiveStep(index)}
-              type="button"
-            />
-          ))}
+      <div className="diary-walkthrough__content">
+        <div>
+          <p className="eyebrow">{t('diary.quickStartEyebrow')}</p>
+          <h2>{t(currentStep.titleKey)}</h2>
+        </div>
+        <div className="diary-walkthrough__steps" role="tablist" aria-label={t('diary.quickStartAria')}>
+          {diarySteps.map((step, index) => {
+            const StepIcon = step.icon
+            return (
+              <button
+                aria-label={t(step.titleKey)}
+                aria-selected={activeStep === index}
+                className={activeStep === index ? 'active' : ''}
+                key={step.key}
+                onClick={() => setActiveStep(index)}
+                role="tab"
+                type="button"
+              >
+                <StepIcon aria-hidden="true" />
+                <span>{index + 1}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
-    </section>
+    </aside>
   )
 }
 

@@ -1,8 +1,14 @@
 .kanban-hub {
   display: grid;
-  gap: 1.15rem;
+  gap: 1rem;
   min-width: 0;
   overflow-x: hidden;
+}
+
+.kanban-hub-actions {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
 }
 
 .kanban-hub-card,
@@ -31,7 +37,7 @@
   align-items: center;
   display: flex;
   gap: 1rem;
-  min-height: 11.5rem;
+  min-height: 10.5rem;
   padding: clamp(1.2rem, 4vw, 1.65rem);
   text-align: left;
 }
@@ -41,19 +47,24 @@
   min-width: 0;
 }
 
-.kanban-hub-card__trigger > svg,
-.kanban-hub-project > svg {
+.kanban-hub-card__icon {
+  align-items: center;
   background: rgba(215, 168, 124, 0.18);
   border: 1px solid rgba(123, 84, 35, 0.14);
   border-radius: 18px;
   color: #7b5423;
+  display: inline-flex;
   flex: 0 0 auto;
-  font-size: 3.4rem;
-  padding: 0.8rem;
+  height: 4.2rem;
+  justify-content: center;
+  width: 4.2rem;
 }
 
-.kanban-hub-card strong,
-.kanban-hub-project span {
+.kanban-hub-card__icon svg {
+  font-size: 2rem;
+}
+
+.kanban-hub-card strong {
   -webkit-box-orient: vertical;
   display: -webkit-box;
   line-clamp: 2;
@@ -65,6 +76,17 @@
   font-weight: 900;
 }
 
+.kanban-hub-project__name {
+  display: block;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-weight: 900;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: break-word;
+}
+
 .kanban-hub-card small {
   -webkit-box-orient: vertical;
   display: -webkit-box;
@@ -72,6 +94,34 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
   overflow-wrap: anywhere;
+}
+
+.kanban-hub-card__kicker {
+  color: #8a5c1f !important;
+  display: block !important;
+  font-size: 0.68rem;
+  letter-spacing: 0.11em;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.kanban-hub-card__arrow {
+  color: var(--primary-dark);
+  flex: 0 0 auto;
+  font-size: 1.35rem;
+}
+
+.kanban-hub-card--daily {
+  background:
+    radial-gradient(circle at 86% 8%, rgba(51, 199, 223, 0.2), transparent 12rem),
+    linear-gradient(135deg, rgba(245, 253, 252, 0.96), rgba(218, 240, 235, 0.84));
+  border-color: rgba(17, 106, 123, 0.16);
+}
+
+.kanban-hub-card--daily .kanban-hub-card__icon {
+  background: rgba(17, 106, 123, 0.12);
+  border-color: rgba(17, 106, 123, 0.16);
+  color: #116a7b;
 }
 
 .kanban-hub-card small,
@@ -144,12 +194,84 @@
 }
 
 .kanban-hub-projects {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(214, 164, 58, 0.16), transparent 16rem),
+    linear-gradient(145deg, rgba(255, 249, 237, 0.92), rgba(246, 232, 205, 0.7));
+  border: 1px solid rgba(148, 96, 29, 0.18);
+  border-radius: 28px;
+  box-shadow: 0 26px 58px rgba(76, 59, 35, 0.11);
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.45rem);
 }
 
-.kanban-hub-projects h2 {
-  margin: 0.5rem 0 0;
+.kanban-hub-projects__header {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.94), rgba(255, 246, 230, 0.82)),
+    repeating-linear-gradient(0deg, rgba(117, 91, 56, 0.035) 0 1px, transparent 1px 18px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: none;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: clamp(1.2rem, 4vw, 1.65rem);
+}
+
+.kanban-hub-projects__icon,
+.kanban-hub-project__open > svg {
+  align-items: center;
+  background: rgba(215, 168, 124, 0.18);
+  border: 1px solid rgba(123, 84, 35, 0.14);
+  border-radius: 14px;
+  color: #7b5423;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 2.6rem;
+  justify-content: center;
+  padding: 0.62rem;
+  width: 2.6rem;
+}
+
+.kanban-hub-projects__icon {
+  border-radius: 18px;
+  height: 3.4rem;
+  width: 3.4rem;
+}
+
+.kanban-hub-projects__header h2 {
+  color: var(--text-primary);
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: clamp(1.45rem, 5vw, 2.05rem);
+  margin: 0.2rem 0;
+}
+
+.kanban-hub-projects__count {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(123, 84, 35, 0.16);
+  border-radius: 999px;
+  display: grid;
+  justify-items: center;
+  min-width: 3rem;
+  padding: 0.55rem 0.85rem;
+  text-align: center;
+}
+
+.kanban-hub-projects__count strong {
+  color: var(--primary-dark);
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.kanban-hub-projects__count small {
+  display: none;
+}
+
+.kanban-hub-projects__header p {
+  margin: 0;
 }
 
 .kanban-hub-projects__grid {
@@ -182,8 +304,27 @@
   text-align: left;
 }
 
-.kanban-hub-project__open small {
+.kanban-hub-project__task-count {
+  align-items: center;
+  background: rgba(123, 84, 35, 0.07);
+  border: 1px solid rgba(123, 84, 35, 0.1);
+  border-radius: 999px;
+  display: inline-flex !important;
+  gap: 0.4rem;
+  padding: 0.42rem 0.55rem;
   white-space: nowrap;
+}
+
+.kanban-hub-project__task-count > svg {
+  color: var(--primary-dark);
+  flex: 0 0 auto;
+}
+
+.kanban-hub-project__task-count strong {
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1;
 }
 
 .kanban-hub-project__actions {
@@ -208,6 +349,28 @@
   color: var(--rose);
 }
 
+.kanban-hub-projects__empty {
+  align-items: center;
+  border: 1px dashed rgba(123, 84, 35, 0.24);
+  border-radius: 18px;
+  display: grid;
+  grid-column: 1 / -1;
+  justify-items: center;
+  min-height: 9rem;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.kanban-hub-projects__empty > svg {
+  color: #7b5423;
+  font-size: 1.8rem;
+  margin-bottom: 0.35rem;
+}
+
+.kanban-hub-projects__empty p {
+  margin: 0.3rem 0 0;
+}
+
 @keyframes kanbanHubIn {
   from {
     opacity: 0;
@@ -221,12 +384,8 @@
 }
 
 @media (min-width: 760px) {
-  .kanban-hub {
+  .kanban-hub-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .kanban-hub-projects {
-    grid-column: 1 / -1;
   }
 
   .kanban-hub-projects__grid {
@@ -234,16 +393,27 @@
   }
 }
 
+:root[data-theme='dark'] .kanban-hub-projects,
 :root[data-theme='dark'] .kanban-hub-card,
-:root[data-theme='dark'] .kanban-hub-project {
-  background: rgba(28, 35, 43, 0.78);
-  border-color: rgba(244, 239, 229, 0.14);
+:root[data-theme='dark'] .kanban-hub-project,
+:root[data-theme='dark'] .kanban-hub-projects__header {
+  background: linear-gradient(145deg, rgba(24, 34, 45, 0.98), rgba(16, 25, 34, 0.96));
+  border-color: rgba(216, 226, 235, 0.16);
 }
 
+:root[data-theme='dark'] .kanban-hub-card--daily {
+  background:
+    radial-gradient(circle at 86% 8%, rgba(45, 173, 192, 0.18), transparent 12rem),
+    linear-gradient(145deg, rgba(19, 42, 49, 0.98), rgba(14, 28, 36, 0.96));
+  border-color: rgba(72, 190, 207, 0.25);
+}
+
+:root[data-theme='dark'] .kanban-hub-projects__count,
+:root[data-theme='dark'] .kanban-hub-project__task-count,
 :root[data-theme='dark'] .kanban-hub-project__actions button {
-  background: rgba(244, 239, 229, 0.08);
-  border-color: rgba(244, 239, 229, 0.14);
-  color: #f0cf84;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(216, 226, 235, 0.15);
+  color: var(--primary-dark);
 }
 
 @media (max-width: 520px) {
@@ -260,14 +430,57 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .kanban-hub-card__trigger > svg,
-  .kanban-hub-project > svg,
-  .kanban-hub-project__open > svg {
-    font-size: 2.8rem;
+  .kanban-hub-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 0;
+  }
+
+  .kanban-hub-card__icon {
+    height: 3.25rem;
+    width: 3.25rem;
+  }
+
+  .kanban-hub-card__trigger {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .kanban-hub-card--project.is-creating .kanban-hub-card__trigger {
+    display: none;
+  }
+
+  .kanban-hub-project-form {
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
   .kanban-hub-project__actions {
     justify-content: flex-end;
     width: 100%;
+  }
+
+  .kanban-hub-projects__header {
+    align-items: start;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .kanban-hub-projects__count {
+    grid-column: 1 / -1;
+    grid-template-columns: auto auto;
+    justify-content: center;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .kanban-hub-projects__count small {
+    margin: 0 0 0 0.35rem;
+  }
+
+  .kanban-hub-project__open {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .kanban-hub-project__task-count {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 }

@@ -1,3 +1,4 @@
+import AuthenticatedImage from './AuthenticatedImage'
 import './ImageFrame.css'
 
 function ImageFrame({ alt = '', children, className = '', src }) {
@@ -5,7 +6,7 @@ function ImageFrame({ alt = '', children, className = '', src }) {
     <figure className={`diary-image-frame ${className}`}>
       <div className="diary-image-frame__braid" aria-hidden="true" />
       <div className="diary-image-frame__inner">
-        {src ? <img src={src} alt={alt} /> : children}
+        {src ? <AuthenticatedImage src={src} alt={alt} fallback={children} /> : children}
       </div>
       <span className="diary-image-frame__stone diary-image-frame__stone--one" aria-hidden="true" />
       <span className="diary-image-frame__stone diary-image-frame__stone--two" aria-hidden="true" />

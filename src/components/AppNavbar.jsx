@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FiChevronDown, FiDatabase, FiGlobe, FiLogOut, FiMenu, FiMoon, FiUser, FiX } from 'react-icons/fi'
+import { FiChevronDown, FiGlobe, FiLogOut, FiMenu, FiMoon, FiUser, FiX } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
 import './AppNavbar.css'
 
@@ -50,13 +50,6 @@ function AppNavbar({ activePage, onLogout, onNavigate, setTheme, theme, user }) 
     setIsMobileDrawerOpen(false)
     setIsUserMenuOpen(false)
     onNavigate('profile')
-  }
-
-  const navigateToPrivacy = () => {
-    setIsMobileAccountOpen(false)
-    setIsMobileDrawerOpen(false)
-    setIsUserMenuOpen(false)
-    onNavigate('privacy')
   }
 
   const logoutFromMenu = () => {
@@ -160,10 +153,6 @@ function AppNavbar({ activePage, onLogout, onNavigate, setTheme, theme, user }) 
                     <FiUser aria-hidden="true" />
                     {t('common.profile')}
                   </button>
-                  <button type="button" onClick={navigateToPrivacy} role="menuitem">
-                    <FiDatabase aria-hidden="true" />
-                    {t('privacy.menu')}
-                  </button>
                   <button type="button" onClick={logoutFromMenu} role="menuitem">
                     <FiLogOut aria-hidden="true" />
                     {t('common.logout')}
@@ -238,10 +227,6 @@ function AppNavbar({ activePage, onLogout, onNavigate, setTheme, theme, user }) 
                         <button type="button" onClick={navigateToProfile}>
                           <FiUser aria-hidden="true" />
                           {t('common.profile')}
-                        </button>
-                        <button type="button" onClick={navigateToPrivacy}>
-                          <FiDatabase aria-hidden="true" />
-                          {t('privacy.menu')}
                         </button>
                         <button type="button" onClick={logoutFromMenu}>
                           <FiLogOut aria-hidden="true" />

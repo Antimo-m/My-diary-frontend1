@@ -18,5 +18,5 @@ export async function getProfileStats({ board = 'all', period = 'week' } = {}) {
 
   const response = await apiClient.get('/stats/profile', { params })
 
-  return response.data
+  return response.data.data ?? response.data
 }

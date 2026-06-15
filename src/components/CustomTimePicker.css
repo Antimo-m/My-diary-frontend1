@@ -1,16 +1,17 @@
 .custom-time {
-  display: block;
   max-width: 100%;
   min-width: 0;
+  position: relative;
+  width: 100%;
 }
 
 .sr-only {
+  clip: rect(0, 0, 0, 0);
   height: 1px;
   margin: -1px;
   overflow: hidden;
   position: absolute;
   width: 1px;
-  clip: rect(0, 0, 0, 0);
 }
 
 .custom-time__control {
@@ -18,43 +19,178 @@
   background: rgba(255, 255, 255, 0.74);
   border: 1px solid var(--line);
   border-radius: 12px;
+  box-sizing: border-box;
   color: var(--ink);
-  display: inline-flex;
+  cursor: pointer;
+  display: grid;
   font: inherit;
   font-family: var(--task-font);
   font-weight: 850;
-  gap: 0.5rem;
-  height: 2.75rem;
-  justify-content: flex-start;
+  gap: 0.55rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 2.75rem;
   padding: 0.65rem 0.9rem;
+  text-align: left;
   width: 100%;
-  min-width: 0;
 }
 
 .custom-time__control svg {
   color: var(--primary-dark);
-  flex: 0 0 auto;
 }
 
-.custom-time__control input {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  color: var(--ink);
-  font: inherit;
-  font-weight: 850;
+.custom-time__control span {
+  letter-spacing: 0.04em;
   min-width: 0;
-  outline: 0;
-  width: 100%;
 }
 
-.custom-time__control:focus-within {
+.custom-time.is-open .custom-time__control {
   border-color: color-mix(in srgb, var(--primary) 48%, var(--line));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
-:root[data-theme='dark'] .custom-time__control {
-  background: rgba(18, 24, 31, 0.72);
-  border-color: rgba(244, 239, 229, 0.16);
+.custom-time__panel {
+  animation: customTimeIn 160ms ease both;
+  background: rgba(255, 253, 247, 0.99);
+  border: 1px solid rgba(130, 102, 64, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 24px 58px rgba(76, 59, 35, 0.22);
+  display: grid;
+  gap: 0.7rem;
+  left: 0;
+  min-width: min(18rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  z-index: 95;
+}
+
+.custom-time__display {
+  align-items: center;
+  background: linear-gradient(135deg, var(--primary-soft), rgba(255, 255, 255, 0.9));
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  border-radius: 14px;
+  color: var(--primary-dark);
+  display: flex;
+  gap: 0.55rem;
+  justify-content: center;
+  min-height: 3rem;
+}
+
+.custom-time__display strong {
+  font-family: var(--task-font);
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+
+.custom-time__columns {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.custom-time__column {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.custom-time__column > span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.custom-time__column > div {
+  background: rgba(246, 236, 216, 0.54);
+  border: 1px solid rgba(130, 102, 64, 0.12);
+  border-radius: 12px;
+  display: grid;
+  gap: 0.2rem;
+  max-height: 10rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.3rem;
+  scrollbar-width: thin;
+}
+
+.custom-time__column button {
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
   color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 850;
+  min-height: 2rem;
+}
+
+.custom-time__column button:hover,
+.custom-time__column button:focus-visible,
+.custom-time__column button.is-selected {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.custom-time__actions {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+}
+
+.custom-time__actions button {
+  align-items: center;
+  border: 0;
+  border-radius: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 900;
+  gap: 0.4rem;
+  justify-content: center;
+  min-height: 2.45rem;
+}
+
+.custom-time__clear {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--rose);
+}
+
+.custom-time__confirm {
+  background: linear-gradient(135deg, var(--primary), var(--coral));
+  color: #ffffff;
+}
+
+:root[data-theme='dark'] .custom-time__control,
+:root[data-theme='dark'] .custom-time__panel {
+  background: rgba(28, 35, 43, 0.99);
+  border-color: rgba(244, 239, 229, 0.14);
+  color: var(--ink);
+}
+
+:root[data-theme='dark'] .custom-time__column > div {
+  background: rgba(244, 239, 229, 0.06);
+  border-color: rgba(244, 239, 229, 0.12);
+}
+
+@keyframes customTimeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 420px) {
+  .custom-time__panel {
+    min-width: min(17rem, calc(100vw - 2rem));
+  }
 }

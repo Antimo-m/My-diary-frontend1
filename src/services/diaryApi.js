@@ -6,13 +6,13 @@ export async function listDiaryNotes(params = {}) {
   return response.data
 }
 
-export async function getDiaryNote(id) {
-  const response = await apiClient.get(`/diary-notes/${id}`)
+export async function getDiaryNote(identifier) {
+  const response = await apiClient.get(`/diary-notes/${encodeURIComponent(identifier)}`)
 
   return response.data.data
 }
 
-export async function saveDiaryNote(payload, id = null) {
+export async function saveDiaryNote(payload, identifier = null) {
   const formData = new FormData()
 
   Object.entries(payload).forEach(([key, value]) => {
@@ -21,15 +21,15 @@ export async function saveDiaryNote(payload, id = null) {
     }
   })
 
-  if (id) {
+  if (identifier) {
     formData.append('_method', 'PUT')
   }
 
-  const response = await apiClient.post(id ? `/diary-notes/${id}` : '/diary-notes', formData)
+  const response = await apiClient.post(identifier ? `/diary-notes/${encodeURIComponent(identifier)}` : '/diary-notes', formData)
 
   return response.data.data
 }
 
-export async function deleteDiaryNote(id) {
-  await apiClient.delete(`/diary-notes/${id}`)
+export async function deleteDiaryNote(identifier) {
+  await apiClient.delete(`/diary-notes/${encodeURIComponent(identifier)}`)
 }

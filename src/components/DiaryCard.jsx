@@ -2,6 +2,7 @@ import { FiEdit3, FiTrash2 } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
 import { textPreview } from '../utils/textPreview'
 import IconButton from './IconButton'
+import AuthenticatedImage from './AuthenticatedImage'
 import './DiaryCard.css'
 
 function DiaryCard({ note, onDelete, onEdit, onOpen }) {
@@ -12,7 +13,11 @@ function DiaryCard({ note, onDelete, onEdit, onOpen }) {
       <button className="journal-entry__content" type="button" onClick={() => onOpen(note)}>
         <span className="journal-entry__thumb">
           {note.cover_image_url ? (
-            <img src={note.cover_image_url} alt={`${t('diary.coverOf')} ${note.title}`} />
+            <AuthenticatedImage
+              src={note.cover_image_url}
+              alt={`${t('diary.coverOf')} ${note.title}`}
+              fallback={<span aria-hidden="true">MD</span>}
+            />
           ) : (
             <span aria-hidden="true">MD</span>
           )}

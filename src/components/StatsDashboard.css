@@ -18,27 +18,9 @@
   padding: 0.75rem;
 }
 
-.stats-dashboard__board-select span {
-  color: var(--muted);
+.stats-dashboard__board-select .custom-select__label {
   font-size: 0.76rem;
-  font-weight: 900;
   text-transform: uppercase;
-}
-
-.stats-dashboard__board-select select {
-  appearance: none;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(130, 102, 64, 0.18);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font: inherit;
-  font-weight: 800;
-  min-height: 2.65rem;
-  padding: 0 0.85rem;
-}
-
-.stats-dashboard__board-select select {
-  max-width: 100%;
 }
 
 .stats-dashboard__period {
@@ -65,7 +47,6 @@
   color: #6f4b21;
 }
 
-.stats-dashboard__board-select select:focus-visible,
 .stats-dashboard__period button:focus-visible {
   outline: 3px solid rgba(214, 164, 58, 0.25);
   outline-offset: 2px;
@@ -138,10 +119,43 @@
   padding: 0.46rem 0.68rem;
 }
 
+.stats-zero-state {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px dashed rgba(123, 84, 35, 0.28);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  justify-content: center;
+  min-height: 220px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stats-zero-state strong {
+  color: #7b5423;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 3.25rem;
+}
+
+.stats-zero-state span,
+.stats-trend-note {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.stats-trend-note {
+  margin: -0.35rem 0 0.35rem;
+  text-align: center;
+}
+
 .stats-card--advice {
   background:
-    linear-gradient(135deg, rgba(23, 114, 132, 0.12), rgba(255, 253, 247, 0.9)),
-    repeating-linear-gradient(0deg, rgba(23, 114, 132, 0.04) 0 1px, transparent 1px 18px);
+    linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(236, 253, 245, 0.96)),
+    repeating-linear-gradient(0deg, rgba(16, 185, 129, 0.05) 0 1px, transparent 1px 18px);
+  border-color: rgba(16, 185, 129, 0.28);
+  position: relative;
 }
 
 .stats-card--advice p {
@@ -153,6 +167,28 @@
   margin: 0 auto;
   max-width: 42rem;
   text-align: center;
+}
+
+.advice-toast__next {
+  align-items: center;
+  align-self: center;
+  background: #10b981;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 900;
+  gap: 0.45rem;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0.5rem 0.85rem;
+}
+
+.advice-toast__next:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.28);
+  outline-offset: 2px;
 }
 
 @media (max-width: 700px) {
@@ -195,6 +231,17 @@
     flex: 1 1 100%;
     text-align: center;
   }
+
+  .stats-card--advice {
+    border-left: 4px solid #10b981;
+    padding: 1rem;
+  }
+
+  .stats-card--advice p {
+    font-size: 1.05rem;
+    padding-inline: 0.35rem;
+    text-align: left;
+  }
 }
 
 @media (min-width: 900px) {
@@ -210,20 +257,18 @@
   .stats-card--wide {
     grid-column: span 2;
   }
+
+  .stats-card--advice {
+    padding: 1.4rem;
+  }
 }
 
 :root[data-theme='dark'] .stats-dashboard__period,
 :root[data-theme='dark'] .stats-dashboard__board-select,
 :root[data-theme='dark'] .stats-dashboard__hero,
 :root[data-theme='dark'] .stats-card {
-  background: rgba(28, 35, 43, 0.78);
-  border-color: rgba(244, 239, 229, 0.14);
-}
-
-:root[data-theme='dark'] .stats-dashboard__board-select select {
-  background: rgba(244, 239, 229, 0.08);
-  border-color: rgba(244, 239, 229, 0.14);
-  color: #e0e0e0;
+  background: linear-gradient(145deg, rgba(24, 34, 45, 0.98), rgba(15, 23, 32, 0.96));
+  border-color: var(--line);
 }
 
 :root[data-theme='dark'] .stats-dashboard__period button.active {
@@ -232,9 +277,34 @@
 }
 
 :root[data-theme='dark'] .stats-card__metric {
-  color: #f0cf84;
+  color: var(--primary-dark);
+}
+
+:root[data-theme='dark'] .stats-dashboard__period button {
+  color: var(--muted);
+}
+
+:root[data-theme='dark'] .stats-pills span {
+  background: var(--surface-muted);
+  border-color: var(--line);
+  color: var(--text-primary);
+}
+
+:root[data-theme='dark'] .stats-zero-state {
+  background: var(--surface-muted);
+  border-color: var(--line);
+}
+
+:root[data-theme='dark'] .stats-zero-state strong {
+  color: var(--primary-dark);
 }
 
 :root[data-theme='dark'] .stats-card--advice {
-  background: rgba(20, 43, 50, 0.8);
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.96), rgba(17, 94, 89, 0.96));
+  border-color: rgba(110, 231, 183, 0.28);
+}
+
+:root[data-theme='dark'] .stats-card--advice p,
+:root[data-theme='dark'] .stats-card--advice h3 {
+  color: #ecfdf5;
 }

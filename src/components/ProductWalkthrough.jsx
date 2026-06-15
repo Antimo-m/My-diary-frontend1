@@ -1,144 +1,59 @@
 import { useEffect, useState } from 'react'
-import { FiCheckCircle, FiEdit3, FiFlag, FiFolderPlus, FiGrid, FiMove, FiPlus, FiTag } from 'react-icons/fi'
+import { FiColumns, FiFolderPlus, FiPlus } from 'react-icons/fi'
+import useMediaQuery from '../hooks/useMediaQuery'
 import './ProductWalkthrough.css'
 
 const steps = [
-  {
-    icon: FiGrid,
-    key: 'hub',
-    titleKey: 'home.demo.hubTitle',
-    captionKey: 'home.demo.hubCaption',
-  },
-  {
-    icon: FiFlag,
-    key: 'daily',
-    titleKey: 'home.demo.dailyTitle',
-    captionKey: 'home.demo.dailyCaption',
-  },
-  {
-    icon: FiFolderPlus,
-    key: 'project',
-    titleKey: 'home.demo.projectTitle',
-    captionKey: 'home.demo.projectCaption',
-  },
-  {
-    icon: FiEdit3,
-    key: 'column',
-    titleKey: 'home.demo.columnTitle',
-    captionKey: 'home.demo.columnCaption',
-  },
-  {
-    icon: FiPlus,
-    key: 'task',
-    titleKey: 'home.demo.taskTitle',
-    captionKey: 'home.demo.taskCaption',
-  },
-  {
-    icon: FiTag,
-    key: 'label',
-    titleKey: 'home.demo.labelTitle',
-    captionKey: 'home.demo.labelCaption',
-  },
-  {
-    icon: FiMove,
-    key: 'move',
-    titleKey: 'home.demo.moveTitle',
-    captionKey: 'home.demo.moveCaption',
-  },
-  {
-    icon: FiCheckCircle,
-    key: 'complete',
-    titleKey: 'home.demo.completeTitle',
-    captionKey: 'home.demo.completeCaption',
-  },
+  { icon: FiFolderPlus, key: 'project', titleKey: 'kanban.quickStartProject' },
+  { icon: FiColumns, key: 'column', titleKey: 'kanban.quickStartColumn' },
+  { icon: FiPlus, key: 'task', titleKey: 'kanban.quickStartTask' },
 ]
 
 function ProductWalkthrough({ t }) {
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [activeStep, setActiveStep] = useState(0)
   const currentStep = steps[activeStep]
-  const StepIcon = currentStep.icon
 
   useEffect(() => {
+    if (reduceMotion) return undefined
+
     const intervalId = window.setInterval(() => {
       setActiveStep((current) => (current + 1) % steps.length)
-    }, 3600)
+    }, 2600)
 
     return () => window.clearInterval(intervalId)
-  }, [])
+  }, [reduceMotion])
 
   return (
-    <section className="product-walkthrough" aria-label={t('home.demoAria')}>
-      <div className={`product-walkthrough__screen is-${currentStep.key}`}>
-        <div className="walkthrough-window">
-          <div className="walkthrough-window__bar">
-            <span />
-            <span />
-            <span />
-          </div>
-
-          <div className="walkthrough-window__content">
-            <aside className="walkthrough-sidebar">
-              <div className="walkthrough-logo">{t('app.brand').slice(0, 2)}</div>
-              <span>{t('nav.diary')}</span>
-              <span>{t('nav.kanban')}</span>
-              <span>{t('nav.analysis')}</span>
-            </aside>
-
-            <main className="walkthrough-stage">
-              <div className="walkthrough-hub">
-                <button type="button">{t('kanban.dailyTitle')}</button>
-                <button type="button">{t('kanban.createProject')}</button>
-              </div>
-
-              <div className="walkthrough-project-form">
-                <span>{t('kanban.name')}</span>
-                <strong>{t('home.demo.projectName')}</strong>
-                <small>{t('kanban.projectCreated')}</small>
-              </div>
-
-              <div className="walkthrough-board">
-                {['todo', 'doing', 'done'].map((column) => (
-                  <div className={`walkthrough-column walkthrough-column--${column}`} key={column}>
-                    <span>{t(`kanban.${column}`)}</span>
-                    <div className="walkthrough-task" />
-                    <div className="walkthrough-task walkthrough-task--small" />
-                    {column === 'doing' ? <div className="walkthrough-label">{t('home.demo.labelName')}</div> : null}
-                  </div>
-                ))}
-              </div>
-
-              <div className="walkthrough-analysis">
-                <span />
-                <span />
-                <span />
-              </div>
-            </main>
-          </div>
+    <aside className="product-walkthrough" aria-label={t('kanban.quickStartAria')}>
+      <div className={`product-walkthrough__clip is-${currentStep.key}`} aria-hidden="true">
+        <div className="kanban-mini-project"><FiFolderPlus /><span /></div>
+        <div className="kanban-mini-board">
+          <div><strong>01</strong><span /></div>
+          <div><strong>02</strong><span /></div>
+          <div><strong>03</strong><span /></div>
         </div>
-
-        <div className="walkthrough-cursor" aria-hidden="true">
-          <StepIcon />
-        </div>
+        <div className="kanban-mini-task"><FiPlus /><span /></div>
       </div>
 
-      <div className="product-walkthrough__caption">
-        <p className="eyebrow">{t('home.demoLabel')}</p>
-        <h2>{t(currentStep.titleKey)}</h2>
-        <p>{t(currentStep.captionKey)}</p>
-        <div className="walkthrough-steps" role="tablist" aria-label={t('home.demoSteps')}>
-          {steps.map((step, index) => (
-            <button
-              aria-label={t(step.titleKey)}
-              aria-selected={activeStep === index}
-              className={activeStep === index ? 'active' : ''}
-              key={step.key}
-              onClick={() => setActiveStep(index)}
-              type="button"
-            />
-          ))}
+      <div className="product-walkthrough__content">
+        <div>
+          <p className="eyebrow">{t('kanban.quickStartEyebrow')}</p>
+          <h2>{t(currentStep.titleKey)}</h2>
+        </div>
+        <div className="product-walkthrough__steps" role="tablist" aria-label={t('kanban.quickStartAria')}>
+          {steps.map((step, index) => {
+            const StepIcon = step.icon
+            return (
+              <button aria-label={t(step.titleKey)} aria-selected={activeStep === index} className={activeStep === index ? 'active' : ''} key={step.key} onClick={() => setActiveStep(index)} role="tab" type="button">
+                <StepIcon aria-hidden="true" />
+                <span>{index + 1}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
-    </section>
+    </aside>
   )
 }
 

@@ -10,6 +10,8 @@
   padding: 0.85rem;
   position: relative;
   transition: box-shadow 180ms ease, transform 180ms ease;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .journal-entry:hover {
@@ -68,6 +70,14 @@
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 1.18rem;
   margin: 0 0 0.35rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.journal-entry__content > span:last-child {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .journal-entry p {

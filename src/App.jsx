@@ -14,7 +14,6 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const DiaryPage = lazy(() => import('./pages/DiaryPage'))
 const KanbanPage = lazy(() => import('./pages/KanbanPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const PrivacyDataPage = lazy(() => import('./pages/PrivacyDataPage'))
 const SecretDiaryPage = lazy(() => import('./pages/SecretDiaryPage'))
 
 const pages = {
@@ -22,7 +21,6 @@ const pages = {
   diary: DiaryPage,
   kanban: KanbanPage,
   profile: ProfilePage,
-  privacy: PrivacyDataPage,
   analysis: AnalysisPage,
   secretDiary: SecretDiaryPage,
 }
@@ -40,12 +38,16 @@ function initialPageFromLocation(searchParams) {
     return 'profile'
   }
 
-  if (window.location.pathname.startsWith('/privacy')) {
-    return 'privacy'
-  }
-
   if (window.location.pathname.startsWith('/analysis')) {
     return 'analysis'
+  }
+
+  if (window.location.pathname.startsWith('/secret-diary')) {
+    return 'secretDiary'
+  }
+
+  if (window.location.pathname.startsWith('/diary')) {
+    return 'diary'
   }
 
   return 'home'
@@ -53,8 +55,20 @@ function initialPageFromLocation(searchParams) {
 
 function App() {
   const { t } = useI18n()
-  const initialParams = useMemo(() => new URLSearchParams(window.location.search), [])
+  const initialParams = useMemo(() => {
+    const params = new URLSearchParams(window.location.search)
+    const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+
+    fragmentParams.forEach((value, key) => {
+      if (!params.has(key)) {
+        params.set(key, value)
+      }
+    })
+
+    return params
+  }, [])
   const [activePage, setActivePage] = useState(() => initialPageFromLocation(initialParams))
+  const [locationKey, setLocationKey] = useState(0)
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [welcomeDismissed, setWelcomeDismissed] = useState(false)
@@ -84,9 +98,25 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (initialParams.get('secret_reset_token')) {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [initialParams])
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme
     localStorage.setItem('my-diary-theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    const restoreLocation = () => {
+      setActivePage(initialPageFromLocation(new URLSearchParams(window.location.search)))
+      setLocationKey((current) => current + 1)
+    }
+
+    window.addEventListener('popstate', restoreLocation)
+    return () => window.removeEventListener('popstate', restoreLocation)
+  }, [])
 
   const handleLogin = async (credentials) => {
     const authenticatedUser = await login(credentials)
@@ -117,18 +147,20 @@ function App() {
     setActivePage('home')
   }
 
-  const navigate = (page) => {
+  const navigate = (page, requestedPath = null) => {
     const paths = {
       analysis: '/analysis',
       diary: '/diary',
       home: '/',
-      kanban: window.location.pathname.startsWith('/kanban/') ? window.location.pathname : '/kanban',
+      kanban: '/kanban',
       profile: '/profile',
-      privacy: '/privacy',
       secretDiary: '/secret-diary',
     }
+    const nextPath = requestedPath ?? paths[page] ?? '/'
 
-    window.history.pushState({}, '', paths[page] ?? '/')
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextPath) {
+      window.history.pushState({}, '', nextPath)
+    }
     setActivePage(page)
   }
 
@@ -166,6 +198,7 @@ function App() {
     <AppLayout activePage={activePage} onNavigate={navigate} user={user} onLogout={handleLogout} setTheme={setTheme} theme={theme}>
       <Suspense fallback={<section className="page-container loading-state">{t('auth.wait')}</section>}>
         <ActivePage
+          key={`${activePage}-${locationKey}`}
           authLoading={authLoading}
           onForgotPassword={handlePasswordResetRequest}
           onLogin={handleLogin}

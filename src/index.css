@@ -3,6 +3,10 @@
   --app-bg-cool: #dff8ff;
   --surface: rgba(255, 252, 245, 0.84);
   --surface-solid: #ffffff;
+  --surface-raised: rgba(255, 255, 255, 0.92);
+  --surface-muted: rgba(246, 236, 216, 0.72);
+  --control-bg: rgba(255, 255, 255, 0.82);
+  --control-hover: rgba(255, 255, 255, 0.96);
   --ink: #172026;
   --text-primary: #172026;
   --bg-secondary: rgba(255, 252, 245, 0.84);
@@ -26,6 +30,7 @@
   --nav-panel: #ffffff;
   --shadow-soft: 0 18px 45px rgba(24, 32, 46, 0.1);
   --shadow-deep: 0 32px 90px rgba(31, 41, 55, 0.18);
+  --focus-ring: #b7791f;
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 28px;
@@ -40,17 +45,21 @@
 }
 
 :root[data-theme='dark'] {
-  --app-bg: #10151b;
-  --app-bg-cool: #17242c;
-  --surface: rgba(28, 35, 43, 0.86);
-  --surface-solid: #1a222b;
-  --ink: #f4efe5;
-  --text-primary: #e0e0e0;
-  --bg-secondary: rgba(28, 35, 43, 0.86);
-  --muted: #b8c1c8;
-  --line: rgba(244, 239, 229, 0.16);
+  --app-bg: #090f16;
+  --app-bg-cool: #10202b;
+  --surface: rgba(22, 31, 41, 0.92);
+  --surface-solid: #17212c;
+  --surface-raised: #1d2935;
+  --surface-muted: rgba(255, 255, 255, 0.07);
+  --control-bg: rgba(7, 13, 20, 0.7);
+  --control-hover: rgba(255, 255, 255, 0.11);
+  --ink: #f7f3eb;
+  --text-primary: #f8f5ee;
+  --bg-secondary: rgba(22, 31, 41, 0.92);
+  --muted: #bdc7d1;
+  --line: rgba(216, 226, 235, 0.18);
   --primary: #d6a43a;
-  --primary-dark: #f0cf84;
+  --primary-dark: #f4d58d;
   --primary-soft: rgba(214, 164, 58, 0.18);
   --coral: #a87624;
   --coral-soft: rgba(214, 164, 58, 0.14);
@@ -60,13 +69,14 @@
   --teal-soft: rgba(64, 217, 187, 0.14);
   --rose: #fb7185;
   --amber: #f8c052;
-  --paper: #2f271d;
-  --paper-edge: #5f4c34;
-  --nav-bg: rgba(12, 17, 23, 0.92);
-  --nav-border: rgba(244, 239, 229, 0.12);
-  --nav-panel: #151d25;
+  --paper: #29231d;
+  --paper-edge: #66533a;
+  --nav-bg: rgba(8, 14, 21, 0.94);
+  --nav-border: rgba(216, 226, 235, 0.14);
+  --nav-panel: #121c26;
   --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.28);
   --shadow-deep: 0 32px 90px rgba(0, 0, 0, 0.38);
+  --focus-ring: #7dd3fc;
 }
 
 * {
@@ -92,7 +102,7 @@ body {
 }
 
 :root[data-theme='dark'] ::placeholder {
-  color: rgba(224, 224, 224, 0.58);
+  color: rgba(216, 226, 235, 0.58);
 }
 
 :root[data-theme='dark'] .surface,
@@ -105,8 +115,8 @@ body {
 :root[data-theme='dark'] .task-card,
 :root[data-theme='dark'] .profile-menu__panel,
 :root[data-theme='dark'] .profile-menu__trigger {
-  background: rgba(28, 35, 43, 0.78);
-  border-color: rgba(244, 239, 229, 0.14);
+  background: var(--surface);
+  border-color: var(--line);
   color: var(--text-primary);
 }
 
@@ -119,8 +129,8 @@ body {
 :root[data-theme='dark'] .btn-subtle,
 :root[data-theme='dark'] .icon-action,
 :root[data-theme='dark'] .icon-button {
-  background: rgba(244, 239, 229, 0.08);
-  border-color: rgba(244, 239, 229, 0.16);
+  background: var(--surface-muted);
+  border-color: var(--line);
 }
 
 :root[data-theme='dark'] .auth-panel__switch,
@@ -137,8 +147,8 @@ body {
 :root[data-theme='dark'] .column-task-form input:not([type='color']),
 :root[data-theme='dark'] .column-task-form select,
 :root[data-theme='dark'] .column-task-form textarea {
-  background: rgba(18, 24, 31, 0.72);
-  border-color: rgba(244, 239, 229, 0.16);
+  background: var(--control-bg);
+  border-color: var(--line);
   color: var(--ink);
 }
 
@@ -173,8 +183,8 @@ body {
 :root[data-theme='dark'] .task-composer__section,
 :root[data-theme='dark'] .add-task-in-column,
 :root[data-theme='dark'] .kanban-count {
-  background: rgba(18, 24, 31, 0.62);
-  border-color: rgba(244, 239, 229, 0.14);
+  background: var(--control-bg);
+  border-color: var(--line);
   color: var(--ink);
 }
 
@@ -203,7 +213,7 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 [role='button']:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--primary) 62%, white);
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 72%, transparent);
   outline-offset: 3px;
 }
 

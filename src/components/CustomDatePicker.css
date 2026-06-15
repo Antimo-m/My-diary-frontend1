@@ -1,5 +1,7 @@
 .custom-date {
+  min-width: 0;
   position: relative;
+  width: 100%;
 }
 
 .custom-date__trigger {
@@ -18,6 +20,13 @@
   justify-content: flex-start;
   padding: 0.65rem 0.9rem;
   width: 100%;
+}
+
+.custom-date__trigger span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .custom-date__trigger svg {
@@ -106,9 +115,8 @@
 
 @media (max-width: 420px) {
   .custom-date__panel {
-    left: 50%;
+    left: 0;
     min-width: min(18rem, calc(100vw - 2rem));
-    transform: translateX(-50%);
   }
 }
 

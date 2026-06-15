@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FiBarChart2, FiBookOpen, FiCheck, FiDatabase, FiGrid, FiMail } from 'react-icons/fi'
+import { FiBarChart2, FiBookOpen, FiCheck, FiGrid, FiMail } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
 import Modal from './Modal'
 import './WelcomeModal.css'
@@ -9,7 +9,6 @@ const checklist = [
   { icon: FiBookOpen, key: 'onboarding.diary' },
   { icon: FiGrid, key: 'onboarding.kanban' },
   { icon: FiBarChart2, key: 'onboarding.analysis' },
-  { icon: FiDatabase, key: 'onboarding.privacy' },
 ]
 
 function WelcomeModal({ onClose }) {

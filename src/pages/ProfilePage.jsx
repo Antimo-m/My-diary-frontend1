@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react'
 import AuthPanel from '../components/AuthPanel'
+import CustomSelect from '../components/CustomSelect'
 import UserMessage from '../components/UserMessage'
+import { timeZones } from '../data/timeZones'
 import { useI18n } from '../i18n/useI18n'
 import { updateProfile } from '../services/profileApi'
 import { getApiError } from '../utils/apiErrors'
 import './ProfilePage.css'
 
 function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, onUserUpdate, user }) {
-  const { locale, setLocale, t, timeZone } = useI18n()
+  const { locale, setLocale, setTimeZone, t, timeZone } = useI18n()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     name: '',
-    email_notifications_enabled: true,
-    default_task_reminder: 'none',
     locale,
-    timezone: timeZone,
+    timezone: user?.timezone ?? 'Europe/Rome',
   })
 
   useEffect(() => {
@@ -24,13 +24,15 @@ function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onRes
       return
     }
 
-    setForm({
-      name: user.name ?? '',
-      email_notifications_enabled: Boolean(user.email_notifications_enabled),
-      default_task_reminder: user.default_task_reminder ?? 'none',
-      locale: user.locale ?? locale,
-      timezone: user.timezone ?? timeZone,
-    })
+    const syncForm = window.setTimeout(() => {
+      setForm({
+        name: user.name ?? '',
+        locale: user.locale ?? locale,
+        timezone: user.timezone ?? 'Europe/Rome',
+      })
+    }, 0)
+
+    return () => window.clearTimeout(syncForm)
   }, [locale, timeZone, user])
 
   if (authLoading) {
@@ -68,6 +70,7 @@ function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onRes
       const updatedUser = await updateProfile(form)
       onUserUpdate?.(updatedUser)
       setLocale(updatedUser.locale ?? form.locale)
+      setTimeZone(updatedUser.timezone ?? form.timezone)
       setSuccess(t('profile.saved'))
     } catch (requestError) {
       setError(getApiError(requestError, t('profile.updateError')))
@@ -104,38 +107,21 @@ function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onRes
             <input name="name" value={form.name} onChange={updateField} />
           </label>
 
-          <label>
-            <span>{t('profile.timezone')}</span>
-            <input name="timezone" value={form.timezone} onChange={updateField} />
-          </label>
+          <CustomSelect
+            label={t('profile.timezone')}
+            name="timezone"
+            onChange={updateField}
+            options={timeZones}
+            searchable
+            value={form.timezone}
+          />
         </section>
 
         <section className="profile-settings__card">
           <div className="profile-settings__section-title">
             <p className="eyebrow">{t('profile.details')}</p>
-            <h2>{t('profile.activityReminders')}</h2>
+            <h2>{t('language.label')}</h2>
           </div>
-
-          <label className="profile-toggle-row">
-            <span>
-              <strong>{t('profile.emailNotifications')}</strong>
-              <small>{t('profile.emailNotificationsHint')}</small>
-            </span>
-            <input
-              checked={form.email_notifications_enabled}
-              name="email_notifications_enabled"
-              onChange={updateField}
-              type="checkbox"
-            />
-          </label>
-
-          <label>
-            <span>{t('profile.defaultReminder')}</span>
-            <select name="default_task_reminder" value={form.default_task_reminder} onChange={updateField}>
-              <option value="none">{t('task.noReminder')}</option>
-              <option value="custom">{t('profile.customReminder')}</option>
-            </select>
-          </label>
 
           <div className="profile-language-control">
             <span>{t('language.label')}</span>

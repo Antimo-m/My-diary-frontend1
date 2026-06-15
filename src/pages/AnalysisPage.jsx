@@ -57,13 +57,11 @@ function AnalysisPage({ authLoading, onForgotPassword, onLogin, onRegister, onRe
 
   const changePeriod = (nextPeriod) => {
     setError('')
-    setStats(null)
     setPeriod(nextPeriod)
   }
 
   const changeBoard = (nextBoard) => {
     setError('')
-    setStats(null)
     setSelectedBoard(nextBoard)
   }
 

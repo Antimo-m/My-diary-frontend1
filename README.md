@@ -1,16 +1,52 @@
-# React + Vite
+# 📖 MyDiary Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MyDiary è il frontend di un'applicazione web progettata per unire due aspetti fondamentali della vita quotidiana: la conservazione dei propri ricordi e l'organizzazione delle proprie attività.
 
-Currently, two official plugins are available:
+L'applicazione permette agli utenti di raccontare esperienze, emozioni e momenti importanti attraverso un diario digitale arricchito da immagini e dediche personalizzate. Parallelamente, offre un sistema di gestione delle attività basato su Kanban, pensato per organizzare impegni e obiettivi in modo semplice ed intuitivo.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Funzionalità Principali
 
-## React Compiler
+### 📔 Diario Digitale
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* Creazione e gestione di pagine personali.
+* Caricamento di immagini di copertina.
+* Dediche e contenuti personalizzati.
+* Esperienza di lettura ispirata ad un diario tradizionale.
 
-## Expanding the ESLint configuration
+### 🔒 Diario Segreto
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* Area privata protetta da password.
+* Accesso separato rispetto al diario principale.
+* Pensato per contenuti particolarmente personali.
+
+### 📋 Kanban e Bacheche
+
+* Creazione di bacheche personalizzate.
+* Organizzazione delle attività tramite colonne.
+* Gestione di task, etichette e priorità.
+* Supporto alla pianificazione giornaliera.
+
+### ⏰ Promemoria
+
+* Possibilità di associare reminder alle attività.
+* Organizzazione degli impegni durante l'intera giornata.
+
+## 🛠️ Stack Tecnologico
+
+* React
+* JavaScript
+* Vite
+* Axios
+* Bootstrap
+* HTML5
+* CSS3
+
+## 🎯 Obiettivo del Progetto
+
+MyDiary nasce con l'obiettivo di offrire in un'unica applicazione uno spazio dedicato sia alla memoria personale che alla produttività quotidiana. Il progetto cerca di combinare l'aspetto emozionale di un diario con la praticità di uno strumento di organizzazione moderno.
+
+## 👨‍💻 Autore
+
+**Antimo Montella**
+
+Junior Full Stack Web Developer

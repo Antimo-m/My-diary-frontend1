@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { FiCheck, FiLock, FiMail, FiUnlock } from 'react-icons/fi'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { FiCheck, FiLogOut, FiLock, FiMail, FiUnlock } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import AppToast from '../components/AppToast'
 import IconButton from '../components/IconButton'
@@ -14,7 +14,10 @@ const emptyPasswordForm = {
   password_confirmation: '',
 }
 
-function SecretDiaryPasswordGate({ initialEmail, initialResetToken, onResetHandled, onUnlocked, user }) {
+const secretDiaryInactivityMs = 5 * 60 * 1000
+const secretDiaryLastActivityKey = 'my-diary-secret-last-activity'
+
+function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noticeTone, onResetHandled, onUnlocked, user }) {
   const { t } = useI18n()
   const [email, setEmail] = useState(initialEmail || user?.email || '')
   const [error, setError] = useState('')
@@ -35,7 +38,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, onResetHandl
         setMode('setup')
       }
       if (nextStatus.unlocked) {
-        onUnlocked(nextStatus)
+        onUnlocked(nextStatus, { fromStatus: true })
       }
     } catch (requestError) {
       setError(getApiError(requestError, 'Non riesco a verificare il Diario Segreto.'))
@@ -123,6 +126,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, onResetHandl
       </header>
 
       <UserMessage tone="error">{error}</UserMessage>
+      <UserMessage tone={noticeTone}>{notice}</UserMessage>
       <AppToast>{successToast}</AppToast>
 
       <form className="secret-gate surface" onSubmit={submitPassword}>
@@ -146,6 +150,13 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, onResetHandl
           <input name="password" type="password" value={form.password} onChange={updateForm} autoComplete="current-password" required />
         </label>
 
+        {!isSetup && !isReset ? (
+          <button className="auth-link-button secret-gate__forgot" type="button" onClick={requestReset} disabled={loading}>
+            <FiMail aria-hidden="true" />
+            {t('secret.forgot')}
+          </button>
+        ) : null}
+
         {isSetup || isReset ? (
           <label>
             {t('secret.passwordConfirm')}
@@ -157,12 +168,6 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, onResetHandl
           <IconButton variant="confirm" type="submit" disabled={loading || !status} label={isSetup ? t('secret.createPassword') : t('secret.unlock')}>
             <FiCheck />
           </IconButton>
-          {!isSetup && !isReset ? (
-            <button className="auth-link-button" type="button" onClick={requestReset} disabled={loading}>
-              <FiMail aria-hidden="true" />
-              {t('secret.forgot')}
-            </button>
-          ) : null}
         </div>
       </form>
     </section>
@@ -171,7 +176,126 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, onResetHandl
 
 function SecretDiaryPage({ authLoading, initialResetEmail = '', initialResetToken = '', onForgotPassword, onLogin, onRegister, onResetPassword, onSecretResetHandled, user }) {
   const { t } = useI18n()
+  const lastActivityRef = useRef(0)
+  const lockInProgressRef = useRef(false)
+  const [lockNotice, setLockNotice] = useState('')
+  const [lockNoticeTone, setLockNoticeTone] = useState('info')
   const [status, setStatus] = useState(null)
+
+  const lockSecretDiary = useCallback(async ({ automatic = false } = {}) => {
+    if (lockInProgressRef.current) {
+      return
+    }
+
+    lockInProgressRef.current = true
+
+    try {
+      const nextStatus = await secretDiaryApi.lockSecretDiary()
+      window.sessionStorage.removeItem(secretDiaryLastActivityKey)
+      setStatus(nextStatus)
+      if (automatic) {
+        setLockNoticeTone('info')
+        setLockNotice(t('secret.inactivityLocked'))
+      }
+    } catch {
+      window.sessionStorage.removeItem(secretDiaryLastActivityKey)
+      setStatus({ unlocked: false })
+      if (automatic) {
+        setLockNoticeTone('info')
+        setLockNotice(t('secret.inactivityLocked'))
+      } else {
+        setLockNoticeTone('error')
+        setLockNotice(t('secret.lockError'))
+      }
+    } finally {
+      lockInProgressRef.current = false
+    }
+  }, [t])
+
+  useEffect(() => {
+    if (!lockNotice) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => setLockNotice(''), 5000)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [lockNotice])
+
+  useEffect(() => {
+    if (!status?.unlocked) {
+      return undefined
+    }
+
+    const storedActivity = Number(window.sessionStorage.getItem(secretDiaryLastActivityKey))
+    let deadline = (Number.isFinite(storedActivity) && storedActivity > 0 ? storedActivity : Date.now()) + secretDiaryInactivityMs
+    let timeoutId
+    let lastPersistedActivity = Number.isFinite(storedActivity) ? storedActivity : 0
+
+    const scheduleLock = () => {
+      window.clearTimeout(timeoutId)
+      const remaining = Math.max(0, deadline - Date.now())
+      timeoutId = window.setTimeout(() => void lockSecretDiary({ automatic: true }), remaining)
+    }
+
+    const registerActivity = () => {
+      const activityTime = Date.now()
+      lastActivityRef.current = activityTime
+      if (activityTime - lastPersistedActivity >= 15000) {
+        window.sessionStorage.setItem(secretDiaryLastActivityKey, String(activityTime))
+        lastPersistedActivity = activityTime
+      }
+      deadline = activityTime + secretDiaryInactivityMs
+      scheduleLock()
+    }
+
+    const checkVisibility = () => {
+      if (document.visibilityState !== 'visible') {
+        return
+      }
+
+      if (Date.now() >= deadline) {
+        void lockSecretDiary({ automatic: true })
+      } else {
+        scheduleLock()
+      }
+    }
+
+    const keepServerSessionAlive = async () => {
+      if (
+        document.visibilityState !== 'visible'
+        || Date.now() - lastActivityRef.current >= secretDiaryInactivityMs
+      ) {
+        return
+      }
+
+      try {
+        const nextStatus = await secretDiaryApi.getSecretDiaryStatus()
+        if (!nextStatus.unlocked) {
+          window.sessionStorage.removeItem(secretDiaryLastActivityKey)
+          setLockNoticeTone('info')
+          setLockNotice(t('secret.inactivityLocked'))
+          setStatus(nextStatus)
+        }
+      } catch {
+        // A transient status failure must not close a diary that is still active locally.
+      }
+    }
+
+    lastActivityRef.current = Number.isFinite(storedActivity) && storedActivity > 0 ? storedActivity : Date.now()
+    const activityEvents = ['pointerdown', 'pointermove', 'keydown', 'input', 'touchstart', 'scroll', 'wheel']
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, registerActivity, { passive: true }))
+    document.addEventListener('visibilitychange', checkVisibility)
+    const keepAliveId = window.setInterval(() => void keepServerSessionAlive(), 60 * 1000)
+    scheduleLock()
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      window.clearInterval(keepAliveId)
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, registerActivity))
+      document.removeEventListener('visibilitychange', checkVisibility)
+    }
+  }, [lockSecretDiary, status?.unlocked, t])
 
   if (authLoading) {
     return <section className="page-container loading-state">{t('auth.wait')}</section>
@@ -190,15 +314,27 @@ function SecretDiaryPage({ authLoading, initialResetEmail = '', initialResetToke
       <SecretDiaryPasswordGate
         initialEmail={initialResetEmail}
         initialResetToken={initialResetToken}
+        notice={lockNotice}
+        noticeTone={lockNoticeTone}
         onResetHandled={onSecretResetHandled}
-        onUnlocked={setStatus}
+        onUnlocked={(nextStatus, { fromStatus = false } = {}) => {
+          const lastActivity = Number(window.sessionStorage.getItem(secretDiaryLastActivityKey))
+
+          if (fromStatus && Number.isFinite(lastActivity) && lastActivity > 0 && Date.now() - lastActivity >= secretDiaryInactivityMs) {
+            void lockSecretDiary({ automatic: true })
+            return
+          }
+
+          const activityTime = Date.now()
+          window.sessionStorage.setItem(secretDiaryLastActivityKey, String(activityTime))
+          lastActivityRef.current = activityTime
+          setLockNotice('')
+          setLockNoticeTone('info')
+          setStatus(nextStatus)
+        }}
         user={user}
       />
     )
-  }
-
-  const lockSecretDiary = async () => {
-    setStatus(await secretDiaryApi.lockSecretDiary())
   }
 
   const secretCopy = {
@@ -218,10 +354,10 @@ function SecretDiaryPage({ authLoading, initialResetEmail = '', initialResetToke
 
   return (
     <>
-      <div className="secret-diary-lockbar page-container">
-        <button className="btn btn-subtle" type="button" onClick={lockSecretDiary}>
-          <FiLock aria-hidden="true" />
-          {t('secret.lock')}
+      <div className="secret-diary-exit-row">
+        <button className="btn secret-diary-exit" type="button" onClick={() => void lockSecretDiary()}>
+          <FiLogOut aria-hidden="true" />
+          <span>{t('secret.lock')}</span>
         </button>
       </div>
       <DiaryPage

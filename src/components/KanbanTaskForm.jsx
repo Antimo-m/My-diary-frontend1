@@ -1,6 +1,7 @@
 import { FiCalendar, FiCheck, FiX } from 'react-icons/fi'
 import ColorPaletteInput from './ColorPaletteInput'
 import CustomDatePicker from './CustomDatePicker'
+import CustomSelect from './CustomSelect'
 import CustomTimePicker from './CustomTimePicker'
 import IconButton from './IconButton'
 import { useI18n } from '../i18n/useI18n'
@@ -73,14 +74,14 @@ function KanbanTaskForm({
           </label>
         </div>
         <div className="task-reminder-group">
-          <label className="deadline-field">
-            <span>{t('task.emailReminder')}</span>
-            <select name="reminder_option" value={taskForm.reminder_option} onChange={updateTaskField}>
-              {reminderOptions.map((option) => (
-                <option value={option.value} key={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </label>
+          <CustomSelect
+            className="deadline-field"
+            label={t('task.emailReminder')}
+            name="reminder_option"
+            onChange={updateTaskField}
+            options={reminderOptions}
+            value={taskForm.reminder_option}
+          />
           {taskForm.reminder_option === 'custom' ? (
             <div className="reminder-datetime-row">
               <label className="deadline-field">

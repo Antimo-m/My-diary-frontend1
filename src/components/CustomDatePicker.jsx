@@ -63,6 +63,15 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
   const selectedLabel = selectedIso
     ? new Intl.DateTimeFormat(localeTag, { day: '2-digit', month: 'short', timeZone, year: 'numeric' }).format(toDate(selectedIso))
     : t('date.selectDate')
+  const weekdayLabels = useMemo(() => {
+    const monday = new Date(2024, 0, 1)
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(monday)
+      day.setDate(monday.getDate() + index)
+      return new Intl.DateTimeFormat(localeTag, { weekday: 'narrow' }).format(day)
+    })
+  }, [localeTag])
 
   const selectDate = (date) => {
     onChange(toIso(date))
@@ -89,7 +98,7 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
             </button>
           </div>
           <div className="custom-date__weekdays" aria-hidden="true">
-            <span>L</span><span>M</span><span>M</span><span>G</span><span>V</span><span>S</span><span>D</span>
+            {weekdayLabels.map((weekday, index) => <span key={`${weekday}-${index}`}>{weekday}</span>)}
           </div>
           <div className="custom-date__grid">
             {days.map((date) => {

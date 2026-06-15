@@ -32,9 +32,9 @@ import {
   updateTask,
 } from '../services/kanbanApi'
 import { getApiError } from '../utils/apiErrors'
+import { currentDateInTimeZone } from '../utils/dateTime'
 import './KanbanPage.css'
 
-const today = new Date().toISOString().slice(0, 10)
 const emptyTaskForm = {
   title: '',
   description: '',
@@ -50,17 +50,17 @@ const emptyLabelForm = { name: '', color: '#d6a43a' }
 const emptyProjectForm = { name: '', icon: 'folder' }
 
 function initialKanbanRoute() {
-  const projectMatch = window.location.pathname.match(/^\/kanban\/project\/(\d+)/)
+  const projectMatch = window.location.pathname.match(/^\/kanban\/project\/([^/]+)/)
 
   if (projectMatch) {
-    return { mode: 'project', projectId: Number(projectMatch[1]) }
+    return { mode: 'project', projectIdentifier: decodeURIComponent(projectMatch[1]) }
   }
 
   if (window.location.pathname === '/kanban/daily') {
-    return { mode: 'daily', projectId: null }
+    return { mode: 'daily', projectIdentifier: null }
   }
 
-  return { mode: 'home', projectId: null }
+  return { mode: 'home', projectIdentifier: null }
 }
 
 function clockPart(value) {
@@ -103,6 +103,7 @@ function reminderValidationMessage(taskForm, t) {
 
 function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
   const { localeTag, t, timeZone } = useI18n()
+  const today = currentDateInTimeZone(timeZone)
   const [kanbanRoute, setKanbanRoute] = useState(initialKanbanRoute)
   const [activeTaskColumnId, setActiveTaskColumnId] = useState(null)
   const [board, setBoard] = useState({ columns: [], labels: [], date: today })
@@ -136,10 +137,10 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     useSensor(TouchSensor, { activationConstraint: { delay: 90, tolerance: 8 } }),
   )
 
-  const navigateKanban = (mode, projectId = null) => {
-    const path = mode === 'project' ? `/kanban/project/${projectId}` : mode === 'daily' ? '/kanban/daily' : '/kanban'
+  const navigateKanban = (mode, projectIdentifier = null) => {
+    const path = mode === 'project' ? `/kanban/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/kanban/daily' : '/kanban'
     window.history.pushState({}, '', path)
-    setKanbanRoute({ mode, projectId })
+    setKanbanRoute({ mode, projectIdentifier })
   }
 
   const loadProjects = async () => {
@@ -156,8 +157,8 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      if (route.mode === 'project' && route.projectId) {
-        const projectBoard = await getKanbanProject(route.projectId)
+      if (route.mode === 'project' && route.projectIdentifier) {
+        const projectBoard = await getKanbanProject(route.projectIdentifier)
         setSelectedProject(projectBoard.project)
         setBoard({ columns: projectBoard.columns, labels: projectBoard.labels, date: nextDate })
       } else {
@@ -181,7 +182,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, kanbanRoute.mode, kanbanRoute.projectId])
+  }, [user, kanbanRoute.mode, kanbanRoute.projectIdentifier])
 
   useEffect(() => {
     if (!validationToast) {
@@ -243,7 +244,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       const project = await createProject(projectForm)
       setProjectForm(emptyProjectForm)
       await loadProjects()
-      navigateKanban('project', project.id)
+      navigateKanban('project', project.route_identifier ?? project.slug ?? project.id)
       setSuccessToast(t('kanban.projectCreated'))
     } catch (requestError) {
       setError(getApiError(requestError))
@@ -270,7 +271,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      const updatedProject = await updateProject(projectEditTarget.id, projectEditForm)
+      const updatedProject = await updateProject(projectEditTarget.route_identifier ?? projectEditTarget.slug ?? projectEditTarget.id, projectEditForm)
       setProjects((current) => current.map((project) => (project.id === updatedProject.id ? { ...project, ...updatedProject } : project)))
       if (selectedProject?.id === updatedProject.id) {
         setSelectedProject((current) => ({ ...current, ...updatedProject }))
@@ -290,9 +291,9 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      await deleteProject(projectDeleteTarget.id)
+      await deleteProject(projectDeleteTarget.route_identifier ?? projectDeleteTarget.slug ?? projectDeleteTarget.id)
       setProjects((current) => current.filter((project) => project.id !== projectDeleteTarget.id))
-      if (kanbanRoute.mode === 'project' && kanbanRoute.projectId === projectDeleteTarget.id) {
+      if (kanbanRoute.mode === 'project' && selectedProject?.id === projectDeleteTarget.id) {
         navigateKanban('home')
         setBoard({ columns: [], labels: [], date })
         setSelectedProject(null)
@@ -332,7 +333,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       } else {
         const createdColumn = await createColumn({
           ...columnForm,
-          ...(kanbanRoute.mode === 'project' ? { project_id: kanbanRoute.projectId } : {}),
+          ...(kanbanRoute.mode === 'project' ? { project_id: selectedProject?.id } : {}),
         })
         pendingColumnFocusId.current = createdColumn.id
       }
@@ -432,7 +433,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
       const payload = {
         ...taskForm,
-        ...(kanbanRoute.mode === 'project' ? { project_id: kanbanRoute.projectId } : { task_date: date }),
+        ...(kanbanRoute.mode === 'project' ? { project_id: selectedProject?.id } : { task_date: date }),
         kanban_column_id: activeTaskColumnId,
       }
 
@@ -609,7 +610,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
           onDeleteProject={setProjectDeleteTarget}
           onEditProject={openEditProject}
           onOpenDaily={() => navigateKanban('daily')}
-          onOpenProject={(projectId) => navigateKanban('project', projectId)}
+          onOpenProject={(project) => navigateKanban('project', project.route_identifier ?? project.slug ?? project.id)}
           projectForm={projectForm}
           projects={projects}
           setProjectForm={setProjectForm}
@@ -620,8 +621,8 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       {kanbanRoute.mode !== 'home' ? (
         <>
           <div className="kanban-mode-actions">
-            <button className="btn btn-subtle" type="button" onClick={() => navigateKanban('home')}>{t('kanban.backToHub')}</button>
-            {kanbanRoute.mode === 'project' ? <button className="btn btn-outline" type="button" onClick={() => navigateKanban('daily')}>{t('kanban.daily')}</button> : null}
+            <button className="btn kanban-mode-action kanban-mode-action--hub" type="button" onClick={() => navigateKanban('home')}>{t('kanban.backToHub')}</button>
+            {kanbanRoute.mode === 'project' ? <button className="btn kanban-mode-action kanban-mode-action--daily" type="button" onClick={() => navigateKanban('daily')}>{t('kanban.daily')}</button> : null}
           </div>
 
       <div className="label-toolbar">

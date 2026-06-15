@@ -1,5 +1,9 @@
-import { FiBarChart2, FiBookOpen, FiCalendar, FiGrid } from 'react-icons/fi'
-import ProductWalkthrough from '../components/ProductWalkthrough'
+import { FiArrowRight, FiBarChart2, FiBookOpen, FiCalendar, FiFolder, FiGrid, FiPlus } from 'react-icons/fi'
+import diaryDesktopVideo from '../assets/diary-desktop.webm'
+import diaryMobileVideo from '../assets/diary-mobile.webm'
+import kanbanDesktopVideo from '../assets/kanban-desktop.webm'
+import kanbanMobileVideo from '../assets/kanban-mobile.webm'
+import HomeFeatureVideo from '../components/HomeFeatureVideo'
 import useHomeOverview from '../hooks/useHomeOverview'
 import { useI18n } from '../i18n/useI18n'
 import './HomePage.css'
@@ -8,9 +12,9 @@ function HomePage({ onNavigate }) {
   const { overview, status } = useHomeOverview()
   const { t } = useI18n()
   const recentProjects = overview.recent_projects ?? []
-  const openProject = (projectId) => {
-    window.history.pushState({}, '', `/kanban/project/${projectId}`)
-    onNavigate('kanban')
+  const openProject = (project) => {
+    const identifier = project.route_identifier ?? project.slug ?? project.id
+    onNavigate('kanban', `/kanban/project/${encodeURIComponent(identifier)}`)
   }
 
   return (
@@ -19,15 +23,6 @@ function HomePage({ onNavigate }) {
         <p className="eyebrow">{t('home.type')}</p>
         <h1>{t('home.tagline')}</h1>
         <p className="lead">{t('home.description')}</p>
-
-        <div className="home-page__actions">
-          <button className="btn btn-primary" type="button" onClick={() => onNavigate('diary')}>
-            {t('home.diaryCta')}
-          </button>
-          <button className="btn btn-outline" type="button" onClick={() => onNavigate('kanban')}>
-            {t('home.kanbanCta')}
-          </button>
-        </div>
 
         <div className="home-page__stats" aria-label={t('home.stats')}>
           <div>
@@ -44,68 +39,114 @@ function HomePage({ onNavigate }) {
           </div>
         </div>
 
-        {status === 'fallback' ? (
-          <p className="api-note">{t('home.fallback')}</p>
-        ) : null}
+        {status === 'fallback' ? <p className="api-note">{t('home.fallback')}</p> : null}
       </header>
 
-      <ProductWalkthrough t={t} />
-
-      <section className="home-value-grid" aria-label={t('home.valueTitle')}>
-        <article>
-          <FiBookOpen />
-          <h2>{t('home.value.diaryTitle')}</h2>
-          <p>{t('home.value.diaryCopy')}</p>
-        </article>
-        <article>
-          <FiGrid />
-          <h2>{t('home.value.kanbanTitle')}</h2>
-          <p>{t('home.value.kanbanCopy')}</p>
-        </article>
-        <article>
-          <FiBarChart2 />
-          <h2>{t('home.value.analysisTitle')}</h2>
-          <p>{t('home.value.analysisCopy')}</p>
-        </article>
-      </section>
-
-      <section className="home-diary-hub" aria-label={t('home.hubTitle')}>
-        <div className="home-hub-card home-hub-card--wide">
-          <p className="eyebrow">{t('home.hubTitle')}</p>
-          <h2>{t('home.hubSubtitle')}</h2>
-          <div className="home-hub-actions">
+      <section className="home-product-zone home-product-zone--diary" aria-labelledby="home-diary-title">
+        <header className="home-zone-header">
+          <span className="home-zone-header__icon"><FiBookOpen aria-hidden="true" /></span>
+          <div>
+            <p className="eyebrow">{t('home.diarySectionEyebrow')}</p>
+            <h2 id="home-diary-title">{t('home.diarySectionTitle')}</h2>
+            <p>{t('home.diarySectionCopy')}</p>
+          </div>
+          <div className="home-zone-header__actions">
             <button className="btn btn-primary" type="button" onClick={() => onNavigate('diary')}>
+              <FiPlus aria-hidden="true" />
               {t('home.newDiaryShortcut')}
             </button>
-            <button className="btn btn-kanban-shortcut" type="button" onClick={() => onNavigate('kanban')}>
-              {t('home.dailyShortcut')}
+            <button className="btn btn-outline" type="button" onClick={() => onNavigate('diary')}>
+              {t('home.diaryCta')}
+              <FiArrowRight aria-hidden="true" />
             </button>
           </div>
-        </div>
+        </header>
 
-        <div className="home-hub-card">
-          <FiCalendar />
-          <h3>{t('home.suggestionTitle')}</h3>
-          <p>{t('home.suggestionCopy')}</p>
-        </div>
+        <HomeFeatureVideo
+          desktopSrc={diaryDesktopVideo}
+          label={t('home.diaryVideoLabel')}
+          mobileSrc={diaryMobileVideo}
+          playbackRate={0.72}
+          t={t}
+          tone="diary"
+        />
+      </section>
 
-        <div className="home-hub-card home-project-shortcuts">
-          <h3>{t('home.recentBoards')}</h3>
+      <section className="home-product-zone home-product-zone--kanban" aria-labelledby="home-kanban-title">
+        <header className="home-zone-header">
+          <span className="home-zone-header__icon"><FiGrid aria-hidden="true" /></span>
+          <div>
+            <p className="eyebrow">{t('home.kanbanSectionEyebrow')}</p>
+            <h2 id="home-kanban-title">{t('home.kanbanSectionTitle')}</h2>
+            <p>{t('home.kanbanSectionCopy')}</p>
+          </div>
+          <div className="home-zone-header__actions">
+            <button
+              className="btn btn-kanban-shortcut home-kanban-quick-button"
+              type="button"
+              onClick={() => onNavigate('kanban')}
+              aria-label={t('home.dailyShortcut')}
+              title={t('home.dailyShortcut')}
+            >
+              <FiCalendar aria-hidden="true" />
+            </button>
+            <button className="btn btn-outline" type="button" onClick={() => onNavigate('kanban')}>
+              {t('home.kanbanCta')}
+              <FiArrowRight aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+
+        <HomeFeatureVideo
+          desktopSrc={kanbanDesktopVideo}
+          label={t('home.kanbanVideoLabel')}
+          mobileSrc={kanbanMobileVideo}
+          playbackRate={0.76}
+          t={t}
+          tone="kanban"
+        />
+
+        <section className="home-custom-projects" aria-labelledby="home-custom-projects-title">
+          <header>
+            <span><FiFolder aria-hidden="true" /></span>
+            <div>
+              <p className="eyebrow">{t('home.projectAreaEyebrow')}</p>
+              <h3 id="home-custom-projects-title">{t('kanban.customProjects')}</h3>
+              <p>{t('home.projectAreaCopy')}</p>
+            </div>
+            <button className="btn btn-kanban-shortcut" type="button" onClick={() => onNavigate('kanban')}>
+              <FiPlus aria-hidden="true" />
+              {t('kanban.createProject')}
+            </button>
+          </header>
+
           {recentProjects.length ? (
             <div className="home-project-shortcuts__list">
               {recentProjects.map((project) => (
-                <button key={project.id} type="button" onClick={() => openProject(project.id)}>
-                  <span>{project.icon?.slice(0, 2)?.toUpperCase() || 'PR'}</span>
+                <button key={project.id} type="button" onClick={() => openProject(project)}>
+                  <span><FiFolder aria-hidden="true" /></span>
                   <strong>{project.name}</strong>
                   <small>{project.tasks_count ?? 0} {t('home.tasks')}</small>
                 </button>
               ))}
             </div>
           ) : (
-            <p>{t('home.noRecentBoards')}</p>
+            <div className="home-custom-projects__empty">
+              <FiFolder aria-hidden="true" />
+              <strong>{t('home.noCustomProjectsTitle')}</strong>
+              <p>{t('home.noRecentBoards')}</p>
+            </div>
           )}
-        </div>
+        </section>
       </section>
+
+      <aside className="home-analysis-note">
+        <FiBarChart2 aria-hidden="true" />
+        <div>
+          <h2>{t('home.value.analysisTitle')}</h2>
+          <p>{t('home.value.analysisCopy')}</p>
+        </div>
+      </aside>
     </section>
   )
 }

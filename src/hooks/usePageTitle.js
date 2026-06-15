@@ -8,7 +8,6 @@ export const pageTitles = {
   secretDiary: 'nav.secretDiary',
   kanban: 'nav.kanban',
   profile: 'common.profile',
-  privacy: 'privacy.title',
   analysis: 'nav.analysis',
 }
 

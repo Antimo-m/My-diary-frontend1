@@ -83,8 +83,7 @@
   font-weight: 850;
 }
 
-.profile-settings input,
-.profile-settings select {
+.profile-settings input {
   background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(130, 102, 64, 0.18);
   border-radius: 12px;
@@ -180,14 +179,18 @@
 }
 
 :root[data-theme='dark'] .profile-settings__card {
-  background: rgba(28, 35, 43, 0.78);
-  border-color: rgba(244, 239, 229, 0.14);
+  background: linear-gradient(145deg, rgba(24, 34, 45, 0.98), rgba(15, 23, 32, 0.96));
+  border-color: var(--line);
 }
 
 :root[data-theme='dark'] .profile-settings input,
-:root[data-theme='dark'] .profile-settings select,
 :root[data-theme='dark'] .profile-language-control > div {
-  background: rgba(244, 239, 229, 0.08);
-  border-color: rgba(244, 239, 229, 0.14);
+  background: var(--control-bg);
+  border-color: var(--line);
   color: var(--ink);
+}
+
+:root[data-theme='dark'] .profile-language-control button.active {
+  background: var(--primary);
+  color: #111820;
 }

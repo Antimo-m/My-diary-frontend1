@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { FiCheck, FiChevronLeft, FiChevronRight, FiEdit3, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { FiCheck, FiChevronLeft, FiChevronRight, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import CustomDatePicker from '../components/CustomDatePicker'
 import DiaryCard from '../components/DiaryCard'
@@ -12,21 +12,24 @@ import UserMessage from '../components/UserMessage'
 import { useI18n } from '../i18n/useI18n'
 import * as defaultDiaryApi from '../services/diaryApi'
 import { getApiError } from '../utils/apiErrors'
+import { currentDateInTimeZone } from '../utils/dateTime'
 import './DiaryPage.css'
 
-const today = new Date().toISOString().slice(0, 10)
-
-const emptyForm = {
-  entry_date: today,
-  title: '',
-  body: '',
-  photo_dedication: '',
-  cover_image: null,
-  cover_image_url: '',
+function createEmptyForm(timeZone) {
+  return {
+    entry_date: currentDateInTimeZone(timeZone),
+    title: '',
+    body: '',
+    photo_dedication: '',
+    cover_image: null,
+    cover_image_url: '',
+  }
 }
+const maxCoverImageBytes = 4 * 1024 * 1024
+const allowedCoverImageTypes = ['image/jpeg', 'image/png', 'image/webp']
 
 const defaultCopy = {
-  createStripText: 'Aggiungi immagine, dedica e testo in stile diario.',
+  createStripText: 'Aggiungi immagine, didascalia e testo in stile diario.',
   empty: 'Nessuna pagina trovata.',
   eyebrow: 'Diario personale',
   loadError: 'Non riesco a caricare il diario.',
@@ -69,8 +72,75 @@ function paginateText(text, maxLength = 220) {
   return pages
 }
 
-function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
-  const { t } = useI18n()
+function paginateTextToElement(text, element) {
+  const content = (text || '').trim()
+
+  if (!content || !element) {
+    return [content]
+  }
+
+  const tokens = Array.from(content)
+  const pages = []
+  let start = 0
+
+  while (start < tokens.length) {
+    let low = start + 1
+    let high = tokens.length
+    let best = start + 1
+
+    while (low <= high) {
+      const middle = Math.floor((low + high) / 2)
+      element.textContent = tokens.slice(start, middle).join('')
+
+      if (element.scrollHeight <= element.clientHeight + 1) {
+        best = middle
+        low = middle + 1
+      } else {
+        high = middle - 1
+      }
+    }
+
+    pages.push(tokens.slice(start, best).join(''))
+    start = best
+  }
+
+  element.textContent = ''
+
+  return pages.length ? pages : ['']
+}
+
+function useReaderPages(text) {
+  const bodyRef = useRef(null)
+  const measureRef = useRef(null)
+  const [pages, setPages] = useState(() => paginateText(text, 620))
+
+  useLayoutEffect(() => {
+    const bodyElement = bodyRef.current
+    const measureElement = measureRef.current
+
+    if (!bodyElement || !measureElement) {
+      return undefined
+    }
+
+    const recalculate = () => {
+      measureElement.style.width = `${bodyElement.clientWidth}px`
+      setPages(paginateTextToElement(text, measureElement))
+    }
+
+    recalculate()
+    const observer = new ResizeObserver(recalculate)
+    observer.observe(bodyElement)
+
+    return () => observer.disconnect()
+  }, [text])
+
+  return { bodyRef, measureRef, pages }
+}
+
+function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
+  const { t, timeZone } = useI18n()
+  const today = currentDateInTimeZone(timeZone)
+  const emptyForm = useMemo(() => createEmptyForm(timeZone), [timeZone])
   const translatedCopy = {
     createStripText: t('diary.addImageDedicationText'),
     empty: t('diary.empty'),
@@ -85,10 +155,12 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
     saveError: t('diary.saveError'),
     secretClass: '',
   }
-  const pageCopy = { ...translatedCopy, ...copy }
+  const pageCopy = { ...defaultCopy, ...translatedCopy, ...(copy ?? {}) }
+  const routeBasePath = pageCopy.secretClass ? '/secret-diary' : '/diary'
   const [filters, setFilters] = useState({ q: '', date: '' })
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState(null)
+  const [editingIdentifier, setEditingIdentifier] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [notes, setNotes] = useState([])
@@ -97,6 +169,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
   const [readerPage, setReaderPage] = useState(0)
   const [dedicationPage, setDedicationPage] = useState(0)
   const [deleteNoteTarget, setDeleteNoteTarget] = useState(null)
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false)
   const [selectedNote, setSelectedNote] = useState(null)
   const [view, setView] = useState('list')
   const [successToast, setSuccessToast] = useState('')
@@ -106,13 +179,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
   const dedicationPages = useMemo(() => (
     paginateText(selectedNote?.photo_dedication || t('diary.emptyDedication'))
   ), [selectedNote?.photo_dedication, t])
-  const readerPages = useMemo(() => {
-    if (selectedNote?.body_pages?.length) {
-      return selectedNote.body_pages
-    }
-
-    return paginateText(selectedNote?.body || t('diary.emptyBody'), 620)
-  }, [selectedNote?.body, selectedNote?.body_pages, t])
+  const { bodyRef, measureRef, pages: readerPages } = useReaderPages(selectedNote?.body || t('diary.emptyBody'))
 
   useEffect(() => () => {
     if (coverPreviewUrl?.startsWith('blob:')) {
@@ -137,7 +204,24 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
 
   useEffect(() => {
     if (user) {
-      void Promise.resolve().then(() => loadNotes())
+      void Promise.resolve().then(async () => {
+        await loadNotes()
+
+        if (window.location.pathname.startsWith(`${routeBasePath}/`)) {
+          const identifier = decodeURIComponent(window.location.pathname.slice(routeBasePath.length + 1))
+
+          if (identifier) {
+            try {
+              setSelectedNote(await diaryApi.getDiaryNote(identifier))
+              setReaderPage(0)
+              setDedicationPage(0)
+              setView('detail')
+            } catch (requestError) {
+              setError(getApiError(requestError, t('diary.openError')))
+            }
+          }
+        }
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
@@ -166,6 +250,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
 
   const startCreate = () => {
     setEditingId(null)
+    setEditingIdentifier(null)
     setForm(emptyForm)
     setSelectedNote(null)
     setError('')
@@ -174,7 +259,22 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
 
   const updateForm = (event) => {
     const { files, name, value } = event.target
-    setForm((current) => ({ ...current, [name]: files ? files[0] : value }))
+    const file = files?.[0]
+
+    if (file && !allowedCoverImageTypes.includes(file.type)) {
+      setError(t('diary.imageTypeError'))
+      event.target.value = ''
+      return
+    }
+
+    if (file && file.size > maxCoverImageBytes) {
+      setError(t('diary.imageSizeError'))
+      event.target.value = ''
+      return
+    }
+
+    setError('')
+    setForm((current) => ({ ...current, [name]: files ? file : value }))
   }
 
   const submitNote = async (event) => {
@@ -183,12 +283,14 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
     setError('')
 
     try {
-      const savedNote = await diaryApi.saveDiaryNote(form, editingId)
+      const savedNote = await diaryApi.saveDiaryNote(form, editingIdentifier)
       await loadNotes()
       setSelectedNote(savedNote)
+      window.history.replaceState({}, '', `${routeBasePath}/${encodeURIComponent(savedNote.route_identifier ?? savedNote.slug ?? savedNote.id)}`)
       setReaderPage(0)
       setDedicationPage(0)
       setEditingId(null)
+      setEditingIdentifier(null)
       setForm(emptyForm)
       setView('detail')
       setSuccessToast(editingId ? t('diary.pageUpdated') : pageCopy.pageSaved)
@@ -204,7 +306,9 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
     setError('')
 
     try {
-      setSelectedNote(await diaryApi.getDiaryNote(note.id))
+      const fullNote = await diaryApi.getDiaryNote(note.route_identifier ?? note.slug ?? note.id)
+      setSelectedNote(fullNote)
+      window.history.pushState({}, '', `${routeBasePath}/${encodeURIComponent(fullNote.route_identifier ?? fullNote.slug ?? fullNote.id)}`)
       setReaderPage(0)
       setDedicationPage(0)
       setView('detail')
@@ -216,8 +320,10 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
   }
 
   const editNote = async (note) => {
-    const fullNote = note.body ? note : await diaryApi.getDiaryNote(note.id)
+    const identifier = note.route_identifier ?? note.slug ?? note.id
+    const fullNote = note.body ? note : await diaryApi.getDiaryNote(identifier)
     setEditingId(fullNote.id)
+    setEditingIdentifier(fullNote.route_identifier ?? fullNote.slug ?? fullNote.id)
     setSelectedNote(null)
     setForm({
       entry_date: fullNote.entry_date ?? today,
@@ -239,7 +345,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
     setError('')
 
     try {
-      await diaryApi.deleteDiaryNote(deleteNoteTarget.id)
+      await diaryApi.deleteDiaryNote(deleteNoteTarget.route_identifier ?? deleteNoteTarget.slug ?? deleteNoteTarget.id)
       setDeleteNoteTarget(null)
       setSelectedNote(null)
       setView('list')
@@ -277,6 +383,19 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
   }
 
   const totalReaderPages = readerPages.length
+  const leaveCompose = () => {
+    setDiscardConfirmOpen(false)
+    setEditingId(null)
+    setEditingIdentifier(null)
+    setForm(emptyForm)
+    window.history.pushState({}, '', routeBasePath)
+    setView('list')
+  }
+  const returnToList = () => {
+    window.history.replaceState({}, '', routeBasePath)
+    setSelectedNote(null)
+    setView('list')
+  }
 
   return (
     <section className={`diary-page page-container ${pageCopy.secretClass}`}>
@@ -299,8 +418,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
 
       {view === 'list' ? (
         <>
-          <DiaryWalkthrough t={t} />
-
+          {!pageCopy.secretClass ? <DiaryWalkthrough t={t} /> : null}
           <div className="diary-create-strip diary-create-strip--fab-only">
             <button className="fab-action" type="button" onClick={startCreate} aria-label={pageCopy.newPage}><FiPlus aria-hidden="true" /></button>
           </div>
@@ -356,13 +474,13 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
       {view === 'create' ? (
         <>
         <div className="diary-detail__toolbar">
-          <IconButton variant="gold" onClick={() => setView('list')} label={t('diary.toPages')}><FiChevronLeft /></IconButton>
+          <IconButton variant="gold" onClick={() => setDiscardConfirmOpen(true)} label={t('diary.toPages')}><FiChevronLeft /></IconButton>
         </div>
         <form className="diary-book diary-book--reader diary-book--compose" onSubmit={submitNote}>
           <section className="diary-book__page diary-book__photo-page">
               <span className="eyebrow">{t('diary.photoAndDedication')}</span>
             <label className="photo-uploader">
-              <input name="cover_image" type="file" accept="image/*" onChange={updateForm} />
+              <input name="cover_image" type="file" accept="image/jpeg,image/png,image/webp" onChange={updateForm} />
               {coverPreviewUrl ? <ImageFrame src={coverPreviewUrl} alt={t('diary.coverPreview')} /> : null}
               <span>{coverPreviewUrl ? t('diary.replaceCover') : t('diary.chooseCover')}</span>
             </label>
@@ -398,7 +516,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
               <IconButton variant="confirm" type="submit" disabled={loading} label={loading ? t('diary.saving') : editingId ? t('diary.pageUpdated') : t('common.save')}>
                 <FiCheck />
               </IconButton>
-              <IconButton variant="danger" type="button" onClick={() => setView('list')} label={t('common.cancel')}>
+              <IconButton variant="danger" type="button" onClick={() => setDiscardConfirmOpen(true)} label={t('common.cancel')}>
                 <FiX />
               </IconButton>
             </div>
@@ -410,19 +528,16 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
       {view === 'detail' && selectedNote ? (
         <div className="diary-detail">
           <div className="diary-detail__toolbar">
-            <IconButton variant="gold" onClick={() => setView('list')} label={t('diary.toPages')}><FiChevronLeft /></IconButton>
-            <div className="diary-detail__actions">
-              <IconButton variant="edit" onClick={() => editNote(selectedNote)} label={t('diary.pageUpdated')}><FiEdit3 /></IconButton>
-              <IconButton variant="danger" onClick={() => setDeleteNoteTarget(selectedNote)} label={t('diary.deletePage')}><FiTrash2 /></IconButton>
-            </div>
+            <IconButton variant="gold" onClick={returnToList} label={t('diary.toPages')}><FiChevronLeft /></IconButton>
           </div>
           <article className="diary-book diary-book--reader diary-book--detail">
             <section className="diary-book__page diary-book__text-page diary-note-lines">
               <span className="eyebrow">{selectedNote.formatted_date}</span>
               <h2>{selectedNote.title}</h2>
-              <p className={`book-note-body page-turn-${pageTurnDirection}`} key={`${selectedNote.id}-${readerPage}`}>
+              <p ref={bodyRef} className={`book-note-body page-turn-${pageTurnDirection}`}>
                 {readerPages[readerPage] ?? readerPages[0]}
               </p>
+              <p ref={measureRef} className="book-note-body diary-measure-box" aria-hidden="true" />
               <div className="diary-page-turner" aria-label={t('diary.pageNavigation')}>
                 <IconButton variant="gold" disabled={readerPage === 0} onClick={() => turnReaderPage(Math.max(0, readerPage - 1), 'prev')} label={t('diary.previousPage')}>
                   <FiChevronLeft />
@@ -436,9 +551,7 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
 
             <section className="diary-book__page diary-book__photo-page">
               <ImageFrame className="diary-image-frame--reader" src={selectedNote.cover_image_url} alt={`${t('diary.coverOf')} ${selectedNote.title}`}>
-                {!selectedNote.cover_image_url ? (
-                  <div className="book-cover-fallback">My Diary</div>
-                ) : null}
+                <div className="book-cover-fallback">My Diary</div>
               </ImageFrame>
               <div className="diary-dedication">
                 <p>{dedicationPages[dedicationPage]}</p>
@@ -477,6 +590,22 @@ function DiaryPage({ authLoading, copy = defaultCopy, diaryApi = defaultDiaryApi
               {t('kanban.delete')}
             </button>
             <button className="btn btn-cancel" type="button" onClick={() => setDeleteNoteTarget(null)}>{t('common.cancel')}</button>
+          </div>
+        </Modal>
+      ) : null}
+
+      {discardConfirmOpen ? (
+        <Modal labelledBy="discard-note-title" onClose={() => setDiscardConfirmOpen(false)}>
+          <div>
+            <p className="eyebrow">{t('diary.unsavedChanges')}</p>
+            <h2 id="discard-note-title">{t('diary.leaveEditorTitle')}</h2>
+            <p className="modal-copy">
+              {editingId ? t('diary.leaveEditCopy') : t('diary.leaveCreateCopy')}
+            </p>
+          </div>
+          <div className="modal-actions">
+            <button className="btn btn-danger" type="button" onClick={leaveCompose}>{t('diary.confirmLeave')}</button>
+            <button className="btn btn-cancel" type="button" onClick={() => setDiscardConfirmOpen(false)}>{t('common.cancel')}</button>
           </div>
         </Modal>
       ) : null}

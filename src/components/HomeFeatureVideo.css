@@ -1,0 +1,81 @@
+.home-feature-video {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.home-feature-video__frame {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(145deg, rgba(249, 244, 233, 0.96), rgba(225, 239, 237, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(82, 64, 36, 0.18);
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.3rem;
+  width: 100%;
+}
+
+.home-feature-video--kanban .home-feature-video__frame {
+  background: linear-gradient(145deg, rgba(228, 245, 242, 0.98), rgba(208, 226, 214, 0.9));
+  border-color: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 24px 60px rgba(17, 106, 123, 0.16);
+}
+
+.home-feature-video video {
+  border-radius: 17px;
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  overflow: hidden;
+  width: 100%;
+}
+
+.home-feature-video figcaption {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  font-weight: 850;
+  gap: 0.55rem 1rem;
+}
+
+.home-feature-video figcaption span {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.38rem;
+}
+
+.home-feature-video figcaption svg {
+  color: var(--primary-dark);
+  flex: 0 0 auto;
+}
+
+@media (max-width: 679px) {
+  .home-feature-video__frame {
+    aspect-ratio: 390 / 844;
+    border-radius: 22px;
+    margin-inline: auto;
+    max-height: 38rem;
+    max-width: 22rem;
+    padding: 0.28rem;
+    width: min(100%, 22rem);
+  }
+
+  .home-feature-video video {
+    border-radius: 17px;
+  }
+
+  .home-feature-video figcaption {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+:root[data-theme='dark'] .home-feature-video__frame {
+  background: rgba(18, 24, 31, 0.9);
+  border-color: rgba(244, 239, 229, 0.12);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}

@@ -104,9 +104,20 @@
 }
 
 :root[data-theme='dark'] .btn-outline {
-  background: rgba(244, 239, 229, 0.08);
-  border-color: rgba(244, 239, 229, 0.16);
+  background: var(--surface-muted);
+  border-color: var(--line);
   color: var(--ink);
+}
+
+:root[data-theme='dark'] .surface {
+  border-color: var(--line);
+}
+
+:root[data-theme='dark'] .btn-subtle,
+:root[data-theme='dark'] .icon-button {
+  background: var(--surface-muted);
+  border-color: var(--line);
+  color: var(--text-primary);
 }
 
 .btn-subtle {
