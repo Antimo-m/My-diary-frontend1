@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
+import { FiAlertTriangle, FiTrash2 } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import CustomSelect from '../components/CustomSelect'
+import Modal from '../components/Modal'
 import UserMessage from '../components/UserMessage'
 import { timeZones } from '../data/timeZones'
 import { useI18n } from '../i18n/useI18n'
+import { deleteAccount } from '../services/authApi'
 import { updateProfile } from '../services/profileApi'
 import { getApiError } from '../utils/apiErrors'
 import './ProfilePage.css'
 
-function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, onUserUpdate, user }) {
+function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin, onRegister, onResetPassword, onUserUpdate, user }) {
   const { locale, setLocale, setTimeZone, t, timeZone } = useI18n()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -18,6 +21,10 @@ function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onRes
     locale,
     timezone: user?.timezone ?? 'Europe/Rome',
   })
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -76,6 +83,33 @@ function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onRes
       setError(getApiError(requestError, t('profile.updateError')))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const openDeleteModal = () => {
+    setDeletePassword('')
+    setDeleteError('')
+    setIsDeleteModalOpen(true)
+  }
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+    setDeletePassword('')
+    setDeleteError('')
+  }
+
+  const confirmDeleteAccount = async (event) => {
+    event.preventDefault()
+    setDeleteError('')
+    setDeleting(true)
+
+    try {
+      await deleteAccount(deletePassword)
+      onAccountDeleted?.()
+    } catch (requestError) {
+      setDeleteError(getApiError(requestError, t('profile.deleteAccountError')))
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -140,6 +174,56 @@ function ProfilePage({ authLoading, onForgotPassword, onLogin, onRegister, onRes
           {saving ? t('auth.wait') : t('profile.saveProfile')}
         </button>
       </form>
+
+      <section className="profile-settings__card profile-settings__card--danger">
+        <div className="profile-settings__section-title">
+          <p className="eyebrow">{t('profile.dangerZone')}</p>
+          <h2>{t('profile.deleteAccount')}</h2>
+          <p className="profile-danger-copy">{t('profile.dangerZoneCopy')}</p>
+        </div>
+
+        <button className="btn btn-danger profile-danger-trigger" type="button" onClick={openDeleteModal}>
+          <FiTrash2 aria-hidden="true" />
+          {t('profile.deleteAccount')}
+        </button>
+      </section>
+
+      {isDeleteModalOpen ? (
+        <Modal labelledBy="delete-account-title" onClose={closeDeleteModal}>
+          <div className="danger-modal-icon" aria-hidden="true"><FiAlertTriangle /></div>
+          <div>
+            <p className="eyebrow">{t('profile.deleteAccount')}</p>
+            <h2 id="delete-account-title">{t('profile.deleteAccountTitle')}</h2>
+            <p className="modal-copy">{t('profile.deleteAccountCopy')}</p>
+          </div>
+
+          <form className="modal-form" onSubmit={confirmDeleteAccount}>
+            <label>
+              <span>{t('profile.deleteAccountConfirmLabel')}</span>
+              <input
+                autoFocus
+                onChange={(event) => setDeletePassword(event.target.value)}
+                placeholder={t('profile.deleteAccountConfirmPlaceholder')}
+                required
+                type="password"
+                value={deletePassword}
+              />
+            </label>
+
+            <UserMessage tone="error">{deleteError}</UserMessage>
+
+            <div className="modal-actions">
+              <button className="btn btn-danger" disabled={deleting} type="submit">
+                <FiTrash2 aria-hidden="true" />
+                {deleting ? t('auth.wait') : t('profile.deleteAccountButton')}
+              </button>
+              <button className="btn btn-cancel" disabled={deleting} onClick={closeDeleteModal} type="button">
+                {t('common.cancel')}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      ) : null}
     </section>
   )
 }
