@@ -147,6 +147,12 @@ function App() {
     setActivePage('home')
   }
 
+  const handleAccountDeleted = () => {
+    setUser(null)
+    setWelcomeDismissed(false)
+    setActivePage('home')
+  }
+
   const navigate = (page, requestedPath = null) => {
     const paths = {
       analysis: '/analysis',
@@ -200,6 +206,7 @@ function App() {
         <ActivePage
           key={`${activePage}-${locationKey}`}
           authLoading={authLoading}
+          onAccountDeleted={handleAccountDeleted}
           onForgotPassword={handlePasswordResetRequest}
           onLogin={handleLogin}
           onNavigate={navigate}
