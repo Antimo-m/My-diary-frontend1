@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
+import useFloatingPanel from '../hooks/useFloatingPanel'
 import './CustomDatePicker.css'
 
 function toDate(value) {
@@ -21,30 +22,14 @@ function toIso(date) {
 
 function CustomDatePicker({ label = 'Data', onChange, value }) {
   const { localeTag, t, timeZone } = useI18n()
-  const pickerRef = useRef(null)
   const selectedDate = toDate(value)
   const [isOpen, setIsOpen] = useState(false)
   const [visibleMonth, setVisibleMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
-
-  useEffect(() => {
-    if (!isOpen) {
-      return undefined
-    }
-
-    const closeOnOutsideInteraction = (event) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', closeOnOutsideInteraction)
-    document.addEventListener('focusin', closeOnOutsideInteraction)
-
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsideInteraction)
-      document.removeEventListener('focusin', closeOnOutsideInteraction)
-    }
-  }, [isOpen])
+  const { triggerRef, panelRef, panelStyle, renderPanel } = useFloatingPanel({
+    isOpen,
+    onClose: () => setIsOpen(false),
+    width: 304,
+  })
 
   const days = useMemo(() => {
     const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1)
@@ -79,15 +64,15 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
   }
 
   return (
-    <div className="custom-date" ref={pickerRef}>
-      <button className="custom-date__trigger" type="button" onClick={() => setIsOpen((current) => !current)} aria-expanded={isOpen}>
+    <div className={`custom-date ${isOpen ? 'is-open' : ''}`}>
+      <button className="custom-date__trigger" type="button" onClick={() => setIsOpen((current) => !current)} aria-expanded={isOpen} ref={triggerRef}>
         <FiCalendar aria-hidden="true" />
         <span>{selectedLabel}</span>
       </button>
       <input type="hidden" value={value || ''} aria-label={label} readOnly />
 
-      {isOpen ? (
-        <div className="custom-date__panel" role="dialog" aria-label={label}>
+      {renderPanel(
+        <div className="custom-date__panel" ref={panelRef} style={panelStyle} role="dialog" aria-label={label}>
           <div className="custom-date__header">
             <button type="button" onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))} aria-label={t('date.previousMonth')}>
               <FiChevronLeft />
@@ -117,8 +102,8 @@ function CustomDatePicker({ label = 'Data', onChange, value }) {
               )
             })}
           </div>
-        </div>
-      ) : null}
+        </div>,
+      )}
     </div>
   )
 }
