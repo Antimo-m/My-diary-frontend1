@@ -148,6 +148,27 @@
   justify-self: end;
 }
 
+.profile-settings__card--danger {
+  border-color: color-mix(in srgb, var(--rose) 32%, rgba(218, 202, 174, 0.72));
+  margin: 1rem auto 0;
+  max-width: 56rem;
+}
+
+.profile-settings__card--danger .eyebrow {
+  color: var(--rose);
+}
+
+.profile-danger-copy {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 750;
+  margin: 0;
+}
+
+.profile-danger-trigger {
+  justify-self: start;
+}
+
 @media (min-width: 760px) {
   .profile-settings {
     grid-template-columns: repeat(2, minmax(0, 1fr));

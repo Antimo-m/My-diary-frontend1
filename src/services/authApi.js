@@ -38,3 +38,10 @@ export async function logout() {
   await ensureCsrfCookie()
   await apiClient.post('/logout')
 }
+
+export async function deleteAccount(password) {
+  await ensureCsrfCookie()
+  const response = await apiClient.delete('/user', { data: { password } })
+
+  return response.data
+}
