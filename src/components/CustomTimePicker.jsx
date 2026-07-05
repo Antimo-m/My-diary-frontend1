@@ -1,44 +1,22 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { FiCheck, FiClock, FiX } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
+import useFloatingPanel from '../hooks/useFloatingPanel'
 import { currentTimeInTimeZone } from '../utils/dateTime'
 import './CustomTimePicker.css'
 
 function CustomTimePicker({ label = 'Ora', onChange, value }) {
   const { t, timeZone } = useI18n()
   const id = useId()
-  const rootRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
   const [draftHour, setDraftHour] = useState('09')
   const [draftMinute, setDraftMinute] = useState('00')
   const hours = useMemo(() => Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0')), [])
   const minutes = useMemo(() => Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0')), [])
-
-  useEffect(() => {
-    if (!isOpen) {
-      return undefined
-    }
-
-    const closeFromOutside = (event) => {
-      if (!rootRef.current?.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
-
-    const closeFromEscape = (event) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', closeFromOutside)
-    document.addEventListener('keydown', closeFromEscape)
-
-    return () => {
-      document.removeEventListener('pointerdown', closeFromOutside)
-      document.removeEventListener('keydown', closeFromEscape)
-    }
-  }, [isOpen])
+  const { triggerRef, panelRef, panelStyle, renderPanel } = useFloatingPanel({
+    isOpen,
+    onClose: () => setIsOpen(false),
+  })
 
   const togglePicker = () => {
     if (!isOpen) {
@@ -61,7 +39,7 @@ function CustomTimePicker({ label = 'Ora', onChange, value }) {
   }
 
   return (
-    <div className={`custom-time ${isOpen ? 'is-open' : ''}`} ref={rootRef}>
+    <div className={`custom-time ${isOpen ? 'is-open' : ''}`}>
       <span className="sr-only" id={`${id}-label`}>{label}</span>
       <button
         aria-expanded={isOpen}
@@ -70,14 +48,15 @@ function CustomTimePicker({ label = 'Ora', onChange, value }) {
         className="custom-time__control"
         id={`${id}-value`}
         onClick={togglePicker}
+        ref={triggerRef}
         type="button"
       >
         <FiClock aria-hidden="true" />
         <span>{value || '--:--'}</span>
       </button>
 
-      {isOpen ? (
-        <div className="custom-time__panel" role="dialog" aria-label={label}>
+      {renderPanel(
+        <div className="custom-time__panel" ref={panelRef} style={panelStyle} role="dialog" aria-label={label}>
           <div className="custom-time__display" aria-live="polite">
             <FiClock aria-hidden="true" />
             <strong>{draftHour}:{draftMinute}</strong>
@@ -128,8 +107,8 @@ function CustomTimePicker({ label = 'Ora', onChange, value }) {
               {t('time.confirm')}
             </button>
           </div>
-        </div>
-      ) : null}
+        </div>,
+      )}
     </div>
   )
 }
