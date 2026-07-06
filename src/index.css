@@ -28,18 +28,16 @@
   --nav-bg: rgba(255, 255, 255, 0.78);
   --nav-border: rgba(255, 255, 255, 0.74);
   --nav-panel: #ffffff;
-  --shadow-soft: 0 18px 45px rgba(24, 32, 46, 0.1);
-  --shadow-deep: 0 32px 90px rgba(31, 41, 55, 0.18);
   --focus-ring: #b7791f;
   --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 28px;
   --radius-full: 999px;
-  --shadow-xs: 0 2px 8px rgba(24, 32, 46, 0.08);
-  --shadow-soft: 0 18px 45px rgba(24, 32, 46, 0.1);
-  --shadow-md: 0 24px 60px rgba(24, 32, 46, 0.14);
-  --shadow-deep: 0 32px 90px rgba(31, 41, 55, 0.18);
+  --shadow-xs: 0 1px 2px rgba(24, 32, 46, 0.06), 0 1px 3px rgba(24, 32, 46, 0.08);
+  --shadow-soft: 0 2px 6px rgba(24, 32, 46, 0.05), 0 14px 32px rgba(24, 32, 46, 0.11);
+  --shadow-md: 0 4px 10px rgba(24, 32, 46, 0.06), 0 20px 46px rgba(24, 32, 46, 0.14);
+  --shadow-deep: 0 8px 18px rgba(24, 32, 46, 0.08), 0 34px 74px rgba(31, 41, 55, 0.2);
 
   /* Semantic status colors — distinct from decorative accents (--lime/--teal/--coral/--amber stay purely decorative) */
   --color-success: #1f8a4c;
@@ -126,10 +124,10 @@
   --nav-bg: rgba(8, 14, 21, 0.94);
   --nav-border: rgba(216, 226, 235, 0.14);
   --nav-panel: #121c26;
-  --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.22);
-  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.28);
-  --shadow-md: 0 24px 60px rgba(0, 0, 0, 0.32);
-  --shadow-deep: 0 32px 90px rgba(0, 0, 0, 0.38);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.24);
+  --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.28), 0 14px 32px rgba(0, 0, 0, 0.34);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.3), 0 20px 46px rgba(0, 0, 0, 0.4);
+  --shadow-deep: 0 8px 18px rgba(0, 0, 0, 0.34), 0 34px 74px rgba(0, 0, 0, 0.46);
   --focus-ring: #7dd3fc;
 
   --color-success: #4ade80;
@@ -268,6 +266,20 @@ input {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  color: var(--ink);
+}
+
+input:not([type='color']):not([type='file']),
+textarea,
+select {
+  transition:
+    border-color var(--duration-base) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard),
+    background var(--duration-base) var(--ease-standard);
 }
 
 button:focus-visible,
