@@ -1,14 +1,18 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { FiCheck, FiChevronLeft, FiChevronRight, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
-import CustomDatePicker from '../components/CustomDatePicker'
 import DiaryCard from '../components/DiaryCard'
 import DiaryWalkthrough from '../components/DiaryWalkthrough'
-import AppToast from '../components/AppToast'
-import IconButton from '../components/IconButton'
 import ImageFrame from '../components/ImageFrame'
-import Modal from '../components/Modal'
 import UserMessage from '../components/UserMessage'
+import Button from '../components/ui/Button'
+import DatePicker from '../components/ui/DatePicker'
+import Dialog from '../components/ui/Dialog'
+import EmptyState from '../components/ui/EmptyState'
+import IconButton from '../components/ui/IconButton'
+import Pagination from '../components/ui/Pagination'
+import Skeleton from '../components/ui/Skeleton'
+import Toast from '../components/ui/Toast'
 import { useI18n } from '../i18n/useI18n'
 import * as defaultDiaryApi from '../services/diaryApi'
 import { getApiError } from '../utils/apiErrors'
@@ -226,16 +230,6 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
-  useEffect(() => {
-    if (!successToast) {
-      return undefined
-    }
-
-    const timeoutId = window.setTimeout(() => setSuccessToast(''), 3500)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [successToast])
-
   if (authLoading) {
     return <section className="page-container loading-state">{t('auth.wait')}</section>
   }
@@ -398,6 +392,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
   }
 
   return (
+    <Toast.Provider>
     <section className={`diary-page page-container ${pageCopy.secretClass}`}>
       <header className="page-header">
         <div>
@@ -414,7 +409,9 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       </header>
 
       <UserMessage tone="error">{error}</UserMessage>
-      <AppToast>{successToast}</AppToast>
+      <Toast open={Boolean(successToast)} onOpenChange={(isOpen) => !isOpen && setSuccessToast('')} tone="success">
+        {successToast}
+      </Toast>
 
       {view === 'list' ? (
         <>
@@ -424,20 +421,22 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
           </div>
 
           <form className="smart-toolbar list-filter-toolbar diary-filter-toolbar" onSubmit={submitFilters} aria-label={t('diary.filter')}>
-            <label className="toolbar-field toolbar-field--search">
-              <input name="q" type="search" value={filters.q} onChange={updateFilter} placeholder={t('diary.search')} />
-            </label>
-            <label className="toolbar-field journal-date-field">
-              <CustomDatePicker label={t('diary.filterDate')} value={filters.date} onChange={(value) => setFilters((current) => ({ ...current, date: value }))} />
-            </label>
+            <div className="toolbar-field toolbar-field--search">
+              <input name="q" type="search" value={filters.q} onChange={updateFilter} placeholder={t('diary.search')} aria-label={t('diary.search')} />
+            </div>
+            <div className="toolbar-field journal-date-field">
+              <DatePicker label={t('diary.filterDate')} value={filters.date} onChange={(value) => setFilters((current) => ({ ...current, date: value }))} />
+            </div>
             <IconButton variant="gold" type="submit" label={t('diary.searchNotes')}><FiSearch /></IconButton>
             <IconButton variant="edit" type="button" onClick={resetFilters} label={t('diary.resetFilters')}><FiRotateCcw /></IconButton>
           </form>
 
           <div className="diary-layout">
             <div className="diary-grid">
-              {loading && !notes.length ? <div className="empty-state surface">{t('diary.loadingPages')}</div> : null}
-              {!loading && !notes.length ? <div className="empty-state surface">{pageCopy.empty}</div> : null}
+              {loading && !notes.length ? (
+                Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} variant="card" />)
+              ) : null}
+              {!loading && !notes.length ? <EmptyState title={pageCopy.empty} /> : null}
               {notes.map((note) => (
                 <DiaryCard note={note} key={note.id} onDelete={setDeleteNoteTarget} onEdit={editNote} onOpen={openNote} />
               ))}
@@ -455,19 +454,16 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
               </div>
             </aside>
           </div>
-          {notesMeta.last_page > 1 ? (
-            <nav className="diary-pagination" aria-label={t('diary.pagination')}>
-              <button className="btn btn-subtle" type="button" disabled={notesMeta.current_page <= 1 || loading} onClick={() => goToNotesPage(notesMeta.current_page - 1)}>
-                {t('diary.previous')}
-              </button>
-              <span>
-                {notesMeta.from ?? 0}-{notesMeta.to ?? 0} {t('common.of')} {notesMeta.total}
-              </span>
-              <button className="btn btn-subtle" type="button" disabled={notesMeta.current_page >= notesMeta.last_page || loading} onClick={() => goToNotesPage(notesMeta.current_page + 1)}>
-                {t('diary.next')}
-              </button>
-            </nav>
-          ) : null}
+          <Pagination
+            page={notesMeta.current_page}
+            lastPage={notesMeta.last_page}
+            from={notesMeta.from}
+            to={notesMeta.to}
+            total={notesMeta.total}
+            disabled={loading}
+            onPageChange={goToNotesPage}
+            labels={{ nav: t('diary.pagination'), previous: t('diary.previous'), next: t('diary.next'), of: t('common.of') }}
+          />
         </>
       ) : null}
 
@@ -501,7 +497,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
             <div className="diary-book__fields">
               <label>
                 {t('diary.date')}
-                <CustomDatePicker label={t('diary.date')} value={form.entry_date} onChange={(value) => setForm((current) => ({ ...current, entry_date: value }))} />
+                <DatePicker label={t('diary.date')} value={form.entry_date} onChange={(value) => setForm((current) => ({ ...current, entry_date: value }))} />
               </label>
               <label>
                 {t('diary.title')}
@@ -577,39 +573,40 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       ) : null}
 
       {deleteNoteTarget ? (
-        <Modal labelledBy="delete-note-title" onClose={() => setDeleteNoteTarget(null)}>
-          <div className="danger-modal-icon" aria-hidden="true"><FiTrash2 /></div>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setDeleteNoteTarget(null)}>
+          <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
             <p className="eyebrow">{t('diary.deletePage')}</p>
-            <h2 id="delete-note-title">{t('diary.deletePageTitle')} “{deleteNoteTarget.title}”?</h2>
-            <p className="modal-copy">{t('diary.deletePageCopy')}</p>
+            <Dialog.Title asChild><h2>{t('diary.deletePageTitle')} “{deleteNoteTarget.title}”?</h2></Dialog.Title>
+            <Dialog.Description asChild><p className="dialog-copy">{t('diary.deletePageCopy')}</p></Dialog.Description>
           </div>
-          <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmRemoveNote} disabled={loading}>
+          <div className="dialog-actions">
+            <Button variant="danger" onClick={confirmRemoveNote} disabled={loading}>
               <FiTrash2 aria-hidden="true" />
               {t('kanban.delete')}
-            </button>
-            <button className="btn btn-cancel" type="button" onClick={() => setDeleteNoteTarget(null)}>{t('common.cancel')}</button>
+            </Button>
+            <Button variant="cancel" onClick={() => setDeleteNoteTarget(null)}>{t('common.cancel')}</Button>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {discardConfirmOpen ? (
-        <Modal labelledBy="discard-note-title" onClose={() => setDiscardConfirmOpen(false)}>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setDiscardConfirmOpen(false)}>
           <div>
             <p className="eyebrow">{t('diary.unsavedChanges')}</p>
-            <h2 id="discard-note-title">{t('diary.leaveEditorTitle')}</h2>
-            <p className="modal-copy">
-              {editingId ? t('diary.leaveEditCopy') : t('diary.leaveCreateCopy')}
-            </p>
+            <Dialog.Title asChild><h2>{t('diary.leaveEditorTitle')}</h2></Dialog.Title>
+            <Dialog.Description asChild>
+              <p className="dialog-copy">{editingId ? t('diary.leaveEditCopy') : t('diary.leaveCreateCopy')}</p>
+            </Dialog.Description>
           </div>
-          <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={leaveCompose}>{t('diary.confirmLeave')}</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setDiscardConfirmOpen(false)}>{t('common.cancel')}</button>
+          <div className="dialog-actions">
+            <Button variant="danger" onClick={leaveCompose}>{t('diary.confirmLeave')}</Button>
+            <Button variant="cancel" onClick={() => setDiscardConfirmOpen(false)}>{t('common.cancel')}</Button>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
     </section>
+    </Toast.Provider>
   )
 }
 

@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { FiAlertTriangle, FiTrash2 } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import CustomSelect from '../components/CustomSelect'
-import Modal from '../components/Modal'
 import UserMessage from '../components/UserMessage'
+import Button from '../components/ui/Button'
+import Dialog from '../components/ui/Dialog'
 import { timeZones } from '../data/timeZones'
 import { useI18n } from '../i18n/useI18n'
 import { deleteAccount } from '../services/authApi'
@@ -170,9 +171,9 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
           </div>
         </section>
 
-        <button className="btn btn-primary profile-settings__submit" type="submit" disabled={saving}>
+        <Button variant="primary" className="profile-settings__submit" type="submit" disabled={saving}>
           {saving ? t('auth.wait') : t('profile.saveProfile')}
-        </button>
+        </Button>
       </form>
 
       <section className="profile-settings__card profile-settings__card--danger">
@@ -182,22 +183,22 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
           <p className="profile-danger-copy">{t('profile.dangerZoneCopy')}</p>
         </div>
 
-        <button className="btn btn-danger profile-danger-trigger" type="button" onClick={openDeleteModal}>
+        <Button variant="danger" className="profile-danger-trigger" type="button" onClick={openDeleteModal}>
           <FiTrash2 aria-hidden="true" />
           {t('profile.deleteAccount')}
-        </button>
+        </Button>
       </section>
 
       {isDeleteModalOpen ? (
-        <Modal labelledBy="delete-account-title" onClose={closeDeleteModal}>
-          <div className="danger-modal-icon" aria-hidden="true"><FiAlertTriangle /></div>
+        <Dialog onOpenChange={(isOpen) => !isOpen && closeDeleteModal()}>
+          <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
             <p className="eyebrow">{t('profile.deleteAccount')}</p>
-            <h2 id="delete-account-title">{t('profile.deleteAccountTitle')}</h2>
-            <p className="modal-copy">{t('profile.deleteAccountCopy')}</p>
+            <Dialog.Title asChild><h2>{t('profile.deleteAccountTitle')}</h2></Dialog.Title>
+            <Dialog.Description asChild><p className="dialog-copy">{t('profile.deleteAccountCopy')}</p></Dialog.Description>
           </div>
 
-          <form className="modal-form" onSubmit={confirmDeleteAccount}>
+          <form className="dialog-form" onSubmit={confirmDeleteAccount}>
             <label>
               <span>{t('profile.deleteAccountConfirmLabel')}</span>
               <input
@@ -212,17 +213,17 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
 
             <UserMessage tone="error">{deleteError}</UserMessage>
 
-            <div className="modal-actions">
-              <button className="btn btn-danger" disabled={deleting} type="submit">
+            <div className="dialog-actions">
+              <Button variant="danger" disabled={deleting} type="submit">
                 <FiTrash2 aria-hidden="true" />
                 {deleting ? t('auth.wait') : t('profile.deleteAccountButton')}
-              </button>
-              <button className="btn btn-cancel" disabled={deleting} onClick={closeDeleteModal} type="button">
+              </Button>
+              <Button variant="cancel" disabled={deleting} onClick={closeDeleteModal} type="button">
                 {t('common.cancel')}
-              </button>
+              </Button>
             </div>
           </form>
-        </Modal>
+        </Dialog>
       ) : null}
     </section>
   )

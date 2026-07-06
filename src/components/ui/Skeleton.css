@@ -1,0 +1,42 @@
+.ui-skeleton {
+  background: linear-gradient(90deg, var(--surface-muted) 25%, var(--control-hover) 37%, var(--surface-muted) 63%);
+  background-size: 400% 100%;
+  animation: ui-skeleton-shimmer 1.4s ease infinite;
+  border-radius: var(--radius-md);
+}
+
+.ui-skeleton--card {
+  border: 1px solid var(--line);
+  height: 6.4rem;
+  width: 100%;
+}
+
+.ui-skeleton--text {
+  animation: none;
+  background: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ui-skeleton--text .ui-skeleton__line {
+  animation: ui-skeleton-shimmer 1.4s ease infinite;
+  background: linear-gradient(90deg, var(--surface-muted) 25%, var(--control-hover) 37%, var(--surface-muted) 63%);
+  background-size: 400% 100%;
+  border-radius: var(--radius-xs);
+  display: block;
+  height: 0.85rem;
+}
+
+.ui-skeleton--text .ui-skeleton__line:last-child {
+  width: 70%;
+}
+
+@keyframes ui-skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
+}

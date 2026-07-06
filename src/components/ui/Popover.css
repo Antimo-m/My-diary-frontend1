@@ -1,0 +1,40 @@
+.ui-popover {
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  outline: none;
+  z-index: 70;
+}
+
+.ui-popover[data-state='open'] {
+  animation: ui-popover-in var(--duration-base) var(--ease-emphasized) both;
+}
+
+.ui-popover[data-state='closed'] {
+  animation: ui-popover-out var(--duration-fast) var(--ease-standard) both;
+}
+
+@keyframes ui-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ui-popover-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
