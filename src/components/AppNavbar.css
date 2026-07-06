@@ -373,13 +373,13 @@
 }
 
 .desktop-theme-toggle.is-off {
-  background: rgba(244, 63, 94, 0.13);
-  color: #be123c;
+  background: var(--color-error-soft);
+  color: var(--color-error);
 }
 
 .desktop-theme-toggle.is-on {
-  background: rgba(34, 197, 94, 0.16);
-  color: #15803d;
+  background: var(--color-success-soft);
+  color: var(--color-success);
 }
 
 .desktop-theme-toggle > span {
@@ -429,7 +429,7 @@
 }
 
 :root[data-theme='dark'] .desktop-theme-toggle.is-on {
-  color: #22c55e;
+  color: var(--color-success);
 }
 
 :root[data-theme='dark'] .language-switch > div {
@@ -611,13 +611,13 @@
   }
 
   .mobile-theme-toggle.is-off {
-    background: rgba(244, 63, 94, 0.13);
-    color: #be123c;
+    background: var(--color-error-soft);
+    color: var(--color-error);
   }
 
   .mobile-theme-toggle.is-on {
-    background: rgba(34, 197, 94, 0.16);
-    color: #15803d;
+    background: var(--color-success-soft);
+    color: var(--color-success);
   }
 
   .mobile-theme-toggle__track {
@@ -713,7 +713,7 @@
 }
 
 :root[data-theme='dark'] .mobile-theme-toggle.is-on {
-  color: #22c55e;
+  color: var(--color-success);
 }
 
 @media (max-width: 900px) {

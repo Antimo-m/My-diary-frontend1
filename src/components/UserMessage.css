@@ -23,21 +23,21 @@
 }
 
 .user-message--error {
-  background: rgba(244, 63, 94, 0.1);
-  border-color: rgba(244, 63, 94, 0.24);
-  color: #b42342;
+  background: var(--color-error-soft);
+  border-color: color-mix(in srgb, var(--color-error) 32%, transparent);
+  color: var(--color-error);
 }
 
 .user-message--info {
-  background: var(--primary-soft);
-  border-color: color-mix(in srgb, var(--primary) 28%, transparent);
-  color: var(--primary-dark);
+  background: var(--color-info-soft);
+  border-color: color-mix(in srgb, var(--color-info) 28%, transparent);
+  color: var(--color-info);
 }
 
 .user-message--success {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.28);
-  color: #15803d;
+  background: var(--color-success-soft);
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+  color: var(--color-success);
 }
 
 :root[data-theme='dark'] .user-message--error {

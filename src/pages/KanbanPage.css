@@ -976,7 +976,7 @@
 }
 
 .task-editor__actions .icon-action,
-.modal-actions .icon-action {
+.dialog-actions .icon-action {
   border-radius: 14px;
   height: 2.8rem;
   width: 2.8rem;

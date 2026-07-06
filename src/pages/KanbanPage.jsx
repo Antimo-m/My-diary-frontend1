@@ -2,15 +2,17 @@ import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors } from '@
 import { useEffect, useRef, useState } from 'react'
 import { FiAlertTriangle, FiCalendar, FiCheck, FiEdit3, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
-import AppToast from '../components/AppToast'
 import ColorPaletteInput from '../components/ColorPaletteInput'
-import CustomDatePicker from '../components/CustomDatePicker'
-import IconButton from '../components/IconButton'
 import KanbanHub from '../components/KanbanHub'
 import KanbanTaskForm from '../components/KanbanTaskForm'
 import { KanbanColumn, LabelPill } from '../components/KanbanBoardParts'
 import Modal from '../components/Modal'
 import UserMessage from '../components/UserMessage'
+import Button from '../components/ui/Button'
+import DatePicker from '../components/ui/DatePicker'
+import Dialog from '../components/ui/Dialog'
+import IconButton from '../components/ui/IconButton'
+import Toast from '../components/ui/Toast'
 import { useI18n } from '../i18n/useI18n'
 import {
   createColumn,
@@ -183,26 +185,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, kanbanRoute.mode, kanbanRoute.projectIdentifier])
-
-  useEffect(() => {
-    if (!validationToast) {
-      return undefined
-    }
-
-    const timeoutId = window.setTimeout(() => setValidationToast(''), 4000)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [validationToast])
-
-  useEffect(() => {
-    if (!successToast) {
-      return undefined
-    }
-
-    const timeoutId = window.setTimeout(() => setSuccessToast(''), 3500)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [successToast])
 
   useEffect(() => {
     if (!pendingColumnFocusId.current || !board.columns.length) {
@@ -588,6 +570,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       : t('kanban.homeTitle')
 
   return (
+    <Toast.Provider>
     <section className="kanban-page page-container">
       <header className="page-header kanban-topbar">
         <div>
@@ -599,10 +582,12 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       </header>
 
       <UserMessage tone="error">{error}</UserMessage>
-      <AppToast>{successToast}</AppToast>
-      <div className={`kanban-toast ${validationToast ? 'is-visible' : ''}`} aria-live="polite">
-        <UserMessage tone="error">{validationToast}</UserMessage>
-      </div>
+      <Toast open={Boolean(successToast)} onOpenChange={(isOpen) => !isOpen && setSuccessToast('')} tone="success">
+        {successToast}
+      </Toast>
+      <Toast open={Boolean(validationToast)} onOpenChange={(isOpen) => !isOpen && setValidationToast('')} tone="error">
+        {validationToast}
+      </Toast>
 
       {kanbanRoute.mode === 'home' ? (
         <KanbanHub
@@ -657,9 +642,9 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
       {kanbanRoute.mode === 'daily' ? (
       <form className="smart-toolbar list-filter-toolbar kanban-filter-toolbar" onSubmit={submitDate} aria-label={t('kanban.changeDate')}>
-        <label className="toolbar-field journal-date-field">
-          <CustomDatePicker label={t('kanban.changeDate')} value={date} onChange={setDate} />
-        </label>
+        <div className="toolbar-field journal-date-field">
+          <DatePicker label={t('kanban.changeDate')} value={date} onChange={setDate} />
+        </div>
         <IconButton variant="gold" type="submit" label={t('kanban.changeDate')}><FiSearch /></IconButton>
         <IconButton variant="edit" type="button" onClick={resetDate} label={t('kanban.resetFilters')}><FiRotateCcw /></IconButton>
       </form>
@@ -708,11 +693,11 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       ) : null}
 
       {taskDetailTarget ? (
-        <Modal labelledBy="task-detail-title" onClose={() => setTaskDetailTarget(null)}>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDetailTarget(null)}>
           <div className="task-detail-modal" style={{ '--task-color': taskDetailTarget.color ?? '#d6a43a' }}>
             <div className="task-detail-modal__header">
               <p className="eyebrow">{t('kanban.detail')}</p>
-              <h2 id="task-detail-title">{taskDetailTarget.title}</h2>
+              <Dialog.Title asChild><h2>{taskDetailTarget.title}</h2></Dialog.Title>
             </div>
             {taskDetailTarget.description ? <p className="task-detail-modal__description">{taskDetailTarget.description}</p> : null}
             <div className="task-detail-modal__meta">
@@ -733,22 +718,22 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
                 ))}
               </div>
             ) : null}
-            <div className="modal-actions">
+            <div className="dialog-actions">
               <IconButton variant="edit" type="button" onClick={() => editTaskFromDetail(taskDetailTarget)} label={t('task.update')}><FiEdit3 /></IconButton>
               <IconButton variant="danger" type="button" onClick={() => setTaskDeleteTarget(taskDetailTarget)} label={t('kanban.deleteActivity')}><FiTrash2 /></IconButton>
               <IconButton variant="gold" type="button" onClick={() => setTaskDetailTarget(null)} label={t('common.close')}><FiX /></IconButton>
             </div>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {isColumnModalOpen ? (
-        <Modal labelledBy="column-modal-title" onClose={closeColumnModal}>
+        <Dialog onOpenChange={(isOpen) => !isOpen && closeColumnModal()}>
           <div>
             <p className="eyebrow">{columnEditTarget ? t('kanban.saveColumn') : t('kanban.addColumn')}</p>
-            <h2 id="column-modal-title">{columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}</h2>
+            <Dialog.Title asChild><h2>{columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}</h2></Dialog.Title>
           </div>
-          <form className="modal-form" onSubmit={submitColumn}>
+          <form className="dialog-form" onSubmit={submitColumn}>
             <label>
               {t('kanban.name')}
               <input
@@ -759,21 +744,21 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
               />
             </label>
             <ColorPaletteInput label={t('kanban.columnColor')} value={columnForm.color} onChange={(value) => setColumnForm((current) => ({ ...current, color: value }))} />
-            <div className="modal-actions">
+            <div className="dialog-actions">
               <IconButton variant="confirm" type="submit" label={columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}><FiCheck /></IconButton>
               <IconButton variant="danger" type="button" onClick={closeColumnModal} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {isLabelModalOpen ? (
-        <Modal labelledBy="label-modal-title" onClose={closeLabelModal}>
+        <Dialog onOpenChange={(isOpen) => !isOpen && closeLabelModal()}>
           <div>
             <p className="eyebrow">{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</p>
-            <h2 id="label-modal-title">{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</h2>
+            <Dialog.Title asChild><h2>{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</h2></Dialog.Title>
           </div>
-          <form className="modal-form" onSubmit={submitLabel}>
+          <form className="dialog-form" onSubmit={submitLabel}>
             <label>
               {t('kanban.name')}
               <input
@@ -788,66 +773,66 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
               <span>{labelForm.name || t('kanban.createLabel')}</span>
             </div>
             <ColorPaletteInput label={t('kanban.labels')} value={labelForm.color} onChange={(value) => setLabelForm((current) => ({ ...current, color: value }))} />
-            <div className="modal-actions">
+            <div className="dialog-actions">
               <IconButton variant="confirm" type="submit" label={t('kanban.saveLabel')}><FiCheck /></IconButton>
               <IconButton variant="danger" type="button" onClick={closeLabelModal} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {columnDeleteTarget ? (
-        <Modal labelledBy="delete-column-title" onClose={() => setColumnDeleteTarget(null)}>
-          <div className="danger-modal-icon" aria-hidden="true"><FiTrash2 /></div>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setColumnDeleteTarget(null)}>
+          <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
             <p className="eyebrow">{t('kanban.deleteColumn')}</p>
-            <h2 id="delete-column-title">{t('kanban.columnDeleteTitle')}</h2>
-            <p className="modal-copy">{t('kanban.columnDeleteCopy')}</p>
+            <Dialog.Title asChild><h2>{t('kanban.columnDeleteTitle')}</h2></Dialog.Title>
+            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.columnDeleteCopy')}</p></Dialog.Description>
           </div>
-          <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteColumn}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setColumnDeleteTarget(null)}>{t('common.cancel')}</button>
+          <div className="dialog-actions">
+            <Button variant="danger" onClick={confirmDeleteColumn}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="cancel" onClick={() => setColumnDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {taskDeleteTarget ? (
-        <Modal labelledBy="delete-task-title" onClose={() => setTaskDeleteTarget(null)}>
-          <div className="danger-modal-icon" aria-hidden="true"><FiTrash2 /></div>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDeleteTarget(null)}>
+          <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
             <p className="eyebrow">{t('kanban.deleteActivity')}</p>
-            <h2 id="delete-task-title">{t('kanban.deleteTaskTitle')} “{taskDeleteTarget.title}”?</h2>
-            <p className="modal-copy">{t('kanban.deleteTaskCopy')}</p>
+            <Dialog.Title asChild><h2>{t('kanban.deleteTaskTitle')} “{taskDeleteTarget.title}”?</h2></Dialog.Title>
+            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteTaskCopy')}</p></Dialog.Description>
           </div>
-          <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteTask}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setTaskDeleteTarget(null)}>{t('common.cancel')}</button>
+          <div className="dialog-actions">
+            <Button variant="danger" onClick={confirmDeleteTask}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="cancel" onClick={() => setTaskDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {labelDeleteTarget ? (
-        <Modal labelledBy="delete-label-title" onClose={() => setLabelDeleteTarget(null)}>
-          <div className="danger-modal-icon" aria-hidden="true"><FiAlertTriangle /></div>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setLabelDeleteTarget(null)}>
+          <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
             <p className="eyebrow">{t('kanban.deleteLabel')}</p>
-            <h2 id="delete-label-title">{t('kanban.deleteLabelTitle')} “{labelDeleteTarget.name}”?</h2>
-            <p className="modal-copy">{t('kanban.labelDeleteCopy')}</p>
+            <Dialog.Title asChild><h2>{t('kanban.deleteLabelTitle')} “{labelDeleteTarget.name}”?</h2></Dialog.Title>
+            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.labelDeleteCopy')}</p></Dialog.Description>
           </div>
-          <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteLabel}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setLabelDeleteTarget(null)}>{t('common.cancel')}</button>
+          <div className="dialog-actions">
+            <Button variant="danger" onClick={confirmDeleteLabel}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="cancel" onClick={() => setLabelDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {projectEditTarget ? (
-        <Modal labelledBy="project-edit-title" onClose={closeEditProject}>
+        <Dialog onOpenChange={(isOpen) => !isOpen && closeEditProject()}>
           <div>
             <p className="eyebrow">{t('kanban.editProject')}</p>
-            <h2 id="project-edit-title">{t('kanban.renameProject')}</h2>
+            <Dialog.Title asChild><h2>{t('kanban.renameProject')}</h2></Dialog.Title>
           </div>
-          <form className="modal-form" onSubmit={submitProjectEdit}>
+          <form className="dialog-form" onSubmit={submitProjectEdit}>
             <label>
               {t('kanban.name')}
               <input
@@ -857,30 +842,31 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
                 required
               />
             </label>
-            <div className="modal-actions">
+            <div className="dialog-actions">
               <IconButton variant="confirm" type="submit" label={t('kanban.saveProject')}><FiCheck /></IconButton>
               <IconButton variant="danger" type="button" onClick={closeEditProject} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
-        </Modal>
+        </Dialog>
       ) : null}
 
       {projectDeleteTarget ? (
-        <Modal labelledBy="delete-project-title" onClose={() => setProjectDeleteTarget(null)}>
-          <div className="danger-modal-icon" aria-hidden="true"><FiAlertTriangle /></div>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setProjectDeleteTarget(null)}>
+          <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
             <p className="eyebrow">{t('kanban.deleteProject')}</p>
-            <h2 id="delete-project-title">{t('kanban.deleteProjectTitle')} “{projectDeleteTarget.name}”?</h2>
-            <p className="modal-copy">{t('kanban.deleteProjectCopy')}</p>
+            <Dialog.Title asChild><h2>{t('kanban.deleteProjectTitle')} “{projectDeleteTarget.name}”?</h2></Dialog.Title>
+            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteProjectCopy')}</p></Dialog.Description>
           </div>
-          <div className="modal-actions">
-            <button className="btn btn-danger" type="button" onClick={confirmDeleteProject}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</button>
-            <button className="btn btn-cancel" type="button" onClick={() => setProjectDeleteTarget(null)}>{t('common.cancel')}</button>
+          <div className="dialog-actions">
+            <Button variant="danger" onClick={confirmDeleteProject}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="cancel" onClick={() => setProjectDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
-        </Modal>
+        </Dialog>
       ) : null}
 
     </section>
+    </Toast.Provider>
   )
 }
 
