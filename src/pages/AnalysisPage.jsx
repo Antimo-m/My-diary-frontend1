@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import AuthPanel from '../components/AuthPanel'
 import StatsDashboard from '../components/StatsDashboard'
 import UserMessage from '../components/UserMessage'
+import Card from '../components/ui/Card'
+import Skeleton from '../components/ui/Skeleton'
 import { useI18n } from '../i18n/useI18n'
 import { listKanbanProjects } from '../services/kanbanApi'
 import { getProfileStats } from '../services/profileApi'
@@ -88,7 +90,11 @@ function AnalysisPage({ authLoading, onForgotPassword, onLogin, onRegister, onRe
       </header>
 
       <UserMessage tone="error">{error}</UserMessage>
-      {!stats ? <div className="surface loading-state">{t('profile.loadingStats')}</div> : null}
+      {!stats ? (
+        <Card className="analysis-loading">
+          <Skeleton variant="text" lines={4} />
+        </Card>
+      ) : null}
       <StatsDashboard
         locale={locale}
         onBoardChange={changeBoard}

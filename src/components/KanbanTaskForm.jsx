@@ -120,6 +120,7 @@ function KanbanTaskForm({
               <label className="label-check" style={{ '--label-color': label.color }} key={`task-label-${label.id}`}>
                 <input
                   type="checkbox"
+                  aria-label={label.name}
                   checked={taskForm.label_ids.includes(label.id)}
                   onChange={() => onToggleTaskLabel(label.id)}
                 />

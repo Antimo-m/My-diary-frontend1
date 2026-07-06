@@ -4,6 +4,7 @@ import diaryMobileVideo from '../assets/diary-mobile.webm'
 import kanbanDesktopVideo from '../assets/kanban-desktop.webm'
 import kanbanMobileVideo from '../assets/kanban-mobile.webm'
 import HomeFeatureVideo from '../components/HomeFeatureVideo'
+import Button from '../components/ui/Button'
 import useHomeOverview from '../hooks/useHomeOverview'
 import { useI18n } from '../i18n/useI18n'
 import './HomePage.css'
@@ -51,14 +52,14 @@ function HomePage({ onNavigate }) {
             <p>{t('home.diarySectionCopy')}</p>
           </div>
           <div className="home-zone-header__actions">
-            <button className="btn btn-primary" type="button" onClick={() => onNavigate('diary')}>
+            <Button variant="primary" onClick={() => onNavigate('diary')}>
               <FiPlus aria-hidden="true" />
               {t('home.newDiaryShortcut')}
-            </button>
-            <button className="btn btn-outline" type="button" onClick={() => onNavigate('diary')}>
+            </Button>
+            <Button variant="outline" onClick={() => onNavigate('diary')}>
               {t('home.diaryCta')}
               <FiArrowRight aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -90,10 +91,10 @@ function HomePage({ onNavigate }) {
             >
               <FiCalendar aria-hidden="true" />
             </button>
-            <button className="btn btn-outline" type="button" onClick={() => onNavigate('kanban')}>
+            <Button variant="outline" onClick={() => onNavigate('kanban')}>
               {t('home.kanbanCta')}
               <FiArrowRight aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </header>
 

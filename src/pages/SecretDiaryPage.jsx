@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiCheck, FiLogOut, FiLock, FiMail, FiUnlock } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
-import AppToast from '../components/AppToast'
-import IconButton from '../components/IconButton'
 import UserMessage from '../components/UserMessage'
+import IconButton from '../components/ui/IconButton'
+import Toast from '../components/ui/Toast'
 import { useI18n } from '../i18n/useI18n'
 import DiaryPage from './DiaryPage'
 import * as secretDiaryApi from '../services/secretDiaryApi'
@@ -51,16 +51,6 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
     void Promise.resolve().then(() => loadStatus())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (!successToast) {
-      return undefined
-    }
-
-    const timeoutId = window.setTimeout(() => setSuccessToast(''), 3500)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [successToast])
 
   const updateForm = (event) => {
     setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
@@ -114,6 +104,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
   const isReset = mode === 'reset'
 
   return (
+    <Toast.Provider>
     <section className="diary-page secret-diary-page page-container">
       <header className="page-header">
         <div>
@@ -127,7 +118,9 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
 
       <UserMessage tone="error">{error}</UserMessage>
       <UserMessage tone={noticeTone}>{notice}</UserMessage>
-      <AppToast>{successToast}</AppToast>
+      <Toast open={Boolean(successToast)} onOpenChange={(isOpen) => !isOpen && setSuccessToast('')} tone="success">
+        {successToast}
+      </Toast>
 
       <form className="secret-gate surface" onSubmit={submitPassword}>
         <div className="secret-gate__icon" aria-hidden="true">
@@ -171,6 +164,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
         </div>
       </form>
     </section>
+    </Toast.Provider>
   )
 }
 

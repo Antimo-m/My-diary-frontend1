@@ -1,0 +1,13 @@
+.ui-pagination {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.ui-pagination__summary {
+  color: var(--muted);
+  font-size: var(--font-size-body-sm);
+  font-weight: 900;
+}

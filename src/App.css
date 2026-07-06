@@ -7,17 +7,18 @@
 
 .eyebrow {
   color: var(--primary-dark);
-  font-size: 0.76rem;
+  font-size: var(--font-size-caption);
   font-weight: 900;
   letter-spacing: 0.12em;
+  line-height: var(--line-height-caption);
   margin: 0;
   text-transform: uppercase;
 }
 
 .page-title {
-  font-size: 2rem;
+  font-size: var(--font-size-h1);
   font-weight: 900;
-  line-height: 1.12;
+  line-height: var(--line-height-h1);
   margin: 0.28rem 0 0.38rem;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -86,15 +87,15 @@
 }
 
 .btn-danger {
-  background: var(--rose);
+  background: var(--color-error);
   box-shadow: 0 14px 30px rgba(244, 63, 94, 0.22);
   color: #ffffff;
 }
 
 .btn-cancel {
-  background: rgba(244, 63, 94, 0.12);
-  border-color: rgba(244, 63, 94, 0.26);
-  color: var(--rose);
+  background: var(--color-error-soft);
+  border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+  color: var(--color-error);
 }
 
 .btn-outline {
@@ -165,7 +166,8 @@
   }
 
   .page-title {
-    font-size: 2.95rem;
+    font-size: var(--font-size-display);
+    line-height: var(--line-height-display);
   }
 }
 
