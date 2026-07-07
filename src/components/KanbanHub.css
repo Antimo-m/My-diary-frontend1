@@ -188,6 +188,12 @@
   padding: 0.75rem 0.9rem;
 }
 
+.kanban-hub-project-form .icon-action {
+  border-radius: 14px;
+  height: 2.8rem;
+  width: 2.8rem;
+}
+
 :root[data-theme='dark'] .kanban-hub-card__trigger > svg {
   background: rgba(214, 164, 58, 0.14);
   color: #f0cf84;
