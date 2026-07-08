@@ -242,7 +242,6 @@ body {
 :root[data-theme='dark'] .label-preview,
 :root[data-theme='dark'] .task-card,
 :root[data-theme='dark'] .task-composer__section,
-:root[data-theme='dark'] .add-task-in-column,
 :root[data-theme='dark'] .kanban-count {
   background: var(--control-bg);
   border-color: var(--line);

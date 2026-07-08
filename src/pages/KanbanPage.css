@@ -822,29 +822,42 @@
 
 .add-task-in-column {
   align-items: center;
-  background: rgba(255, 255, 255, 0.62);
-  border: 1px dashed color-mix(in srgb, var(--column-color, var(--primary)) 38%, rgba(31, 41, 55, 0.18));
-  border-radius: 18px;
-  color: var(--primary-dark);
+  background: linear-gradient(135deg, var(--coral), var(--amber));
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 14px 28px rgba(214, 164, 58, 0.26);
+  color: #ffffff;
   cursor: pointer;
   display: flex;
   font-weight: 900;
-  gap: 0.55rem;
+  gap: 0.5rem;
   justify-content: center;
-  min-height: 3.2rem;
-  padding: 0.75rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
   width: 100%;
 }
 
+.add-task-in-column:hover {
+  box-shadow: 0 20px 38px rgba(214, 164, 58, 0.32);
+  transform: translateY(-2px);
+}
+
+.add-task-in-column:active {
+  box-shadow: 0 12px 24px rgba(214, 164, 58, 0.28);
+  transform: translateY(0);
+}
+
+.add-task-in-column:disabled {
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
 .add-task-in-column svg {
-  align-items: center;
-  background: linear-gradient(135deg, var(--primary), var(--coral));
-  border-radius: 999px;
-  color: #ffffff;
-  display: inline-flex;
-  height: 1.6rem;
-  justify-content: center;
-  width: 1.6rem;
+  font-size: 1.25rem;
+  flex: 0 0 auto;
 }
 
 .column-task-form {
@@ -1061,6 +1074,12 @@
   .task-schedule-grid,
   .reminder-datetime-row {
     grid-template-columns: 1fr;
+  }
+
+  .task-editor__actions .icon-action,
+  .dialog-actions .icon-action {
+    height: 2.5rem;
+    width: 2.5rem;
   }
 
   .kanban-toast {

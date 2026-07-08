@@ -1,10 +1,14 @@
 .modal-backdrop {
-  align-items: center;
+  align-items: flex-start;
   background: rgba(23, 32, 38, 0.3);
   display: flex;
   inset: 0;
   justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
   position: fixed;
   z-index: 60;
   animation: modal-backdrop-in 150ms ease-out both;
@@ -13,6 +17,8 @@
 .app-modal {
   display: grid;
   gap: 1rem;
+  margin: auto;
+  max-height: calc(100vh - 2rem);
   max-height: calc(100svh - 2rem);
   max-width: 30rem;
   overflow-y: auto;
@@ -136,13 +142,22 @@
 
 @media (max-width: 480px) {
   .modal-backdrop {
-    align-items: flex-end;
     padding: 0.75rem;
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
 
   .app-modal {
     border-radius: 22px;
+    margin-bottom: 0;
+    margin-top: auto;
+    max-height: calc(100vh - 1.5rem);
     max-height: calc(100svh - 1.5rem);
     width: 100%;
+  }
+
+  .modal-actions .icon-action {
+    height: 2.5rem;
+    width: 2.5rem;
   }
 }
