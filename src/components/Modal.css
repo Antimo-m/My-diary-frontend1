@@ -10,7 +10,7 @@
   padding-top: max(1rem, env(safe-area-inset-top));
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
   position: fixed;
-  z-index: 60;
+  z-index: 250;
   animation: modal-backdrop-in 150ms ease-out both;
 }
 

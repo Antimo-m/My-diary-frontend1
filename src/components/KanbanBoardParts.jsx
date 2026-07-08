@@ -43,9 +43,8 @@ export function KanbanColumn({ column, onDeleteColumn, onEditColumn, onOpenTaskD
           <div className="kanban-empty">{t('kanban.emptyColumn')}</div>
         )}
 
-        <button className="add-task-in-column" type="button" onClick={() => onOpenTaskForm(column)}>
+        <button className="add-task-in-column" type="button" onClick={() => onOpenTaskForm(column)} aria-label={t('task.create')} title={t('task.create')}>
           <FiPlus aria-hidden="true" />
-          {t('task.create')}
         </button>
       </div>
     </section>

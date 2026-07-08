@@ -27,14 +27,19 @@ function useFloatingPanel({ isOpen, onClose, width = 288, gap = 8 }) {
     const left = Math.min(Math.max(VIEWPORT_MARGIN, rect.left), viewportWidth - panelWidth - VIEWPORT_MARGIN)
 
     const panelHeight = panelRef.current?.offsetHeight ?? 0
-    const spaceBelow = viewportHeight - rect.bottom
-    const openUpward = panelHeight > spaceBelow && rect.top > spaceBelow
+    const spaceBelow = viewportHeight - rect.bottom - gap - VIEWPORT_MARGIN
+    const spaceAbove = rect.top - gap - VIEWPORT_MARGIN
+    const openUpward = panelHeight > spaceBelow && spaceAbove > spaceBelow
+
+    // L'altezza è sempre vincolata allo spazio reale del lato scelto, così il
+    // pannello scrolla al proprio interno invece di sbordare dalla viewport.
+    const availableHeight = Math.max(openUpward ? spaceAbove : spaceBelow, 120)
 
     const next = {
       position: 'fixed',
       left: `${left}px`,
       width: `${panelWidth}px`,
-      maxHeight: `${viewportHeight - VIEWPORT_MARGIN * 2}px`,
+      maxHeight: `${Math.min(availableHeight, viewportHeight - VIEWPORT_MARGIN * 2)}px`,
       overflowY: 'auto',
     }
 

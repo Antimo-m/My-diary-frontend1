@@ -47,12 +47,9 @@
   box-shadow: 0 24px 55px rgba(82, 64, 35, 0.18);
   display: grid;
   gap: 0.8rem;
-  left: 0;
   min-width: min(19rem, calc(100vw - 2rem));
   padding: 0.9rem;
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  z-index: 70;
+  z-index: 260;
 }
 
 .custom-date__header {
@@ -115,7 +112,6 @@
 
 @media (max-width: 420px) {
   .custom-date__panel {
-    left: 0;
     min-width: min(18rem, calc(100vw - 2rem));
   }
 }

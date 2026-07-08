@@ -37,6 +37,41 @@
     border-color var(--duration-base) var(--ease-standard);
 }
 
+.fab-action {
+  align-items: center;
+  background: linear-gradient(135deg, var(--coral), var(--amber));
+  border: 0;
+  border-radius: var(--radius-full);
+  box-shadow: 0 18px 36px rgba(214, 164, 58, 0.28);
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+  font-weight: 900;
+  height: 3rem;
+  justify-content: center;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  width: 3rem;
+}
+
+.fab-action:hover {
+  box-shadow: 0 22px 42px rgba(214, 164, 58, 0.34);
+  transform: translateY(-2px);
+}
+
+.fab-action:active {
+  box-shadow: 0 14px 28px rgba(214, 164, 58, 0.3);
+  transform: translateY(0);
+}
+
+.fab-action:disabled {
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
 .mobile-auth-gate {
   align-items: center;
   box-sizing: border-box;

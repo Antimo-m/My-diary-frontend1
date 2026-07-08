@@ -7,7 +7,7 @@
   right: 1rem;
   transform: translateY(0.6rem);
   transition: opacity 180ms ease, transform 180ms ease;
-  z-index: 90;
+  z-index: 270;
 }
 
 .app-toast.is-visible {
