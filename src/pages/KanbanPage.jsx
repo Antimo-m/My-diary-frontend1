@@ -23,9 +23,9 @@ import {
   deleteLabel,
   deleteProject,
   deleteTask,
-  getKanbanBoard,
-  getKanbanProject,
-  listKanbanProjects,
+  getBachecaBoard,
+  getBachecaProject,
+  listBachecaProjects,
   moveTask,
   toggleTaskComplete,
   updateColumn,
@@ -52,13 +52,13 @@ const emptyLabelForm = { name: '', color: '#d6a43a' }
 const emptyProjectForm = { name: '', icon: 'folder' }
 
 function initialKanbanRoute() {
-  const projectMatch = window.location.pathname.match(/^\/kanban\/project\/([^/]+)/)
+  const projectMatch = window.location.pathname.match(/^\/bacheca\/project\/([^/]+)/)
 
   if (projectMatch) {
     return { mode: 'project', projectIdentifier: decodeURIComponent(projectMatch[1]) }
   }
 
-  if (window.location.pathname === '/kanban/daily') {
+  if (window.location.pathname === '/bacheca/daily') {
     return { mode: 'daily', projectIdentifier: null }
   }
 
@@ -140,14 +140,14 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
   )
 
   const navigateKanban = (mode, projectIdentifier = null) => {
-    const path = mode === 'project' ? `/kanban/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/kanban/daily' : '/kanban'
+    const path = mode === 'project' ? `/bacheca/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/bacheca/daily' : '/bacheca'
     window.history.pushState({}, '', path)
     setKanbanRoute({ mode, projectIdentifier })
   }
 
   const loadProjects = async () => {
     try {
-      setProjects(await listKanbanProjects())
+      setProjects(await listBachecaProjects())
     } catch (requestError) {
       setProjects([])
       setError(getApiError(requestError, t('kanban.projectsLoadError')))
@@ -160,12 +160,12 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
     try {
       if (route.mode === 'project' && route.projectIdentifier) {
-        const projectBoard = await getKanbanProject(route.projectIdentifier)
+        const projectBoard = await getBachecaProject(route.projectIdentifier)
         setSelectedProject(projectBoard.project)
         setBoard({ columns: projectBoard.columns, labels: projectBoard.labels, date: nextDate })
       } else {
         setSelectedProject(null)
-        setBoard(await getKanbanBoard(nextDate))
+        setBoard(await getBachecaBoard(nextDate))
       }
     } catch (requestError) {
       setError(getApiError(requestError, t('kanban.loadError')))

@@ -30,7 +30,7 @@ function initialPageFromLocation(searchParams) {
     return 'secretDiary'
   }
 
-  if (window.location.pathname.startsWith('/kanban')) {
+  if (window.location.pathname.startsWith('/bacheca')) {
     return 'kanban'
   }
 
@@ -158,7 +158,7 @@ function App() {
       analysis: '/analysis',
       diary: '/diary',
       home: '/',
-      kanban: '/kanban',
+      kanban: '/bacheca',
       profile: '/profile',
       secretDiary: '/secret-diary',
     }

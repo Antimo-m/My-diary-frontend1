@@ -1,19 +1,19 @@
 import apiClient from './apiClient'
 
-export async function getKanbanBoard(date) {
-  const response = await apiClient.get('/kanban/daily', { params: { date } })
+export async function getBachecaBoard(date) {
+  const response = await apiClient.get('/bacheca/daily', { params: { date } })
 
   return response.data
 }
 
-export async function getKanbanProject(identifier) {
-  const response = await apiClient.get(`/kanban/project/${encodeURIComponent(identifier)}`)
+export async function getBachecaProject(identifier) {
+  const response = await apiClient.get(`/bacheca/project/${encodeURIComponent(identifier)}`)
 
   return response.data
 }
 
-export async function listKanbanProjects() {
-  const response = await apiClient.get('/kanban/projects')
+export async function listBachecaProjects() {
+  const response = await apiClient.get('/bacheca/projects')
 
   return response.data.data
 }
@@ -35,41 +35,41 @@ export async function deleteProject(identifier) {
 }
 
 export async function createColumn(payload) {
-  const response = await apiClient.post('/kanban/columns', payload)
+  const response = await apiClient.post('/bacheca/columns', payload)
 
   return response.data.data
 }
 
 export async function updateColumn(id, payload) {
-  const response = await apiClient.put(`/kanban/columns/${id}`, payload)
+  const response = await apiClient.put(`/bacheca/columns/${id}`, payload)
 
   return response.data.data
 }
 
 export async function deleteColumn(id) {
-  await apiClient.delete(`/kanban/columns/${id}`)
+  await apiClient.delete(`/bacheca/columns/${id}`)
 }
 
 export async function createTask(payload) {
-  const response = await apiClient.post('/kanban/tasks', payload)
+  const response = await apiClient.post('/bacheca/tasks', payload)
 
   return response.data.data
 }
 
 export async function updateTask(id, payload) {
-  const response = await apiClient.put(`/kanban/tasks/${id}`, payload)
+  const response = await apiClient.put(`/bacheca/tasks/${id}`, payload)
 
   return response.data.data
 }
 
 export async function moveTask(id, payload) {
-  const response = await apiClient.patch(`/kanban/tasks/${id}/move`, payload)
+  const response = await apiClient.patch(`/bacheca/tasks/${id}/move`, payload)
 
   return response.data.data
 }
 
 export async function deleteTask(id) {
-  await apiClient.delete(`/kanban/tasks/${id}`)
+  await apiClient.delete(`/bacheca/tasks/${id}`)
 }
 
 export async function toggleTaskComplete(id) {
@@ -79,17 +79,17 @@ export async function toggleTaskComplete(id) {
 }
 
 export async function createLabel(payload) {
-  const response = await apiClient.post('/kanban/labels', payload)
+  const response = await apiClient.post('/bacheca/labels', payload)
 
   return response.data.data
 }
 
 export async function updateLabel(id, payload) {
-  const response = await apiClient.put(`/kanban/labels/${id}`, payload)
+  const response = await apiClient.put(`/bacheca/labels/${id}`, payload)
 
   return response.data.data
 }
 
 export async function deleteLabel(id) {
-  await apiClient.delete(`/kanban/labels/${id}`)
+  await apiClient.delete(`/bacheca/labels/${id}`)
 }

@@ -2,10 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 120;
-  background: var(--nav-bg);
-  border-bottom: 1px solid var(--nav-border);
-  box-shadow: 0 10px 35px rgba(31, 41, 55, 0.07);
-  backdrop-filter: blur(22px);
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(41, 49, 61, 0.16);
+  box-shadow: 0 8px 32px rgba(31, 41, 55, 0.12), 0 1px 2px rgba(31, 41, 55, 0.08);
+  backdrop-filter: blur(28px);
 }
 
 .app-navbar__inner {
@@ -34,14 +34,16 @@
 
 .app-navbar__mobile-toggle {
   align-items: center;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(245, 246, 250, 0.92));
+  border: 1px solid rgba(41, 49, 61, 0.12);
   border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
   color: var(--ink);
   display: none;
   height: 2.45rem;
   justify-content: center;
   width: 2.45rem;
+  transition: all 180ms ease;
 }
 
 .app-navbar__brand {
@@ -221,14 +223,16 @@
 
 .profile-menu__trigger {
   align-items: center;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(245, 246, 250, 0.92));
+  border: 1px solid rgba(41, 49, 61, 0.12);
   border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(31, 41, 55, 0.08);
   color: var(--muted);
   display: inline-flex;
   gap: 0.4rem;
   min-height: 2.55rem;
   padding: 0.55rem 0.8rem;
+  transition: all 180ms ease;
 }
 
 .profile-menu__trigger svg {
@@ -236,10 +240,10 @@
 }
 
 .profile-menu__panel {
-  background: var(--surface-solid);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 252, 0.96));
+  border: 1px solid rgba(41, 49, 61, 0.14);
   border-radius: 18px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 12px 40px rgba(31, 41, 55, 0.16), 0 4px 12px rgba(31, 41, 55, 0.08);
   display: grid;
   gap: 0.25rem;
   min-width: 16rem;
@@ -493,9 +497,9 @@
   }
 
   .mobile-drawer__panel {
-    background: var(--nav-panel);
-    border-left: 1px solid var(--line);
-    box-shadow: var(--shadow-deep);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 252, 0.96));
+    border-left: 1px solid rgba(41, 49, 61, 0.14);
+    box-shadow: -8px 0 48px rgba(31, 41, 55, 0.18);
     display: grid;
     gap: 0.7rem;
     height: 100svh;
@@ -525,9 +529,10 @@
   .mobile-drawer__session button,
   .mobile-drawer__links button {
     align-items: center;
-    background: rgba(255, 255, 255, 0.74);
-    border: 1px solid var(--line);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(245, 246, 250, 0.82));
+    border: 1px solid rgba(41, 49, 61, 0.12);
     border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, 0.06);
     color: var(--ink);
     display: inline-flex;
     font-weight: 850;
@@ -537,6 +542,7 @@
     padding: 0.55rem 0.7rem;
     text-align: left;
     width: 100%;
+    transition: all 120ms ease;
   }
 
   .mobile-drawer__header button {

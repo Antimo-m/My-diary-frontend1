@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { FiArrowRight, FiCalendar, FiCheck, FiCheckSquare, FiEdit3, FiFolder, FiPlus, FiTrash2, FiX } from 'react-icons/fi'
-import ProductWalkthrough from './ProductWalkthrough'
+import HomeFeatureVideo from './HomeFeatureVideo'
+import kanbanDesktopVideo from '../assets/kanban-desktop.webm'
+import kanbanMobileVideo from '../assets/kanban-mobile.webm'
 import './KanbanHub.css'
 
 function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDaily, onOpenProject, projectForm, projects, setProjectForm, t }) {
@@ -57,7 +59,14 @@ function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDail
         </section>
       </div>
 
-      <ProductWalkthrough t={t} />
+      <HomeFeatureVideo
+        desktopSrc={kanbanDesktopVideo}
+        label={t('home.kanbanVideoLabel')}
+        mobileSrc={kanbanMobileVideo}
+        playbackRate={0.76}
+        t={t}
+        tone="kanban"
+      />
 
       <section className="kanban-hub-projects">
         <header className="kanban-hub-projects__header">

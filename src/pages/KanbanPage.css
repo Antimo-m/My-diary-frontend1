@@ -120,9 +120,9 @@
 }
 
 .kanban-mode-actions .kanban-mode-action--daily {
-  background: linear-gradient(135deg, #d7f3ef, #9fddd4);
-  border-color: rgba(15, 118, 110, 0.24);
-  color: #0f615b;
+  background: linear-gradient(135deg, #dcf5eb, #a8e4d0);
+  border-color: rgba(29, 184, 116, 0.22);
+  color: #1DB874;
 }
 
 .kanban-date-toolbar {

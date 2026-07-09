@@ -18,9 +18,9 @@
 }
 
 .home-feature-video--kanban .home-feature-video__frame {
-  background: linear-gradient(145deg, rgba(228, 245, 242, 0.98), rgba(208, 226, 214, 0.9));
-  border-color: rgba(255, 255, 255, 0.68);
-  box-shadow: 0 24px 60px rgba(17, 106, 123, 0.16);
+  background: linear-gradient(145deg, rgba(235, 250, 244, 0.98), rgba(215, 240, 230, 0.92));
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 24px 60px rgba(29, 184, 116, 0.15);
 }
 
 .home-feature-video video {

@@ -94,6 +94,7 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
   overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 
 .kanban-hub-card__kicker {
@@ -113,15 +114,15 @@
 
 .kanban-hub-card--daily {
   background:
-    radial-gradient(circle at 86% 8%, rgba(51, 199, 223, 0.2), transparent 12rem),
-    linear-gradient(135deg, rgba(245, 253, 252, 0.96), rgba(218, 240, 235, 0.84));
-  border-color: rgba(17, 106, 123, 0.16);
+    radial-gradient(circle at 86% 8%, rgba(29, 184, 116, 0.2), transparent 12rem),
+    linear-gradient(135deg, rgba(245, 253, 251, 0.96), rgba(220, 245, 235, 0.88));
+  border-color: rgba(29, 184, 116, 0.18);
 }
 
 .kanban-hub-card--daily .kanban-hub-card__icon {
-  background: rgba(17, 106, 123, 0.12);
-  border-color: rgba(17, 106, 123, 0.16);
-  color: #116a7b;
+  background: rgba(29, 184, 116, 0.14);
+  border-color: rgba(29, 184, 116, 0.18);
+  color: #1DB874;
 }
 
 .kanban-hub-card small,
@@ -133,7 +134,9 @@
 
 .kanban-hub-card--project {
   display: grid;
-  gap: 1rem;
+  gap: 1.2rem;
+  min-height: 11.5rem;
+  padding: clamp(1.5rem, 4vw, 1.85rem);
 }
 
 .kanban-hub-card__trigger {
