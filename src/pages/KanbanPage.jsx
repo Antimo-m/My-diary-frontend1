@@ -1,18 +1,12 @@
-import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { FiAlertTriangle, FiCalendar, FiCheck, FiEdit3, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
-import ColorPaletteInput from '../components/ColorPaletteInput'
 import KanbanHub from '../components/KanbanHub'
-import KanbanTaskForm from '../components/KanbanTaskForm'
-import { KanbanColumn, LabelPill } from '../components/KanbanBoardParts'
-import Modal from '../components/Modal'
+import KanbanBoardView from '../components/kanban/KanbanBoardView'
+import KanbanProjectModals from '../components/kanban/KanbanProjectModals'
+import KanbanStructureModals from '../components/kanban/KanbanStructureModals'
+import KanbanTaskModals from '../components/kanban/KanbanTaskModals'
 import UserMessage from '../components/UserMessage'
-import Button from '../components/ui/Button'
-import DatePicker from '../components/ui/DatePicker'
-import Dialog from '../components/ui/Dialog'
-import IconButton from '../components/ui/IconButton'
 import Toast from '../components/ui/Toast'
 import { useI18n } from '../i18n/useI18n'
 import {
@@ -33,7 +27,7 @@ import {
 } from '../services/kanbanApi'
 import useBachecaBoard from '../hooks/useBachecaBoard'
 import { getApiError } from '../utils/apiErrors'
-import { currentDateInTimeZone } from '../utils/dateTime'
+import { clockPart, currentDateInTimeZone } from '../utils/dateTime'
 import './KanbanPage.css'
 
 const emptyTaskForm = {
@@ -64,21 +58,6 @@ function kanbanRouteFromPathname(pathname) {
   return { mode: 'home', projectIdentifier: null }
 }
 
-function clockPart(value) {
-  return value ? value.slice(0, 5) : ''
-}
-
-function localDateTimeLabel(value, localeTag) {
-  if (!value) {
-    return ''
-  }
-
-  const date = value.slice(0, 10)
-  const time = value.slice(11, 16)
-
-  return `${new Date(`${date}T00:00:00`).toLocaleDateString(localeTag)}${time ? `, ${time}` : ''}`
-}
-
 function buildDueDateTime({ due_date, due_time }) {
   if (!due_date) {
     return null
@@ -103,7 +82,7 @@ function reminderValidationMessage(taskForm, t) {
 }
 
 function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
-  const { localeTag, t, timeZone } = useI18n()
+  const { t, timeZone } = useI18n()
   const today = currentDateInTimeZone(timeZone)
   const location = useLocation()
   const navigate = useNavigate()
@@ -129,12 +108,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
   const [taskDeleteTarget, setTaskDeleteTarget] = useState(null)
   const [taskDetailTarget, setTaskDetailTarget] = useState(null)
   const [taskForm, setTaskForm] = useState(emptyTaskForm)
-  const boardRef = useRef(null)
-  const pendingColumnFocusId = useRef(null)
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 90, tolerance: 8 } }),
-  )
+  const [columnToFocus, setColumnToFocus] = useState(null)
   const { board, boardError, boardLoading, invalidateBacheca, patchBoardTask, projects, projectsError, selectedProject } = useBachecaBoard({
     date,
     enabled: Boolean(user),
@@ -145,16 +119,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     const path = mode === 'project' ? `/bacheca/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/bacheca/daily' : '/bacheca'
     navigate(path)
   }
-
-  useEffect(() => {
-    if (!pendingColumnFocusId.current || !board.columns.length) {
-      return
-    }
-
-    const columnElement = boardRef.current?.querySelector(`[data-column-id="${pendingColumnFocusId.current}"]`)
-    pendingColumnFocusId.current = null
-    columnElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' })
-  }, [board.columns])
 
   if (authLoading) {
     return <section className="page-container loading-state">{t('auth.wait')}</section>
@@ -271,7 +235,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
           ...columnForm,
           ...(kanbanRoute.mode === 'project' ? { project_id: selectedProject?.id } : { date }),
         })
-        pendingColumnFocusId.current = createdColumn.id
+        setColumnToFocus(createdColumn.id)
       }
 
       closeColumnModal()
@@ -547,257 +511,80 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       ) : null}
 
       {kanbanRoute.mode !== 'home' ? (
-        <>
-          <div className="kanban-mode-actions">
-            <button className="btn kanban-mode-action kanban-mode-action--hub" type="button" onClick={() => navigateKanban('home')}>{t('kanban.backToHub')}</button>
-            {kanbanRoute.mode === 'project' ? <button className="btn kanban-mode-action kanban-mode-action--daily" type="button" onClick={() => navigateKanban('daily')}>{t('kanban.daily')}</button> : null}
-          </div>
-
-      <div className="label-toolbar">
-        <div>
-          <h2>{t('kanban.labels')}</h2>
-          <div className="label-chip-list">
-            {board.labels.map((label) => (
-              <LabelPill
-                key={label.id}
-                label={label}
-                action={(
-                  <>
-                    <button className="chip-action chip-action--edit" type="button" onClick={() => openEditLabel(label)} aria-label={`${t('common.save')} ${label.name}`}><FiEdit3 /></button>
-                    <button className="chip-action chip-action--danger" type="button" onClick={() => setLabelDeleteTarget(label)} aria-label={`${t('kanban.delete')} ${label.name}`}><FiTrash2 /></button>
-                  </>
-                )}
-              />
-            ))}
-          </div>
-        </div>
-        <button className="fab-action label-add-button" type="button" onClick={openCreateLabel} aria-label={t('kanban.createLabel')}>
-          <FiPlus aria-hidden="true" />
-        </button>
-      </div>
-
-      <div className="kanban-board-toolbar">
-        <div>
-          <h2>{t('kanban.organize')}</h2>
-        </div>
-      </div>
-
-      {kanbanRoute.mode === 'daily' ? (
-      <form className="smart-toolbar list-filter-toolbar kanban-filter-toolbar" onSubmit={submitDate} aria-label={t('kanban.changeDate')}>
-        <div className="toolbar-field journal-date-field">
-          <DatePicker label={t('kanban.changeDate')} value={date} onChange={setDate} />
-        </div>
-        <IconButton variant="gold" type="submit" label={t('kanban.changeDate')}><FiSearch /></IconButton>
-        <IconButton variant="edit" type="button" onClick={resetDate} label={t('kanban.resetFilters')}><FiRotateCcw /></IconButton>
-      </form>
+        <KanbanBoardView
+          board={board}
+          boardLoading={boardLoading}
+          date={date}
+          mode={kanbanRoute.mode}
+          onCreateColumn={openCreateColumn}
+          onCreateLabel={openCreateLabel}
+          onDeleteColumn={setColumnDeleteTarget}
+          onDeleteLabel={setLabelDeleteTarget}
+          onDragEnd={handleDragEnd}
+          onEditColumn={openEditColumn}
+          onEditLabel={openEditLabel}
+          onNavigate={navigateKanban}
+          onOpenTaskDetail={openTaskDetail}
+          onOpenTaskForm={openTaskForm}
+          onResetDate={resetDate}
+          onSubmitDate={submitDate}
+          onToggleTaskComplete={handleToggleTaskComplete}
+          columnToFocus={columnToFocus}
+          onColumnFocusHandled={() => setColumnToFocus(null)}
+          setDate={setDate}
+        />
       ) : null}
 
-      <div className="kanban-add-column-row">
-        <button className="fab-action" type="button" onClick={openCreateColumn} aria-label={t('kanban.addColumn')}>
-          <FiPlus aria-hidden="true" />
-        </button>
-      </div>
+      <KanbanTaskModals
+        activeTaskColumnId={activeTaskColumnId}
+        board={board}
+        closeTaskForm={closeTaskForm}
+        editingTask={editingTask}
+        loading={boardLoading}
+        onConfirmDeleteTask={confirmDeleteTask}
+        onEditTaskFromDetail={editTaskFromDetail}
+        onSubmitTask={submitTask}
+        onToggleTaskLabel={toggleTaskLabel}
+        setTaskDeleteTarget={setTaskDeleteTarget}
+        setTaskDetailTarget={setTaskDetailTarget}
+        setTaskForm={setTaskForm}
+        taskDeleteTarget={taskDeleteTarget}
+        taskDetailTarget={taskDetailTarget}
+        taskForm={taskForm}
+        updateTaskField={updateTaskField}
+      />
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="kanban-board" aria-label={t('kanban.boardAria')} ref={boardRef}>
-          {boardLoading && !board.columns.length ? <div className="surface">{t('kanban.loadingBoard')}</div> : null}
-          {board.columns.map((column) => (
-            <KanbanColumn
-              column={column}
-              key={column.id}
-              onDeleteColumn={setColumnDeleteTarget}
-              onEditColumn={openEditColumn}
-              onOpenTaskDetail={openTaskDetail}
-              onOpenTaskForm={openTaskForm}
-              onToggleTaskComplete={handleToggleTaskComplete}
-            />
-          ))}
-        </div>
-      </DndContext>
-        </>
-      ) : null}
+      <KanbanStructureModals
+        columnDeleteTarget={columnDeleteTarget}
+        columnEditTarget={columnEditTarget}
+        columnForm={columnForm}
+        closeColumnModal={closeColumnModal}
+        closeLabelModal={closeLabelModal}
+        isColumnModalOpen={isColumnModalOpen}
+        isLabelModalOpen={isLabelModalOpen}
+        labelDeleteTarget={labelDeleteTarget}
+        labelEditTarget={labelEditTarget}
+        labelForm={labelForm}
+        onConfirmDeleteColumn={confirmDeleteColumn}
+        onConfirmDeleteLabel={confirmDeleteLabel}
+        onSubmitColumn={submitColumn}
+        onSubmitLabel={submitLabel}
+        setColumnDeleteTarget={setColumnDeleteTarget}
+        setColumnForm={setColumnForm}
+        setLabelDeleteTarget={setLabelDeleteTarget}
+        setLabelForm={setLabelForm}
+      />
 
-      {activeTaskColumnId ? (
-        <Modal labelledBy="task-form-title" onClose={closeTaskForm}>
-          <KanbanTaskForm
-            board={board}
-            closeTaskForm={closeTaskForm}
-            editingTask={editingTask}
-            loading={boardLoading}
-            onSubmitTask={submitTask}
-            onToggleTaskLabel={toggleTaskLabel}
-            setTaskForm={setTaskForm}
-            taskForm={taskForm}
-            titleId="task-form-title"
-            updateTaskField={updateTaskField}
-          />
-        </Modal>
-      ) : null}
-
-      {taskDetailTarget ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDetailTarget(null)}>
-          <div className="task-detail-modal" style={{ '--task-color': taskDetailTarget.color ?? '#d6a43a' }}>
-            <div className="task-detail-modal__header">
-              <Dialog.Title asChild><h2>{taskDetailTarget.title}</h2></Dialog.Title>
-            </div>
-            {taskDetailTarget.description ? <p className="task-detail-modal__description">{taskDetailTarget.description}</p> : null}
-            <div className="task-detail-modal__meta">
-              {taskDetailTarget.due_date ? (
-                <span className="task-deadline">
-                  <FiCalendar aria-hidden="true" />
-                  {t('kanban.due')} {new Date(taskDetailTarget.due_date).toLocaleDateString(localeTag, { timeZone })}
-                  {taskDetailTarget.due_time ? `, ${clockPart(taskDetailTarget.due_time)}` : ''}
-                </span>
-              ) : <span>{t('kanban.noDue')}</span>}
-              {taskDetailTarget.custom_reminder_at ? <span>{t('kanban.reminder')}: {localDateTimeLabel(taskDetailTarget.custom_reminder_at, localeTag)}</span> : null}
-              {taskDetailTarget.reminder_sent_at ? <span>{t('kanban.emailSent')}: {localDateTimeLabel(taskDetailTarget.reminder_sent_at, localeTag)}</span> : null}
-            </div>
-            {taskDetailTarget.labels.length ? (
-              <div className="task-card-labels">
-                {taskDetailTarget.labels.map((label) => (
-                  <LabelPill label={label} key={`detail-${taskDetailTarget.id}-${label.id}`} />
-                ))}
-              </div>
-            ) : null}
-            <div className="dialog-actions">
-              <IconButton variant="edit" type="button" onClick={() => editTaskFromDetail(taskDetailTarget)} label={t('task.update')}><FiEdit3 /></IconButton>
-              <IconButton variant="danger" type="button" onClick={() => setTaskDeleteTarget(taskDetailTarget)} label={t('kanban.deleteActivity')}><FiTrash2 /></IconButton>
-              <IconButton variant="gold" type="button" onClick={() => setTaskDetailTarget(null)} label={t('common.close')}><FiX /></IconButton>
-            </div>
-          </div>
-        </Dialog>
-      ) : null}
-
-      {isColumnModalOpen ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && closeColumnModal()}>
-          <div>
-            <Dialog.Title asChild><h2>{columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}</h2></Dialog.Title>
-          </div>
-          <form className="dialog-form" onSubmit={submitColumn}>
-            <label>
-              {t('kanban.name')}
-              <input
-                value={columnForm.title}
-                onChange={(event) => setColumnForm((current) => ({ ...current, title: event.target.value }))}
-                placeholder={t('kanban.columnPlaceholder')}
-                required
-              />
-            </label>
-            <ColorPaletteInput label={t('kanban.columnColor')} value={columnForm.color} onChange={(value) => setColumnForm((current) => ({ ...current, color: value }))} />
-            <div className="dialog-actions">
-              <IconButton variant="confirm" type="submit" label={columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}><FiCheck /></IconButton>
-              <IconButton variant="danger" type="button" onClick={closeColumnModal} label={t('common.cancel')}><FiX /></IconButton>
-            </div>
-          </form>
-        </Dialog>
-      ) : null}
-
-      {isLabelModalOpen ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && closeLabelModal()}>
-          <div>
-            <Dialog.Title asChild><h2>{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</h2></Dialog.Title>
-          </div>
-          <form className="dialog-form" onSubmit={submitLabel}>
-            <label>
-              {t('kanban.name')}
-              <input
-                value={labelForm.name}
-                onChange={(event) => setLabelForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder={t('kanban.labelPlaceholder')}
-                required
-              />
-            </label>
-            <div className="label-preview" style={{ '--label-color': labelForm.color }}>
-              <span className="label-dot" aria-hidden="true" />
-              <span>{labelForm.name || t('kanban.createLabel')}</span>
-            </div>
-            <ColorPaletteInput label={t('kanban.labels')} value={labelForm.color} onChange={(value) => setLabelForm((current) => ({ ...current, color: value }))} />
-            <div className="dialog-actions">
-              <IconButton variant="confirm" type="submit" label={t('kanban.saveLabel')}><FiCheck /></IconButton>
-              <IconButton variant="danger" type="button" onClick={closeLabelModal} label={t('common.cancel')}><FiX /></IconButton>
-            </div>
-          </form>
-        </Dialog>
-      ) : null}
-
-      {columnDeleteTarget ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && setColumnDeleteTarget(null)}>
-          <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
-          <div>
-            <Dialog.Title asChild><h2>{t('kanban.columnDeleteTitle')}</h2></Dialog.Title>
-            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.columnDeleteCopy')}</p></Dialog.Description>
-          </div>
-          <div className="dialog-actions">
-            <Button variant="danger" onClick={confirmDeleteColumn}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
-            <Button variant="cancel" onClick={() => setColumnDeleteTarget(null)}>{t('common.cancel')}</Button>
-          </div>
-        </Dialog>
-      ) : null}
-
-      {taskDeleteTarget ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDeleteTarget(null)}>
-          <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
-          <div>
-            <Dialog.Title asChild><h2>{t('kanban.deleteTaskTitle')} “{taskDeleteTarget.title}”?</h2></Dialog.Title>
-            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteTaskCopy')}</p></Dialog.Description>
-          </div>
-          <div className="dialog-actions">
-            <Button variant="danger" onClick={confirmDeleteTask}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
-            <Button variant="cancel" onClick={() => setTaskDeleteTarget(null)}>{t('common.cancel')}</Button>
-          </div>
-        </Dialog>
-      ) : null}
-
-      {labelDeleteTarget ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && setLabelDeleteTarget(null)}>
-          <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
-          <div>
-            <Dialog.Title asChild><h2>{t('kanban.deleteLabelTitle')} “{labelDeleteTarget.name}”?</h2></Dialog.Title>
-            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.labelDeleteCopy')}</p></Dialog.Description>
-          </div>
-          <div className="dialog-actions">
-            <Button variant="danger" onClick={confirmDeleteLabel}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
-            <Button variant="cancel" onClick={() => setLabelDeleteTarget(null)}>{t('common.cancel')}</Button>
-          </div>
-        </Dialog>
-      ) : null}
-
-      {projectEditTarget ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && closeEditProject()}>
-          <div>
-            <Dialog.Title asChild><h2>{t('kanban.renameProject')}</h2></Dialog.Title>
-          </div>
-          <form className="dialog-form" onSubmit={submitProjectEdit}>
-            <label>
-              {t('kanban.name')}
-              <input
-                value={projectEditForm.name}
-                onChange={(event) => setProjectEditForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder={t('kanban.projectNamePlaceholder')}
-                required
-              />
-            </label>
-            <div className="dialog-actions">
-              <IconButton variant="confirm" type="submit" label={t('kanban.saveProject')}><FiCheck /></IconButton>
-              <IconButton variant="danger" type="button" onClick={closeEditProject} label={t('common.cancel')}><FiX /></IconButton>
-            </div>
-          </form>
-        </Dialog>
-      ) : null}
-
-      {projectDeleteTarget ? (
-        <Dialog onOpenChange={(isOpen) => !isOpen && setProjectDeleteTarget(null)}>
-          <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
-          <div>
-            <Dialog.Title asChild><h2>{t('kanban.deleteProjectTitle')} “{projectDeleteTarget.name}”?</h2></Dialog.Title>
-            <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteProjectCopy')}</p></Dialog.Description>
-          </div>
-          <div className="dialog-actions">
-            <Button variant="danger" onClick={confirmDeleteProject}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
-            <Button variant="cancel" onClick={() => setProjectDeleteTarget(null)}>{t('common.cancel')}</Button>
-          </div>
-        </Dialog>
-      ) : null}
+      <KanbanProjectModals
+        closeEditProject={closeEditProject}
+        onConfirmDeleteProject={confirmDeleteProject}
+        onSubmitProjectEdit={submitProjectEdit}
+        projectDeleteTarget={projectDeleteTarget}
+        projectEditForm={projectEditForm}
+        projectEditTarget={projectEditTarget}
+        setProjectDeleteTarget={setProjectDeleteTarget}
+        setProjectEditForm={setProjectEditForm}
+      />
 
     </section>
     </Toast.Provider>

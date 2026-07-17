@@ -26,3 +26,7 @@ export function currentTimeInTimeZone(timeZone, date = new Date()) {
 
   return `${hour === '24' ? '00' : hour}:${minute}`
 }
+
+export function clockPart(value) {
+  return value ? value.slice(0, 5) : ''
+}
