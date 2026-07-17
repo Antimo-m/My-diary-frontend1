@@ -1,34 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { fallbackHome } from '../data/fallbackHome'
 import { getHomeOverview } from '../services/homeApi'
 
 function useHomeOverview() {
-  const [overview, setOverview] = useState(fallbackHome)
-  const [status, setStatus] = useState('loading')
+  const { data, isError, isPending } = useQuery({
+    queryKey: ['home-overview'],
+    queryFn: getHomeOverview,
+  })
 
-  useEffect(() => {
-    let isMounted = true
-
-    getHomeOverview()
-      .then((data) => {
-        if (isMounted) {
-          setOverview(data)
-          setStatus('ready')
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setOverview(fallbackHome)
-          setStatus('fallback')
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  return { overview, status }
+  return {
+    overview: data ?? fallbackHome,
+    status: isPending ? 'loading' : isError ? 'fallback' : 'ready',
+  }
 }
 
 export default useHomeOverview

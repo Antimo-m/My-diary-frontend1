@@ -14,6 +14,7 @@ import IconButton from '../components/ui/IconButton'
 import Pagination from '../components/ui/Pagination'
 import Skeleton from '../components/ui/Skeleton'
 import Toast from '../components/ui/Toast'
+import useDiaryNotes from '../hooks/useDiaryNotes'
 import { useI18n } from '../i18n/useI18n'
 import * as defaultDiaryApi from '../services/diaryApi'
 import { getApiError } from '../utils/apiErrors'
@@ -163,13 +164,18 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
   const pageCopy = { ...defaultCopy, ...translatedCopy, ...(copy ?? {}) }
   const routeBasePath = pageCopy.secretClass ? '/secret-diary' : '/diary'
   const [filters, setFilters] = useState({ q: '', date: '' })
+  const [appliedFilters, setAppliedFilters] = useState({ q: '', date: '', page: 1 })
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState(null)
   const [editingIdentifier, setEditingIdentifier] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [notes, setNotes] = useState([])
-  const [notesMeta, setNotesMeta] = useState({ current_page: 1, last_page: 1, total: 0, from: null, to: null })
+  const { invalidateNotes, notes, notesError, notesLoading, notesMeta } = useDiaryNotes({
+    diaryApi,
+    enabled: Boolean(user),
+    filters: appliedFilters,
+    scope: routeBasePath,
+  })
   const [pageTurnDirection, setPageTurnDirection] = useState('next')
   const [readerPage, setReaderPage] = useState(0)
   const [dedicationPage, setDedicationPage] = useState(0)
@@ -191,28 +197,6 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       URL.revokeObjectURL(coverPreviewUrl)
     }
   }, [coverPreviewUrl])
-
-  const loadNotes = async (nextFilters = filters) => {
-    setLoading(true)
-    setError('')
-
-    try {
-      const response = await diaryApi.listDiaryNotes({ per_page: 8, ...nextFilters })
-      setNotes(response.data ?? [])
-      setNotesMeta(response.meta ?? { current_page: 1, last_page: 1, total: 0, from: null, to: null })
-    } catch (requestError) {
-      setError(getApiError(requestError, pageCopy.loadError))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (user) {
-      void Promise.resolve().then(() => loadNotes())
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
 
   useEffect(() => {
     if (!user) {
@@ -302,7 +286,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
 
     try {
       const savedNote = await diaryApi.saveDiaryNote(form, editingIdentifier)
-      await loadNotes()
+      await invalidateNotes()
       setSelectedNote(savedNote)
       navigate(`${routeBasePath}/${encodeURIComponent(savedNote.route_identifier ?? savedNote.slug ?? savedNote.id)}`, { replace: true })
       setReaderPage(0)
@@ -367,7 +351,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       setDeleteNoteTarget(null)
       setSelectedNote(null)
       setView('list')
-      await loadNotes()
+      await invalidateNotes()
       setSuccessToast(t('diary.pageDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError, 'Non riesco a eliminare la pagina.'))
@@ -376,19 +360,18 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     }
   }
 
-  const submitFilters = async (event) => {
+  const submitFilters = (event) => {
     event.preventDefault()
-    await loadNotes({ ...filters, page: 1 })
+    setAppliedFilters({ ...filters, page: 1 })
   }
 
-  const resetFilters = async () => {
-    const nextFilters = { q: '', date: '' }
-    setFilters(nextFilters)
-    await loadNotes(nextFilters)
+  const resetFilters = () => {
+    setFilters({ q: '', date: '' })
+    setAppliedFilters({ q: '', date: '', page: 1 })
   }
 
-  const goToNotesPage = async (page) => {
-    await loadNotes({ ...filters, page })
+  const goToNotesPage = (page) => {
+    setAppliedFilters((current) => ({ ...current, page }))
   }
 
   const updateFilter = (event) => {
@@ -431,7 +414,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
         </div>
       </header>
 
-      <UserMessage tone="error">{error}</UserMessage>
+      <UserMessage tone="error">{error || (notesError ? getApiError(notesError, pageCopy.loadError) : '')}</UserMessage>
       <Toast open={Boolean(successToast)} onOpenChange={(isOpen) => !isOpen && setSuccessToast('')} tone="success">
         {successToast}
       </Toast>
@@ -456,10 +439,10 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
 
           <div className="diary-layout">
             <div className="diary-grid">
-              {loading && !notes.length ? (
+              {notesLoading && !notes.length ? (
                 Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} variant="card" />)
               ) : null}
-              {!loading && !notes.length ? <EmptyState title={pageCopy.empty} /> : null}
+              {!notesLoading && !notes.length ? <EmptyState title={pageCopy.empty} /> : null}
               {notes.map((note) => (
                 <DiaryCard note={note} key={note.id} onDelete={setDeleteNoteTarget} onEdit={editNote} onOpen={openNote} />
               ))}

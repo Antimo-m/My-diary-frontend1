@@ -24,9 +24,6 @@ import {
   deleteLabel,
   deleteProject,
   deleteTask,
-  getBachecaBoard,
-  getBachecaProject,
-  listBachecaProjects,
   moveTask,
   toggleTaskComplete,
   updateColumn,
@@ -34,6 +31,7 @@ import {
   updateProject,
   updateTask,
 } from '../services/kanbanApi'
+import useBachecaBoard from '../hooks/useBachecaBoard'
 import { getApiError } from '../utils/apiErrors'
 import { currentDateInTimeZone } from '../utils/dateTime'
 import './KanbanPage.css'
@@ -111,7 +109,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
   const navigate = useNavigate()
   const kanbanRoute = useMemo(() => kanbanRouteFromPathname(location.pathname), [location.pathname])
   const [activeTaskColumnId, setActiveTaskColumnId] = useState(null)
-  const [board, setBoard] = useState({ columns: [], labels: [], date: today })
   const [columnDeleteTarget, setColumnDeleteTarget] = useState(null)
   const [columnEditTarget, setColumnEditTarget] = useState(null)
   const [columnForm, setColumnForm] = useState(emptyColumnForm)
@@ -123,13 +120,10 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
   const [labelDeleteTarget, setLabelDeleteTarget] = useState(null)
   const [labelEditTarget, setLabelEditTarget] = useState(null)
   const [labelForm, setLabelForm] = useState(emptyLabelForm)
-  const [loading, setLoading] = useState(false)
   const [projectForm, setProjectForm] = useState(emptyProjectForm)
   const [projectEditForm, setProjectEditForm] = useState(emptyProjectForm)
   const [projectEditTarget, setProjectEditTarget] = useState(null)
   const [projectDeleteTarget, setProjectDeleteTarget] = useState(null)
-  const [projects, setProjects] = useState([])
-  const [selectedProject, setSelectedProject] = useState(null)
   const [validationToast, setValidationToast] = useState('')
   const [successToast, setSuccessToast] = useState('')
   const [taskDeleteTarget, setTaskDeleteTarget] = useState(null)
@@ -141,52 +135,16 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 90, tolerance: 8 } }),
   )
+  const { board, boardError, boardLoading, invalidateBacheca, patchBoardTask, projects, projectsError, selectedProject } = useBachecaBoard({
+    date,
+    enabled: Boolean(user),
+    route: kanbanRoute,
+  })
 
   const navigateKanban = (mode, projectIdentifier = null) => {
     const path = mode === 'project' ? `/bacheca/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/bacheca/daily' : '/bacheca'
     navigate(path)
   }
-
-  const loadProjects = async () => {
-    try {
-      setProjects(await listBachecaProjects())
-    } catch (requestError) {
-      setProjects([])
-      setError(getApiError(requestError, t('kanban.projectsLoadError')))
-    }
-  }
-
-  const loadBoard = async (nextDate = date, route = kanbanRoute) => {
-    setLoading(true)
-    setError('')
-
-    try {
-      if (route.mode === 'project' && route.projectIdentifier) {
-        const projectBoard = await getBachecaProject(route.projectIdentifier)
-        setSelectedProject(projectBoard.project)
-        setBoard({ columns: projectBoard.columns, labels: projectBoard.labels, date: nextDate })
-      } else {
-        setSelectedProject(null)
-        setBoard(await getBachecaBoard(nextDate))
-      }
-    } catch (requestError) {
-      setError(getApiError(requestError, t('kanban.loadError')))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (user) {
-      void Promise.resolve().then(async () => {
-        await loadProjects()
-        if (kanbanRoute.mode !== 'home') {
-          await loadBoard(date, kanbanRoute)
-        }
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, kanbanRoute.mode, kanbanRoute.projectIdentifier])
 
   useEffect(() => {
     if (!pendingColumnFocusId.current || !board.columns.length) {
@@ -212,12 +170,11 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
   const submitDate = async (event) => {
     event.preventDefault()
-    await loadBoard(date)
+    await invalidateBacheca()
   }
 
-  const resetDate = async () => {
+  const resetDate = () => {
     setDate(today)
-    await loadBoard(today)
   }
 
   const submitProject = async (event) => {
@@ -227,7 +184,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     try {
       const project = await createProject(projectForm)
       setProjectForm(emptyProjectForm)
-      await loadProjects()
+      await invalidateBacheca()
       navigateKanban('project', project.route_identifier ?? project.slug ?? project.id)
       setSuccessToast(t('kanban.projectCreated'))
     } catch (requestError) {
@@ -255,11 +212,8 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      const updatedProject = await updateProject(projectEditTarget.route_identifier ?? projectEditTarget.slug ?? projectEditTarget.id, projectEditForm)
-      setProjects((current) => current.map((project) => (project.id === updatedProject.id ? { ...project, ...updatedProject } : project)))
-      if (selectedProject?.id === updatedProject.id) {
-        setSelectedProject((current) => ({ ...current, ...updatedProject }))
-      }
+      await updateProject(projectEditTarget.route_identifier ?? projectEditTarget.slug ?? projectEditTarget.id, projectEditForm)
+      await invalidateBacheca()
       closeEditProject()
       setSuccessToast(t('kanban.projectUpdated'))
     } catch (requestError) {
@@ -276,12 +230,10 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
     try {
       await deleteProject(projectDeleteTarget.route_identifier ?? projectDeleteTarget.slug ?? projectDeleteTarget.id)
-      setProjects((current) => current.filter((project) => project.id !== projectDeleteTarget.id))
       if (kanbanRoute.mode === 'project' && selectedProject?.id === projectDeleteTarget.id) {
         navigateKanban('home')
-        setBoard({ columns: [], labels: [], date })
-        setSelectedProject(null)
       }
+      await invalidateBacheca()
       setProjectDeleteTarget(null)
       setSuccessToast(t('kanban.projectDeleted'))
     } catch (requestError) {
@@ -323,7 +275,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       }
 
       closeColumnModal()
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(columnEditTarget ? t('kanban.columnUpdated') : t('kanban.columnCreated'))
     } catch (requestError) {
       setError(getApiError(requestError))
@@ -338,7 +290,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     try {
       await deleteColumn(columnDeleteTarget.id)
       setColumnDeleteTarget(null)
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(t('kanban.columnDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
@@ -428,7 +380,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       }
 
       closeTaskForm()
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(editingTask ? t('kanban.taskUpdated') : t('kanban.taskCreated'))
     } catch (requestError) {
       setValidationToast(getApiError(requestError))
@@ -444,7 +396,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       await deleteTask(taskDeleteTarget.id)
       setTaskDeleteTarget(null)
       setTaskDetailTarget(null)
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(t('kanban.taskDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
@@ -479,7 +431,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         position: targetColumn.tasks.length,
         status: task.status,
       })
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(t('kanban.taskMoved'))
     } catch (requestError) {
       setError(getApiError(requestError))
@@ -516,7 +468,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       }
 
       closeLabelModal()
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(labelEditTarget ? t('kanban.labelUpdated') : t('kanban.labelCreated'))
     } catch (requestError) {
       setError(getApiError(requestError))
@@ -531,37 +483,27 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     try {
       await deleteLabel(labelDeleteTarget.id)
       setLabelDeleteTarget(null)
-      await loadBoard()
+      await invalidateBacheca()
       setSuccessToast(t('kanban.labelDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
   }
 
-  const optimisticallyPatchTask = (taskId, patch) => {
-    setBoard((currentBoard) => ({
-      ...currentBoard,
-      columns: currentBoard.columns.map((column) => ({
-        ...column,
-        tasks: column.tasks.map((task) => (task.id === taskId ? { ...task, ...patch } : task)),
-      })),
-    }))
-  }
-
   const handleToggleTaskComplete = async (task) => {
     const nextCompleted = !task.is_completed
-    optimisticallyPatchTask(task.id, {
+    patchBoardTask(task.id, {
       is_completed: nextCompleted,
       completed_at: nextCompleted ? new Date().toISOString() : null,
     })
 
     try {
       const updatedTask = await toggleTaskComplete(task.id)
-      optimisticallyPatchTask(task.id, updatedTask)
+      patchBoardTask(task.id, updatedTask)
       setSuccessToast(nextCompleted ? t('kanban.taskCompleted') : t('kanban.taskReopened'))
     } catch (requestError) {
       setError(getApiError(requestError))
-      await loadBoard()
+      await invalidateBacheca()
     }
   }
 
@@ -582,7 +524,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
       </header>
 
-      <UserMessage tone="error">{error}</UserMessage>
+      <UserMessage tone="error">{error || (boardError ? getApiError(boardError, t('kanban.loadError')) : projectsError ? getApiError(projectsError, t('kanban.projectsLoadError')) : '')}</UserMessage>
       <Toast open={Boolean(successToast)} onOpenChange={(isOpen) => !isOpen && setSuccessToast('')} tone="success">
         {successToast}
       </Toast>
@@ -658,7 +600,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <div className="kanban-board" aria-label={t('kanban.boardAria')} ref={boardRef}>
-          {loading && !board.columns.length ? <div className="surface">{t('kanban.loadingBoard')}</div> : null}
+          {boardLoading && !board.columns.length ? <div className="surface">{t('kanban.loadingBoard')}</div> : null}
           {board.columns.map((column) => (
             <KanbanColumn
               column={column}
@@ -681,7 +623,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
             board={board}
             closeTaskForm={closeTaskForm}
             editingTask={editingTask}
-            loading={loading}
+            loading={boardLoading}
             onSubmitTask={submitTask}
             onToggleTaskLabel={toggleTaskLabel}
             setTaskForm={setTaskForm}

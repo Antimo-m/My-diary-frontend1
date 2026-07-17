@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import AuthPanel from '../components/AuthPanel'
 import StatsDashboard from '../components/StatsDashboard'
 import UserMessage from '../components/UserMessage'
@@ -12,58 +13,30 @@ import './ProfilePage.css'
 
 function AnalysisPage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
   const { locale, t } = useI18n()
-  const [error, setError] = useState('')
   const [period, setPeriod] = useState('week')
-  const [projects, setProjects] = useState([])
   const [selectedBoard, setSelectedBoard] = useState('all')
-  const [stats, setStats] = useState(null)
 
-  useEffect(() => {
-    if (!user) {
-      return undefined
-    }
-
-    let isMounted = true
-    const loadStats = () => {
-      getProfileStats({ board: selectedBoard, period })
-        .then((data) => {
-          if (isMounted) {
-            setStats(data)
-          }
-        })
-        .catch((requestError) => {
-          if (isMounted) {
-            setError(getApiError(requestError, t('profile.statsError')))
-          }
-        })
-    }
-
-    loadStats()
-    const intervalId = window.setInterval(loadStats, 15000)
-
-    return () => {
-      isMounted = false
-      window.clearInterval(intervalId)
-    }
-  }, [period, selectedBoard, t, user])
-
-  useEffect(() => {
-    if (!user) {
-      return
-    }
-
-    listBachecaProjects()
-      .then(setProjects)
-      .catch(() => setProjects([]))
-  }, [user])
+  const statsQuery = useQuery({
+    queryKey: ['profile-stats', selectedBoard, period],
+    queryFn: () => getProfileStats({ board: selectedBoard, period }),
+    enabled: Boolean(user),
+    placeholderData: keepPreviousData,
+    refetchInterval: 15000,
+  })
+  const projectsQuery = useQuery({
+    queryKey: ['bacheca', 'projects'],
+    queryFn: listBachecaProjects,
+    enabled: Boolean(user),
+  })
+  const stats = statsQuery.data ?? null
+  const projects = projectsQuery.data ?? []
+  const error = statsQuery.error ? getApiError(statsQuery.error, t('profile.statsError')) : ''
 
   const changePeriod = (nextPeriod) => {
-    setError('')
     setPeriod(nextPeriod)
   }
 
   const changeBoard = (nextBoard) => {
-    setError('')
     setSelectedBoard(nextBoard)
   }
 
