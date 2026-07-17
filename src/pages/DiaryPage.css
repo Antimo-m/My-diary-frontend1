@@ -339,18 +339,6 @@
   transform: translateY(-2px);
 }
 
-.diary-photo-frame img,
-.book-cover-fallback {
-  aspect-ratio: 4 / 5;
-  border: 1px solid rgba(128, 82, 31, 0.2);
-  border-radius: 18px;
-  max-height: 24rem;
-  min-height: 0;
-  object-fit: cover;
-  object-position: center;
-  width: 100%;
-}
-
 .book-cover-fallback {
   align-items: center;
   background: linear-gradient(135deg, var(--primary-soft), var(--teal-soft));
@@ -882,14 +870,6 @@
     border-radius: 16px;
     gap: 0.45rem;
     padding: 0.48rem;
-  }
-
-  .diary-book--reader .diary-photo-frame img,
-  .diary-book--reader .photo-uploader img,
-  .diary-book--reader .book-cover-fallback {
-    border-radius: 12px;
-    max-height: 11.5rem;
-    min-height: 6.8rem;
   }
 
   .diary-book--reader .photo-uploader {

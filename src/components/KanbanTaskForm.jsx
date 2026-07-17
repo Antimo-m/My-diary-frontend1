@@ -43,7 +43,6 @@ function KanbanTaskForm({
   return (
     <form className="column-task-form task-composer" onSubmit={onSubmitTask}>
       <header className="task-composer__header">
-        <span className="eyebrow">{editingTask ? t('task.update') : t('task.create')}</span>
         <strong id={titleId}>{editingTask ? t('task.updateDetails') : t('task.newDetails')}</strong>
       </header>
 

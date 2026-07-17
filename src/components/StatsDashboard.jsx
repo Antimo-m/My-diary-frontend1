@@ -113,7 +113,6 @@ function StatsDashboard({ locale, onBoardChange, onPeriodChange, period, project
       </div>
 
       <div className="stats-dashboard__hero">
-        <p className="eyebrow">{t('profile.analysis')}</p>
         <h2>{t('profile.periodSummary')}</h2>
         <p>{stats?.range?.starts_at} · {stats?.range?.ends_at}</p>
       </div>
@@ -121,7 +120,6 @@ function StatsDashboard({ locale, onBoardChange, onPeriodChange, period, project
       <div className="stats-dashboard__grid">
         <article className="stats-card stats-card--kanban">
           <div className="stats-card__heading">
-            <p className="eyebrow">Kanban</p>
             <h3>{kanbanMessage ?? t('profile.loadingStats')}</h3>
           </div>
           <strong className="stats-card__metric">{kanban.completion_rate ?? 0}%</strong>
@@ -149,7 +147,6 @@ function StatsDashboard({ locale, onBoardChange, onPeriodChange, period, project
 
         <article className="stats-card stats-card--diary">
           <div className="stats-card__heading">
-            <p className="eyebrow">{t('nav.diary')}</p>
             <h3>{diaryMessage ?? t('profile.loadingStats')}</h3>
           </div>
           <strong className="stats-card__metric">{diary.interactions ?? 0}</strong>
@@ -178,7 +175,6 @@ function StatsDashboard({ locale, onBoardChange, onPeriodChange, period, project
 
         <article className="stats-card stats-card--wide">
           <div className="stats-card__heading">
-            <p className="eyebrow">{t('profile.dailyTrend')}</p>
             <h3>{t('profile.kanbanTrend')}</h3>
           </div>
           <ResponsiveContainer width="100%" height={250}>
@@ -196,7 +192,6 @@ function StatsDashboard({ locale, onBoardChange, onPeriodChange, period, project
 
         <article className="stats-card stats-card--wide">
           <div className="stats-card__heading">
-            <p className="eyebrow">{t('profile.diaryTrend')}</p>
             <h3>{t('profile.diaryTrendTitle')}</h3>
           </div>
           <ResponsiveContainer width="100%" height={250}>
@@ -214,7 +209,6 @@ function StatsDashboard({ locale, onBoardChange, onPeriodChange, period, project
 
         <article className="stats-card stats-card--advice stats-card--wide">
           <div className="stats-card__heading">
-            <p className="eyebrow">{t('analysis.adviceEyebrow')}</p>
             <h3>{t('analysis.adviceTitle')}</h3>
           </div>
           <p>{adviceList[adviceIndex % adviceList.length]}</p>

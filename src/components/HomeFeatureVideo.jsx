@@ -1,12 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { FiMonitor, FiSmartphone, FiVideo } from 'react-icons/fi'
 import useMediaQuery from '../hooks/useMediaQuery'
+import { useI18n } from '../i18n/useI18n'
 import './HomeFeatureVideo.css'
 
-function HomeFeatureVideo({ desktopSrc, label, mobileSrc, playbackRate = 0.82, t, tone }) {
+function HomeFeatureVideo({ desktopSrc, desktopSrcEn, label, mobileSrc, mobileSrcEn, playbackRate = 0.82, t, tone }) {
+  const { locale } = useI18n()
   const isMobile = useMediaQuery('(max-width: 679px)')
   const videoRef = useRef(null)
-  const activeSrc = isMobile ? mobileSrc : desktopSrc
+  const isEnglish = locale === 'en'
+  const activeSrc = isMobile
+    ? (isEnglish ? mobileSrcEn ?? mobileSrc : mobileSrc)
+    : (isEnglish ? desktopSrcEn ?? desktopSrc : desktopSrc)
   const DeviceIcon = isMobile ? FiSmartphone : FiMonitor
 
   useEffect(() => {

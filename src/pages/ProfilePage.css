@@ -154,10 +154,6 @@
   max-width: 56rem;
 }
 
-.profile-settings__card--danger .eyebrow {
-  color: var(--rose);
-}
-
 .profile-danger-copy {
   color: var(--muted);
   font-size: 0.85rem;

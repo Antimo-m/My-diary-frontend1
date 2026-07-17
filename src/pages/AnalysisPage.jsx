@@ -5,7 +5,7 @@ import UserMessage from '../components/UserMessage'
 import Card from '../components/ui/Card'
 import Skeleton from '../components/ui/Skeleton'
 import { useI18n } from '../i18n/useI18n'
-import { listKanbanProjects } from '../services/kanbanApi'
+import { listBachecaProjects } from '../services/kanbanApi'
 import { getProfileStats } from '../services/profileApi'
 import { getApiError } from '../utils/apiErrors'
 import './ProfilePage.css'
@@ -52,7 +52,7 @@ function AnalysisPage({ authLoading, onForgotPassword, onLogin, onRegister, onRe
       return
     }
 
-    listKanbanProjects()
+    listBachecaProjects()
       .then(setProjects)
       .catch(() => setProjects([]))
   }, [user])
@@ -83,7 +83,6 @@ function AnalysisPage({ authLoading, onForgotPassword, onLogin, onRegister, onRe
     <section className="profile-page analysis-page page-container">
       <header className="page-header profile-analysis-header">
         <div>
-          <p className="eyebrow">{t('profile.analysis')}</p>
           <h1 className="page-title">{t('nav.analysis')}</h1>
           <p className="page-subtitle">{t('profile.analysisSubtitle')}</p>
         </div>

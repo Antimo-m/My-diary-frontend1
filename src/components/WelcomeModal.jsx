@@ -35,7 +35,6 @@ function WelcomeModal({ onClose }) {
     <Modal labelledBy="welcome-modal-title" onClose={() => onClose(dontShowAgain)}>
       <div className="welcome-modal__icon" aria-hidden="true"><FiCheck /></div>
       <div>
-        <p className="eyebrow">{t('onboarding.eyebrow')}</p>
         <h2 id="welcome-modal-title">{t('onboarding.title')}</h2>
         <p className="modal-copy">{t('onboarding.copy')}</p>
       </div>

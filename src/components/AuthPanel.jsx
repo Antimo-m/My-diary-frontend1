@@ -128,18 +128,15 @@ function AuthPanel({
 
   return (
     <section className="auth-panel surface" aria-label={t('auth.access')}>
-      <div>
-        <p className="eyebrow">{t('auth.secure')}</p>
-        <h2>
-          {mode === 'login'
-            ? t('auth.loginTitle')
-            : mode === 'register'
-              ? t('auth.createSpace')
-              : mode === 'forgot'
-                ? t('auth.forgot')
-                : t('secret.newPassword')}
-        </h2>
-      </div>
+      <h2>
+        {mode === 'login'
+          ? t('auth.loginTitle')
+          : mode === 'register'
+            ? t('auth.createSpace')
+            : mode === 'forgot'
+              ? t('auth.forgot')
+              : t('secret.newPassword')}
+      </h2>
 
       <div className="auth-panel__switch" role="tablist" aria-label={t('auth.mode')}>
         <button className={mode === 'login' ? 'active' : ''} type="button" onClick={() => changeMode('login')}>

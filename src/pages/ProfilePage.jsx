@@ -118,7 +118,6 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
     <section className="profile-page page-container">
       <header className="page-header profile-page__header">
         <div>
-          <p className="eyebrow">{t('profile.info')}</p>
           <h1 className="page-title">{t('common.profile')}</h1>
           <p className="page-subtitle">{t('profile.subtitle')}</p>
         </div>
@@ -154,7 +153,6 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
 
         <section className="profile-settings__card">
           <div className="profile-settings__section-title">
-            <p className="eyebrow">{t('profile.details')}</p>
             <h2>{t('language.label')}</h2>
           </div>
 
@@ -178,7 +176,6 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
 
       <section className="profile-settings__card profile-settings__card--danger">
         <div className="profile-settings__section-title">
-          <p className="eyebrow">{t('profile.dangerZone')}</p>
           <h2>{t('profile.deleteAccount')}</h2>
           <p className="profile-danger-copy">{t('profile.dangerZoneCopy')}</p>
         </div>
@@ -193,7 +190,6 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
         <Dialog onOpenChange={(isOpen) => !isOpen && closeDeleteModal()}>
           <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
-            <p className="eyebrow">{t('profile.deleteAccount')}</p>
             <Dialog.Title asChild><h2>{t('profile.deleteAccountTitle')}</h2></Dialog.Title>
             <Dialog.Description asChild><p className="dialog-copy">{t('profile.deleteAccountCopy')}</p></Dialog.Description>
           </div>

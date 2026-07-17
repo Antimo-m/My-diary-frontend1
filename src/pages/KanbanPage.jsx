@@ -315,7 +315,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       } else {
         const createdColumn = await createColumn({
           ...columnForm,
-          ...(kanbanRoute.mode === 'project' ? { project_id: selectedProject?.id } : {}),
+          ...(kanbanRoute.mode === 'project' ? { project_id: selectedProject?.id } : { date }),
         })
         pendingColumnFocusId.current = createdColumn.id
       }
@@ -574,7 +574,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     <section className="kanban-page page-container">
       <header className="page-header kanban-topbar">
         <div>
-          <p className="eyebrow">{kanbanRoute.mode === 'home' ? t('kanban.boardPersonal') : t('kanban.activeBoard')}</p>
           <h1 className="page-title">{activeBoardTitle}</h1>
           <p className="page-subtitle">{kanbanRoute.mode === 'project' ? t('kanban.projectSubtitle') : t('kanban.subtitle')}</p>
         </div>
@@ -635,7 +634,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
       <div className="kanban-board-toolbar">
         <div>
-          <p className="eyebrow">{t('kanban.columns')}</p>
           <h2>{t('kanban.organize')}</h2>
         </div>
       </div>
@@ -696,7 +694,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDetailTarget(null)}>
           <div className="task-detail-modal" style={{ '--task-color': taskDetailTarget.color ?? '#d6a43a' }}>
             <div className="task-detail-modal__header">
-              <p className="eyebrow">{t('kanban.detail')}</p>
               <Dialog.Title asChild><h2>{taskDetailTarget.title}</h2></Dialog.Title>
             </div>
             {taskDetailTarget.description ? <p className="task-detail-modal__description">{taskDetailTarget.description}</p> : null}
@@ -730,7 +727,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       {isColumnModalOpen ? (
         <Dialog onOpenChange={(isOpen) => !isOpen && closeColumnModal()}>
           <div>
-            <p className="eyebrow">{columnEditTarget ? t('kanban.saveColumn') : t('kanban.addColumn')}</p>
             <Dialog.Title asChild><h2>{columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}</h2></Dialog.Title>
           </div>
           <form className="dialog-form" onSubmit={submitColumn}>
@@ -755,7 +751,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       {isLabelModalOpen ? (
         <Dialog onOpenChange={(isOpen) => !isOpen && closeLabelModal()}>
           <div>
-            <p className="eyebrow">{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</p>
             <Dialog.Title asChild><h2>{labelEditTarget ? t('kanban.saveLabel') : t('kanban.createLabel')}</h2></Dialog.Title>
           </div>
           <form className="dialog-form" onSubmit={submitLabel}>
@@ -785,7 +780,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         <Dialog onOpenChange={(isOpen) => !isOpen && setColumnDeleteTarget(null)}>
           <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
-            <p className="eyebrow">{t('kanban.deleteColumn')}</p>
             <Dialog.Title asChild><h2>{t('kanban.columnDeleteTitle')}</h2></Dialog.Title>
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.columnDeleteCopy')}</p></Dialog.Description>
           </div>
@@ -800,7 +794,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDeleteTarget(null)}>
           <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
-            <p className="eyebrow">{t('kanban.deleteActivity')}</p>
             <Dialog.Title asChild><h2>{t('kanban.deleteTaskTitle')} “{taskDeleteTarget.title}”?</h2></Dialog.Title>
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteTaskCopy')}</p></Dialog.Description>
           </div>
@@ -815,7 +808,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         <Dialog onOpenChange={(isOpen) => !isOpen && setLabelDeleteTarget(null)}>
           <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
-            <p className="eyebrow">{t('kanban.deleteLabel')}</p>
             <Dialog.Title asChild><h2>{t('kanban.deleteLabelTitle')} “{labelDeleteTarget.name}”?</h2></Dialog.Title>
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.labelDeleteCopy')}</p></Dialog.Description>
           </div>
@@ -829,7 +821,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       {projectEditTarget ? (
         <Dialog onOpenChange={(isOpen) => !isOpen && closeEditProject()}>
           <div>
-            <p className="eyebrow">{t('kanban.editProject')}</p>
             <Dialog.Title asChild><h2>{t('kanban.renameProject')}</h2></Dialog.Title>
           </div>
           <form className="dialog-form" onSubmit={submitProjectEdit}>
@@ -854,7 +845,6 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         <Dialog onOpenChange={(isOpen) => !isOpen && setProjectDeleteTarget(null)}>
           <div className="dialog-danger-icon" aria-hidden="true"><FiAlertTriangle /></div>
           <div>
-            <p className="eyebrow">{t('kanban.deleteProject')}</p>
             <Dialog.Title asChild><h2>{t('kanban.deleteProjectTitle')} “{projectDeleteTarget.name}”?</h2></Dialog.Title>
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteProjectCopy')}</p></Dialog.Description>
           </div>

@@ -32,7 +32,6 @@ function DiaryWalkthrough({ t }) {
       ariaLabel={t('diary.quickStartAria')}
       baseClass="diary-walkthrough"
       clip={clip}
-      eyebrow={t('diary.quickStartEyebrow')}
       steps={diarySteps}
       t={t}
     />

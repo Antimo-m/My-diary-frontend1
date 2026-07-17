@@ -586,8 +586,8 @@
 }
 
 :root[data-theme='dark'] .kanban-mode-actions .kanban-mode-action--daily {
-  background: rgba(45, 212, 191, 0.16);
-  color: #99f6e4;
+  background: rgba(29, 184, 116, 0.2);
+  color: #6ff0b7;
 }
 
 .kanban-count {

@@ -112,7 +112,7 @@
 }
 
 .home-product-zone--kanban .home-zone-header__icon {
-  color: #116a7b;
+  color: #1db874;
 }
 
 .home-zone-header h2,
@@ -151,14 +151,14 @@
 }
 
 .btn-kanban-shortcut {
-  background: linear-gradient(135deg, #116a7b, #2bb3c0);
-  border-color: rgba(17, 106, 123, 0.2);
-  box-shadow: 0 14px 30px rgba(17, 106, 123, 0.22);
+  background: linear-gradient(135deg, #159c63, #1db874);
+  border-color: rgba(29, 184, 116, 0.2);
+  box-shadow: 0 14px 30px rgba(29, 184, 116, 0.22);
   color: #ffffff;
 }
 
 .btn-kanban-shortcut:hover {
-  background: linear-gradient(135deg, #0d5969, #2299a6);
+  background: linear-gradient(135deg, #0f7a4d, #159c63);
 }
 
 .home-zone-header__actions .home-kanban-quick-button {
@@ -173,7 +173,7 @@
 
 .home-custom-projects {
   background: rgba(255, 255, 255, 0.56);
-  border: 1px solid rgba(17, 106, 123, 0.14);
+  border: 1px solid rgba(29, 184, 116, 0.14);
   border-radius: 22px;
   display: grid;
   gap: 1rem;
@@ -199,7 +199,7 @@
 .home-project-shortcuts__list button {
   align-items: center;
   background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(17, 106, 123, 0.14);
+  border: 1px solid rgba(29, 184, 116, 0.14);
   border-radius: 14px;
   color: var(--text-primary);
   cursor: pointer;
@@ -213,9 +213,9 @@
 
 .home-project-shortcuts__list button > span {
   align-items: center;
-  background: rgba(17, 106, 123, 0.11);
+  background: rgba(29, 184, 116, 0.11);
   border-radius: 10px;
-  color: #116a7b;
+  color: #1db874;
   display: inline-flex;
   height: 2.2rem;
   justify-content: center;
@@ -235,7 +235,7 @@
 
 .home-custom-projects__empty {
   align-items: center;
-  border: 1px dashed rgba(17, 106, 123, 0.24);
+  border: 1px dashed rgba(29, 184, 116, 0.24);
   border-radius: 16px;
   display: grid;
   justify-items: center;
@@ -244,7 +244,7 @@
 }
 
 .home-custom-projects__empty > svg {
-  color: #116a7b;
+  color: #1db874;
   font-size: 1.8rem;
   margin-bottom: 0.45rem;
 }
@@ -295,8 +295,8 @@
 
 :root[data-theme='dark'] .home-product-zone--kanban {
   background:
-    radial-gradient(circle at 8% 4%, rgba(45, 173, 192, 0.12), transparent 19rem),
-    linear-gradient(145deg, rgba(17, 39, 46, 0.98), rgba(16, 27, 35, 0.96));
+    radial-gradient(circle at 8% 4%, rgba(29, 184, 116, 0.16), transparent 19rem),
+    linear-gradient(145deg, rgba(15, 36, 28, 0.98), rgba(14, 24, 20, 0.96));
 }
 
 :root[data-theme='dark'] .home-project-shortcuts__list button:hover {

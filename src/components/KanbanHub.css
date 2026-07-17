@@ -415,9 +415,9 @@
 
 :root[data-theme='dark'] .kanban-hub-card--daily {
   background:
-    radial-gradient(circle at 86% 8%, rgba(45, 173, 192, 0.18), transparent 12rem),
-    linear-gradient(145deg, rgba(19, 42, 49, 0.98), rgba(14, 28, 36, 0.96));
-  border-color: rgba(72, 190, 207, 0.25);
+    radial-gradient(circle at 86% 8%, rgba(29, 184, 116, 0.22), transparent 12rem),
+    linear-gradient(145deg, rgba(15, 40, 30, 0.98), rgba(14, 26, 21, 0.96));
+  border-color: rgba(29, 184, 116, 0.3);
 }
 
 :root[data-theme='dark'] .kanban-hub-projects__count,
@@ -454,6 +454,7 @@
   }
 
   .kanban-hub-card__trigger {
+    grid-column: 1 / -1;
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
@@ -462,11 +463,15 @@
   }
 
   .kanban-hub-project-form {
+    grid-column: 1 / -1;
     grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.55rem 0.75rem;
+    padding-right: 0.15rem;
   }
 
   .kanban-hub-project-form .icon-action {
     height: 2.5rem;
+    margin-left: 0.15rem;
     width: 2.5rem;
   }
 

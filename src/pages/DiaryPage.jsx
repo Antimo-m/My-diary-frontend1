@@ -35,7 +35,6 @@ const allowedCoverImageTypes = ['image/jpeg', 'image/png', 'image/webp']
 const defaultCopy = {
   createStripText: 'Aggiungi immagine, didascalia e testo in stile diario.',
   empty: 'Nessuna pagina trovata.',
-  eyebrow: 'Diario personale',
   loadError: 'Non riesco a caricare il diario.',
   newPage: 'Nuova pagina',
   pageSaved: 'Pagina salvata.',
@@ -148,7 +147,6 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
   const translatedCopy = {
     createStripText: t('diary.addImageDedicationText'),
     empty: t('diary.empty'),
-    eyebrow: t('diary.personal'),
     loadError: t('diary.loadError'),
     newPage: t('diary.newPage'),
     pageSaved: t('diary.pageSaved'),
@@ -229,6 +227,12 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  useLayoutEffect(() => {
+    if (view === 'detail') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+  }, [view, selectedNote?.id])
 
   if (authLoading) {
     return <section className="page-container loading-state">{t('auth.wait')}</section>
@@ -396,7 +400,6 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     <section className={`diary-page page-container ${pageCopy.secretClass}`}>
       <header className="page-header">
         <div>
-          <p className="eyebrow">{pageCopy.eyebrow}</p>
           <h1 className="page-title">
             {view === 'detail' ? pageCopy.pageTitle : view === 'create' ? (editingId ? t('diary.editPage') : pageCopy.newPage) : pageCopy.pageTitle}
           </h1>
@@ -576,7 +579,6 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
         <Dialog onOpenChange={(isOpen) => !isOpen && setDeleteNoteTarget(null)}>
           <div className="dialog-danger-icon" aria-hidden="true"><FiTrash2 /></div>
           <div>
-            <p className="eyebrow">{t('diary.deletePage')}</p>
             <Dialog.Title asChild><h2>{t('diary.deletePageTitle')} “{deleteNoteTarget.title}”?</h2></Dialog.Title>
             <Dialog.Description asChild><p className="dialog-copy">{t('diary.deletePageCopy')}</p></Dialog.Description>
           </div>
@@ -593,7 +595,6 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       {discardConfirmOpen ? (
         <Dialog onOpenChange={(isOpen) => !isOpen && setDiscardConfirmOpen(false)}>
           <div>
-            <p className="eyebrow">{t('diary.unsavedChanges')}</p>
             <Dialog.Title asChild><h2>{t('diary.leaveEditorTitle')}</h2></Dialog.Title>
             <Dialog.Description asChild>
               <p className="dialog-copy">{editingId ? t('diary.leaveEditCopy') : t('diary.leaveCreateCopy')}</p>

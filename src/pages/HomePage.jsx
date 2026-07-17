@@ -1,8 +1,12 @@
 import { FiArrowRight, FiBarChart2, FiBookOpen, FiCalendar, FiFolder, FiGrid, FiPlus } from 'react-icons/fi'
 import diaryDesktopVideo from '../assets/diary-desktop.webm'
+import diaryDesktopVideoEn from '../assets/diary-desktop-en.webm'
 import diaryMobileVideo from '../assets/diary-mobile.webm'
+import diaryMobileVideoEn from '../assets/diary-mobile-en.webm'
 import kanbanDesktopVideo from '../assets/kanban-desktop.webm'
+import kanbanDesktopVideoEn from '../assets/kanban-desktop-en.webm'
 import kanbanMobileVideo from '../assets/kanban-mobile.webm'
+import kanbanMobileVideoEn from '../assets/kanban-mobile-en.webm'
 import HomeFeatureVideo from '../components/HomeFeatureVideo'
 import Button from '../components/ui/Button'
 import useHomeOverview from '../hooks/useHomeOverview'
@@ -21,7 +25,6 @@ function HomePage({ onNavigate }) {
   return (
     <section className="home-page page-container">
       <header className="home-hero">
-        <p className="eyebrow">{t('home.type')}</p>
         <h1>{t('home.tagline')}</h1>
         <p className="lead">{t('home.description')}</p>
 
@@ -47,7 +50,6 @@ function HomePage({ onNavigate }) {
         <header className="home-zone-header">
           <span className="home-zone-header__icon"><FiBookOpen aria-hidden="true" /></span>
           <div>
-            <p className="eyebrow">{t('home.diarySectionEyebrow')}</p>
             <h2 id="home-diary-title">{t('home.diarySectionTitle')}</h2>
             <p>{t('home.diarySectionCopy')}</p>
           </div>
@@ -65,8 +67,10 @@ function HomePage({ onNavigate }) {
 
         <HomeFeatureVideo
           desktopSrc={diaryDesktopVideo}
+          desktopSrcEn={diaryDesktopVideoEn}
           label={t('home.diaryVideoLabel')}
           mobileSrc={diaryMobileVideo}
+          mobileSrcEn={diaryMobileVideoEn}
           playbackRate={0.72}
           t={t}
           tone="diary"
@@ -77,7 +81,6 @@ function HomePage({ onNavigate }) {
         <header className="home-zone-header">
           <span className="home-zone-header__icon"><FiGrid aria-hidden="true" /></span>
           <div>
-            <p className="eyebrow">{t('home.kanbanSectionEyebrow')}</p>
             <h2 id="home-kanban-title">{t('home.kanbanSectionTitle')}</h2>
             <p>{t('home.kanbanSectionCopy')}</p>
           </div>
@@ -100,8 +103,10 @@ function HomePage({ onNavigate }) {
 
         <HomeFeatureVideo
           desktopSrc={kanbanDesktopVideo}
+          desktopSrcEn={kanbanDesktopVideoEn}
           label={t('home.kanbanVideoLabel')}
           mobileSrc={kanbanMobileVideo}
+          mobileSrcEn={kanbanMobileVideoEn}
           playbackRate={0.76}
           t={t}
           tone="kanban"
@@ -111,7 +116,6 @@ function HomePage({ onNavigate }) {
           <header>
             <span><FiFolder aria-hidden="true" /></span>
             <div>
-              <p className="eyebrow">{t('home.projectAreaEyebrow')}</p>
               <h3 id="home-custom-projects-title">{t('kanban.customProjects')}</h3>
               <p>{t('home.projectAreaCopy')}</p>
             </div>

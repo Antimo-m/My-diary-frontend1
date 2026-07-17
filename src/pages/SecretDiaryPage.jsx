@@ -108,7 +108,6 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
     <section className="diary-page secret-diary-page page-container">
       <header className="page-header">
         <div>
-          <p className="eyebrow">{t('secret.protectedArea')}</p>
           <h1 className="page-title">{t('secret.title')}</h1>
           <p className="page-subtitle">
             {isSetup ? t('secret.setupSubtitle') : t('secret.enterPassword')}
@@ -334,7 +333,6 @@ function SecretDiaryPage({ authLoading, initialResetEmail = '', initialResetToke
   const secretCopy = {
     createStripText: t('secret.gateCopy'),
     empty: t('diary.empty'),
-    eyebrow: t('secret.protectedArea'),
     loadError: t('diary.loadError'),
     newPage: t('diary.newPage'),
     pageSaved: t('diary.pageSaved'),

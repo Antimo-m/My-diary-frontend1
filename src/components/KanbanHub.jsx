@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { FiArrowRight, FiCalendar, FiCheck, FiCheckSquare, FiEdit3, FiFolder, FiPlus, FiTrash2, FiX } from 'react-icons/fi'
 import HomeFeatureVideo from './HomeFeatureVideo'
 import kanbanDesktopVideo from '../assets/kanban-desktop.webm'
+import kanbanDesktopVideoEn from '../assets/kanban-desktop-en.webm'
 import kanbanMobileVideo from '../assets/kanban-mobile.webm'
+import kanbanMobileVideoEn from '../assets/kanban-mobile-en.webm'
 import './KanbanHub.css'
 
 function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDaily, onOpenProject, projectForm, projects, setProjectForm, t }) {
@@ -61,8 +63,10 @@ function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDail
 
       <HomeFeatureVideo
         desktopSrc={kanbanDesktopVideo}
+        desktopSrcEn={kanbanDesktopVideoEn}
         label={t('home.kanbanVideoLabel')}
         mobileSrc={kanbanMobileVideo}
+        mobileSrcEn={kanbanMobileVideoEn}
         playbackRate={0.76}
         t={t}
         tone="kanban"
@@ -72,7 +76,6 @@ function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDail
         <header className="kanban-hub-projects__header">
           <span className="kanban-hub-projects__icon"><FiFolder aria-hidden="true" /></span>
           <div>
-            <p className="eyebrow">{t('kanban.customProjectsEyebrow')}</p>
             <h2>{t('kanban.customProjects')}</h2>
             <p>{t('kanban.customProjectsCopy')}</p>
           </div>

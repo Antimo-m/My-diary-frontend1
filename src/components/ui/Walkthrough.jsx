@@ -6,7 +6,7 @@ import useMediaQuery from '../../hooks/useMediaQuery'
  * walkthroughs. Callers pass their own `baseClass` (so existing CSS + e2e
  * class hooks are preserved) plus the illustration `clip` and `steps` data.
  */
-function Walkthrough({ ariaLabel, baseClass, clip, eyebrow, steps, t }) {
+function Walkthrough({ ariaLabel, baseClass, clip, steps, t }) {
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [activeStep, setActiveStep] = useState(0)
   const currentStep = steps[activeStep]
@@ -29,7 +29,6 @@ function Walkthrough({ ariaLabel, baseClass, clip, eyebrow, steps, t }) {
 
       <div className={`${baseClass}__content`}>
         <div>
-          <p className="eyebrow">{eyebrow}</p>
           <h2>{t(currentStep.titleKey)}</h2>
         </div>
         <div className={`${baseClass}__steps`} role="tablist" aria-label={ariaLabel}>
