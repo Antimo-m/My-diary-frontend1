@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { FiCheck, FiChevronLeft, FiChevronRight, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import DiaryCard from '../components/DiaryCard'
@@ -142,6 +143,8 @@ function useReaderPages(text) {
 
 function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
   const { t, timeZone } = useI18n()
+  const navigate = useNavigate()
+  const { identifier: routeIdentifier } = useParams()
   const today = currentDateInTimeZone(timeZone)
   const emptyForm = useMemo(() => createEmptyForm(timeZone), [timeZone])
   const translatedCopy = {
@@ -206,27 +209,44 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
 
   useEffect(() => {
     if (user) {
-      void Promise.resolve().then(async () => {
-        await loadNotes()
-
-        if (window.location.pathname.startsWith(`${routeBasePath}/`)) {
-          const identifier = decodeURIComponent(window.location.pathname.slice(routeBasePath.length + 1))
-
-          if (identifier) {
-            try {
-              setSelectedNote(await diaryApi.getDiaryNote(identifier))
-              setReaderPage(0)
-              setDedicationPage(0)
-              setView('detail')
-            } catch (requestError) {
-              setError(getApiError(requestError, t('diary.openError')))
-            }
-          }
-        }
-      })
+      void Promise.resolve().then(() => loadNotes())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    if (!routeIdentifier) {
+      if (view === 'detail') {
+        void Promise.resolve().then(() => {
+          setSelectedNote(null)
+          setView('list')
+        })
+      }
+      return
+    }
+
+    const currentIdentifier = selectedNote ? String(selectedNote.route_identifier ?? selectedNote.slug ?? selectedNote.id) : ''
+
+    if (view === 'detail' && currentIdentifier === routeIdentifier) {
+      return
+    }
+
+    void Promise.resolve().then(async () => {
+      try {
+        setSelectedNote(await diaryApi.getDiaryNote(routeIdentifier))
+        setReaderPage(0)
+        setDedicationPage(0)
+        setView('detail')
+      } catch (requestError) {
+        setError(getApiError(requestError, t('diary.openError')))
+      }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, routeIdentifier])
 
   useLayoutEffect(() => {
     if (view === 'detail') {
@@ -284,7 +304,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       const savedNote = await diaryApi.saveDiaryNote(form, editingIdentifier)
       await loadNotes()
       setSelectedNote(savedNote)
-      window.history.replaceState({}, '', `${routeBasePath}/${encodeURIComponent(savedNote.route_identifier ?? savedNote.slug ?? savedNote.id)}`)
+      navigate(`${routeBasePath}/${encodeURIComponent(savedNote.route_identifier ?? savedNote.slug ?? savedNote.id)}`, { replace: true })
       setReaderPage(0)
       setDedicationPage(0)
       setEditingId(null)
@@ -306,7 +326,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     try {
       const fullNote = await diaryApi.getDiaryNote(note.route_identifier ?? note.slug ?? note.id)
       setSelectedNote(fullNote)
-      window.history.pushState({}, '', `${routeBasePath}/${encodeURIComponent(fullNote.route_identifier ?? fullNote.slug ?? fullNote.id)}`)
+      navigate(`${routeBasePath}/${encodeURIComponent(fullNote.route_identifier ?? fullNote.slug ?? fullNote.id)}`)
       setReaderPage(0)
       setDedicationPage(0)
       setView('detail')
@@ -386,11 +406,11 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     setEditingId(null)
     setEditingIdentifier(null)
     setForm(emptyForm)
-    window.history.pushState({}, '', routeBasePath)
+    navigate(routeBasePath)
     setView('list')
   }
   const returnToList = () => {
-    window.history.replaceState({}, '', routeBasePath)
+    navigate(routeBasePath, { replace: true })
     setSelectedNote(null)
     setView('list')
   }

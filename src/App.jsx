@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import AppLayout from './layout/AppLayout'
 import AuthPanel from './components/AuthPanel'
 import { getCurrentUser, login, logout, register, requestPasswordReset, resetPassword } from './services/authApi'
@@ -16,45 +17,27 @@ const KanbanPage = lazy(() => import('./pages/KanbanPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SecretDiaryPage = lazy(() => import('./pages/SecretDiaryPage'))
 
-const pages = {
-  home: HomePage,
-  diary: DiaryPage,
-  kanban: KanbanPage,
-  profile: ProfilePage,
-  analysis: AnalysisPage,
-  secretDiary: SecretDiaryPage,
+const pagePaths = {
+  analysis: '/analysis',
+  diary: '/diary',
+  home: '/',
+  kanban: '/bacheca',
+  profile: '/profile',
+  secretDiary: '/secret-diary',
 }
 
-function initialPageFromLocation(searchParams) {
-  if (searchParams.get('secret_reset_token')) {
-    return 'secretDiary'
-  }
-
-  if (window.location.pathname.startsWith('/bacheca')) {
-    return 'kanban'
-  }
-
-  if (window.location.pathname.startsWith('/profile')) {
-    return 'profile'
-  }
-
-  if (window.location.pathname.startsWith('/analysis')) {
-    return 'analysis'
-  }
-
-  if (window.location.pathname.startsWith('/secret-diary')) {
-    return 'secretDiary'
-  }
-
-  if (window.location.pathname.startsWith('/diary')) {
-    return 'diary'
-  }
-
-  return 'home'
+const sectionPages = {
+  analysis: 'analysis',
+  bacheca: 'kanban',
+  diary: 'diary',
+  profile: 'profile',
+  'secret-diary': 'secretDiary',
 }
 
 function App() {
   const { t } = useI18n()
+  const location = useLocation()
+  const routerNavigate = useNavigate()
   const initialParams = useMemo(() => {
     const params = new URLSearchParams(window.location.search)
     const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
@@ -67,8 +50,6 @@ function App() {
 
     return params
   }, [])
-  const [activePage, setActivePage] = useState(() => initialPageFromLocation(initialParams))
-  const [locationKey, setLocationKey] = useState(0)
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [welcomeDismissed, setWelcomeDismissed] = useState(false)
@@ -86,7 +67,7 @@ function App() {
     }
   })
   const isMobileViewport = useMediaQuery('(max-width: 900px)')
-  const ActivePage = useMemo(() => pages[activePage] ?? pages.home, [activePage])
+  const activePage = sectionPages[location.pathname.split('/')[1]] ?? 'home'
 
   usePageTitle(activePage, t)
 
@@ -99,8 +80,9 @@ function App() {
 
   useEffect(() => {
     if (initialParams.get('secret_reset_token')) {
-      window.history.replaceState({}, document.title, window.location.pathname)
+      routerNavigate(window.location.pathname, { replace: true })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialParams])
 
   useEffect(() => {
@@ -108,26 +90,16 @@ function App() {
     localStorage.setItem('my-diary-theme', theme)
   }, [theme])
 
-  useEffect(() => {
-    const restoreLocation = () => {
-      setActivePage(initialPageFromLocation(new URLSearchParams(window.location.search)))
-      setLocationKey((current) => current + 1)
-    }
-
-    window.addEventListener('popstate', restoreLocation)
-    return () => window.removeEventListener('popstate', restoreLocation)
-  }, [])
-
   const handleLogin = async (credentials) => {
     const authenticatedUser = await login(credentials)
     setUser(authenticatedUser)
-    setActivePage(secretResetRequest.token ? 'secretDiary' : isMobileViewport ? 'home' : 'diary')
+    routerNavigate(secretResetRequest.token ? '/secret-diary' : isMobileViewport ? '/' : '/diary')
   }
 
   const handleRegister = async (payload) => {
     const authenticatedUser = await register(payload)
     setUser(authenticatedUser)
-    setActivePage(secretResetRequest.token ? 'secretDiary' : isMobileViewport ? 'home' : 'diary')
+    routerNavigate(secretResetRequest.token ? '/secret-diary' : isMobileViewport ? '/' : '/diary')
   }
 
   const handlePasswordResetRequest = async (email) => {
@@ -137,37 +109,24 @@ function App() {
   const handlePasswordReset = async (payload) => {
     await resetPassword(payload)
     setResetRequest({ email: '', token: '' })
-    window.history.replaceState({}, document.title, window.location.pathname)
+    routerNavigate(window.location.pathname, { replace: true })
   }
 
   const handleLogout = async () => {
     await logout()
     setUser(null)
     setWelcomeDismissed(false)
-    setActivePage('home')
+    routerNavigate('/')
   }
 
   const handleAccountDeleted = () => {
     setUser(null)
     setWelcomeDismissed(false)
-    setActivePage('home')
+    routerNavigate('/')
   }
 
   const navigate = (page, requestedPath = null) => {
-    const paths = {
-      analysis: '/analysis',
-      diary: '/diary',
-      home: '/',
-      kanban: '/bacheca',
-      profile: '/profile',
-      secretDiary: '/secret-diary',
-    }
-    const nextPath = requestedPath ?? paths[page] ?? '/'
-
-    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextPath) {
-      window.history.pushState({}, '', nextPath)
-    }
-    setActivePage(page)
+    routerNavigate(requestedPath ?? pagePaths[page] ?? '/')
   }
 
   const closeWelcomeModal = async (dontShowAgain) => {
@@ -176,6 +135,23 @@ function App() {
     if (dontShowAgain) {
       setUser(await updateProfile({ show_welcome_modal: false }))
     }
+  }
+
+  const pageProps = {
+    authLoading,
+    onAccountDeleted: handleAccountDeleted,
+    onForgotPassword: handlePasswordResetRequest,
+    onLogin: handleLogin,
+    onNavigate: navigate,
+    onRegister: handleRegister,
+    onResetPassword: handlePasswordReset,
+    initialResetEmail: secretResetRequest.email,
+    initialResetToken: secretResetRequest.token,
+    onSecretResetHandled: () => setSecretResetRequest({ email: '', token: '' }),
+    onUserUpdate: setUser,
+    setTheme,
+    theme,
+    user,
   }
 
   const shouldShowAuthGate = !user && (isMobileViewport || resetRequest.token)
@@ -203,23 +179,15 @@ function App() {
   return (
     <AppLayout activePage={activePage} onNavigate={navigate} user={user} onLogout={handleLogout} setTheme={setTheme} theme={theme}>
       <Suspense fallback={<section className="page-container loading-state">{t('auth.wait')}</section>}>
-        <ActivePage
-          key={`${activePage}-${locationKey}`}
-          authLoading={authLoading}
-          onAccountDeleted={handleAccountDeleted}
-          onForgotPassword={handlePasswordResetRequest}
-          onLogin={handleLogin}
-          onNavigate={navigate}
-          onRegister={handleRegister}
-          onResetPassword={handlePasswordReset}
-          initialResetEmail={secretResetRequest.email}
-          initialResetToken={secretResetRequest.token}
-          onSecretResetHandled={() => setSecretResetRequest({ email: '', token: '' })}
-          onUserUpdate={setUser}
-          setTheme={setTheme}
-          theme={theme}
-          user={user}
-        />
+        <Routes>
+          <Route path="/" element={<HomePage {...pageProps} />} />
+          <Route path="/diary/:identifier?" element={<DiaryPage {...pageProps} />} />
+          <Route path="/secret-diary/:identifier?" element={<SecretDiaryPage {...pageProps} />} />
+          <Route path="/bacheca/*" element={<KanbanPage {...pageProps} />} />
+          <Route path="/analysis" element={<AnalysisPage {...pageProps} />} />
+          <Route path="/profile" element={<ProfilePage {...pageProps} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </Suspense>
       {user?.show_welcome_modal && !welcomeDismissed ? (
         <WelcomeModal onClose={closeWelcomeModal} />

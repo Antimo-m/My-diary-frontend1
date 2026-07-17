@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FiCheck, FiLogOut, FiLock, FiMail, FiUnlock } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import UserMessage from '../components/UserMessage'
@@ -19,6 +20,7 @@ const secretDiaryLastActivityKey = 'my-diary-secret-last-activity'
 
 function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noticeTone, onResetHandled, onUnlocked, user }) {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const [email, setEmail] = useState(initialEmail || user?.email || '')
   const [error, setError] = useState('')
   const [form, setForm] = useState(emptyPasswordForm)
@@ -75,7 +77,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
         setMode('unlock')
         setForm(emptyPasswordForm)
         onResetHandled?.()
-        window.history.replaceState({}, document.title, window.location.pathname)
+        navigate(window.location.pathname, { replace: true })
       } else {
         onUnlocked(await secretDiaryApi.unlockSecretDiary(form.password))
       }

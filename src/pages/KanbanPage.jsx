@@ -1,5 +1,6 @@
 import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { FiAlertTriangle, FiCalendar, FiCheck, FiEdit3, FiPlus, FiRotateCcw, FiSearch, FiTrash2, FiX } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import ColorPaletteInput from '../components/ColorPaletteInput'
@@ -51,14 +52,14 @@ const emptyColumnForm = { title: '', color: '#d6a43a' }
 const emptyLabelForm = { name: '', color: '#d6a43a' }
 const emptyProjectForm = { name: '', icon: 'folder' }
 
-function initialKanbanRoute() {
-  const projectMatch = window.location.pathname.match(/^\/bacheca\/project\/([^/]+)/)
+function kanbanRouteFromPathname(pathname) {
+  const projectMatch = pathname.match(/^\/bacheca\/project\/([^/]+)/)
 
   if (projectMatch) {
     return { mode: 'project', projectIdentifier: decodeURIComponent(projectMatch[1]) }
   }
 
-  if (window.location.pathname === '/bacheca/daily') {
+  if (pathname === '/bacheca/daily') {
     return { mode: 'daily', projectIdentifier: null }
   }
 
@@ -106,7 +107,9 @@ function reminderValidationMessage(taskForm, t) {
 function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onResetPassword, user }) {
   const { localeTag, t, timeZone } = useI18n()
   const today = currentDateInTimeZone(timeZone)
-  const [kanbanRoute, setKanbanRoute] = useState(initialKanbanRoute)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const kanbanRoute = useMemo(() => kanbanRouteFromPathname(location.pathname), [location.pathname])
   const [activeTaskColumnId, setActiveTaskColumnId] = useState(null)
   const [board, setBoard] = useState({ columns: [], labels: [], date: today })
   const [columnDeleteTarget, setColumnDeleteTarget] = useState(null)
@@ -141,8 +144,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
   const navigateKanban = (mode, projectIdentifier = null) => {
     const path = mode === 'project' ? `/bacheca/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/bacheca/daily' : '/bacheca'
-    window.history.pushState({}, '', path)
-    setKanbanRoute({ mode, projectIdentifier })
+    navigate(path)
   }
 
   const loadProjects = async () => {
