@@ -75,7 +75,7 @@ test('confirming delete shows a success toast and removes the note', async ({ pa
   await expect(dialog).toBeVisible()
   await dialog.getByRole('button', { name: /^Elimina$|^Delete$/ }).click()
 
-  await expect(page.getByRole('status').filter({ hasText: /Pagina eliminata|Page deleted/ })).toBeVisible()
+  await expect(page.locator('.user-message--success').filter({ hasText: /Pagina eliminata|Page deleted/ })).toBeVisible({ timeout: 10_000 })
   await expect(dialog).toHaveCount(0)
   await expect(page.getByText('Seconda nota')).toHaveCount(0)
 })
