@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { FiEdit3, FiPlus, FiTrash2 } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
 import ActivityCard from './ActivityCard'
-import IconButton from './IconButton'
+import IconButton from './ui/IconButton'
 
 export function LabelPill({ action, label }) {
   return (

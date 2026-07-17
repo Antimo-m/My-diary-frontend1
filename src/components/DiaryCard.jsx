@@ -1,7 +1,7 @@
 import { FiEdit3, FiTrash2 } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
 import { textPreview } from '../utils/textPreview'
-import IconButton from './IconButton'
+import IconButton from './ui/IconButton'
 import AuthenticatedImage from './AuthenticatedImage'
 import './DiaryCard.css'
 

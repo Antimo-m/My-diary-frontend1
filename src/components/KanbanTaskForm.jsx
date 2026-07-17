@@ -3,7 +3,7 @@ import ColorPaletteInput from './ColorPaletteInput'
 import CustomDatePicker from './CustomDatePicker'
 import CustomSelect from './CustomSelect'
 import CustomTimePicker from './CustomTimePicker'
-import IconButton from './IconButton'
+import IconButton from './ui/IconButton'
 import { useI18n } from '../i18n/useI18n'
 
 function datePart(value) {
