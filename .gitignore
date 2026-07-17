@@ -19,11 +19,6 @@ blob-report
 .env.*
 !.env.example
 
-# Local demo recording experiments
-/scripts/record-diary-demo.mjs
-/scripts/record-home-videos.mjs
-/src/assets/diary-demo.webm
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

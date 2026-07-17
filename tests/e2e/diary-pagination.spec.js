@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 const longUnbrokenBody = `DASDASDADASD${'c'.repeat(1800)}`
 
 async function mockDiary(page) {
-  await page.route('**/api/user', async (route) => {
+  await page.route('**/api/v1/user', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -29,14 +29,14 @@ async function mockDiary(page) {
     cover_image_url: null,
   }
 
-  await page.route('**/api/diary-notes/testo-senza-spazi', async (route) => {
+  await page.route('**/api/v1/diary-notes/testo-senza-spazi', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({ data: note }),
     })
   })
 
-  await page.route('**/api/diary-notes?*', async (route) => {
+  await page.route('**/api/v1/diary-notes?*', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({

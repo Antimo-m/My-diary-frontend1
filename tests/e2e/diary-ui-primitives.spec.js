@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 async function mockAuthenticatedUser(page) {
-  await page.route('**/api/user', async (route) => {
+  await page.route('**/api/v1/user', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -17,7 +17,7 @@ async function mockAuthenticatedUser(page) {
 }
 
 function mockDiaryList(page, getNotes) {
-  return page.route('**/api/diary-notes?*', async (route) => {
+  return page.route('**/api/v1/diary-notes?*', async (route) => {
     const notes = getNotes()
 
     await route.fulfill({
@@ -36,7 +36,7 @@ test('delete confirmation dialog closes on Escape without deleting', async ({ pa
   await mockDiaryList(page, () => [note])
 
   let deleteCalled = false
-  await page.route('**/api/diary-notes/nota-di-prova', async (route) => {
+  await page.route('**/api/v1/diary-notes/nota-di-prova', async (route) => {
     if (route.request().method() === 'DELETE') {
       deleteCalled = true
     }
@@ -60,7 +60,7 @@ test('confirming delete shows a success toast and removes the note', async ({ pa
   const note = { id: 2, route_identifier: 'seconda-nota', title: 'Seconda nota', formatted_date: '02 giugno 2026', excerpt: 'Testo' }
   let notes = [note]
   await mockDiaryList(page, () => notes)
-  await page.route('**/api/diary-notes/seconda-nota', async (route) => {
+  await page.route('**/api/v1/diary-notes/seconda-nota', async (route) => {
     if (route.request().method() === 'DELETE') {
       notes = []
     }
@@ -75,7 +75,7 @@ test('confirming delete shows a success toast and removes the note', async ({ pa
   await expect(dialog).toBeVisible()
   await dialog.getByRole('button', { name: /^Elimina$|^Delete$/ }).click()
 
-  await expect(dialog).toHaveCount(0)
   await expect(page.getByRole('status').filter({ hasText: /Pagina eliminata|Page deleted/ })).toBeVisible()
+  await expect(dialog).toHaveCount(0)
   await expect(page.getByText('Seconda nota')).toHaveCount(0)
 })

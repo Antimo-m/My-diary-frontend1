@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { Buffer } from 'node:buffer'
 
 async function mockAuthenticatedUser(page) {
-  await page.route('**/api/user', async (route) => {
+  await page.route('**/api/v1/user', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -28,7 +28,7 @@ test('mobile drawer opens and exposes navigation actions', async ({ isMobile, pa
   await expect(page.getByRole('dialog', { name: /Menu principale|Main menu/ })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Home' }).last()).toBeVisible()
   await expect(page.getByRole('button', { name: /Diario|Diary/ }).last()).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Kanban' }).last()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Bacheca' }).last()).toBeVisible()
 })
 
 test('dark mode applies a dark navbar surface', async ({ page }) => {
@@ -51,7 +51,7 @@ test('diary heading follows the selected English language', async ({ page }) => 
   await page.addInitScript(() => {
     window.localStorage.setItem('my-diary-locale', 'en')
   })
-  await page.route('**/api/diary-notes**', async (route) => {
+  await page.route('**/api/v1/diary-notes**', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -82,7 +82,7 @@ test('home uses real device-specific clips and keeps walkthroughs on internal pa
 
 test('diary keeps a compact three-step walkthrough in the page flow', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/diary-notes**', (route) => route.fulfill({
+  await page.route('**/api/v1/diary-notes**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [], meta: { current_page: 1, last_page: 1, total: 0 } }),
   }))
@@ -96,7 +96,7 @@ test('diary keeps a compact three-step walkthrough in the page flow', async ({ p
 
 test('diary cover images load through the authenticated API client', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/diary-notes**', (route) => route.fulfill({
+  await page.route('**/api/v1/diary-notes**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       data: [{
@@ -134,7 +134,7 @@ test('diary detail keeps only the back action and shows the default cover', asyn
     cover_image_url: null,
     photo_dedication: '',
   }
-  await page.route('**/api/diary-notes**', (route) => {
+  await page.route('**/api/v1/diary-notes**', (route) => {
     if (route.request().url().endsWith('/pagina-senza-cover')) {
       return route.fulfill({
         contentType: 'application/json',
@@ -158,15 +158,15 @@ test('diary detail keeps only the back action and shows the default cover', asyn
 
 test('browser back restores the page matching the previous URL', async ({ isMobile, page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/home', (route) => route.fulfill({
+  await page.route('**/api/v1/home', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ stats: {}, recent_projects: [] }),
   }))
-  await page.route('**/api/kanban/projects', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [] }),
   }))
-  await page.route('**/api/stats/profile**', (route) => route.fulfill({
+  await page.route('**/api/v1/stats/profile**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       range: { starts_at: '2026-06-01', ends_at: '2026-06-07' },
@@ -190,11 +190,11 @@ test('browser back restores the page matching the previous URL', async ({ isMobi
 
 test('analysis keeps advice in the page flow and uses the shared custom select', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/kanban/projects', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [] }),
   }))
-  await page.route('**/api/stats/profile**', (route) => route.fulfill({
+  await page.route('**/api/v1/stats/profile**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       data: {
@@ -218,11 +218,11 @@ test('analysis keeps advice in the page flow and uses the shared custom select',
 test('analysis select contains very long project names without horizontal scrolling', async ({ page }) => {
   const longProjectName = `Progetto ${'estremamente-lungo-'.repeat(18)}finale`
   await mockAuthenticatedUser(page)
-  await page.route('**/api/kanban/projects', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [{ id: 99, name: longProjectName }] }),
   }))
-  await page.route('**/api/stats/profile**', (route) => route.fulfill({
+  await page.route('**/api/v1/stats/profile**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       data: {
@@ -261,15 +261,15 @@ test('home, kanban, and analysis render without console errors', async ({ page }
   page.on('pageerror', (error) => errors.push(error.message))
 
   await mockAuthenticatedUser(page)
-  await page.route('**/api/home', (route) => route.fulfill({
+  await page.route('**/api/v1/home', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ stats: { notes: 0, today_tasks: 0, projects: 0 }, recent_projects: [] }),
   }))
-  await page.route('**/api/kanban/projects', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [] }),
   }))
-  await page.route('**/api/stats/profile**', (route) => route.fulfill({
+  await page.route('**/api/v1/stats/profile**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
       range: { starts_at: '2026-06-01', ends_at: '2026-06-07' },
@@ -290,19 +290,19 @@ test('secret diary locks after five inactive minutes without logging out the acc
   let unlocked = true
   await page.clock.install()
   await mockAuthenticatedUser(page)
-  await page.route('**/api/secret-diary/status', (route) => route.fulfill({
+  await page.route('**/api/v1/secret-diary/status', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: { has_password: true, unlocked } }),
   }))
   await page.route('**/sanctum/csrf-cookie', (route) => route.fulfill({ status: 204 }))
-  await page.route('**/api/secret-diary/lock', (route) => {
+  await page.route('**/api/v1/secret-diary/lock', (route) => {
     unlocked = false
     return route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({ data: { has_password: true, unlocked: false } }),
     })
   })
-  await page.route('**/api/secret-diary/notes**', (route) => route.fulfill({
+  await page.route('**/api/v1/secret-diary/notes**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [], meta: { current_page: 1, last_page: 1, total: 0 } }),
   }))
@@ -328,19 +328,19 @@ test('secret diary locks after five inactive minutes without logging out the acc
 test('secret diary exit button locks the protected area immediately', async ({ page }) => {
   let unlocked = true
   await mockAuthenticatedUser(page)
-  await page.route('**/api/secret-diary/status', (route) => route.fulfill({
+  await page.route('**/api/v1/secret-diary/status', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: { has_password: true, unlocked } }),
   }))
   await page.route('**/sanctum/csrf-cookie', (route) => route.fulfill({ status: 204 }))
-  await page.route('**/api/secret-diary/lock', (route) => {
+  await page.route('**/api/v1/secret-diary/lock', (route) => {
     unlocked = false
     return route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({ data: { has_password: true, unlocked: false } }),
     })
   })
-  await page.route('**/api/secret-diary/notes**', (route) => route.fulfill({
+  await page.route('**/api/v1/secret-diary/notes**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [], meta: { current_page: 1, last_page: 1, total: 0 } }),
   }))
@@ -356,23 +356,23 @@ test('secret diary locks when reopened after five inactive minutes', async ({ pa
   let unlocked = true
   await page.clock.install()
   await mockAuthenticatedUser(page)
-  await page.route('**/api/home', (route) => route.fulfill({
+  await page.route('**/api/v1/home', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ stats: {}, recent_projects: [] }),
   }))
-  await page.route('**/api/secret-diary/status', (route) => route.fulfill({
+  await page.route('**/api/v1/secret-diary/status', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: { has_password: true, unlocked } }),
   }))
   await page.route('**/sanctum/csrf-cookie', (route) => route.fulfill({ status: 204 }))
-  await page.route('**/api/secret-diary/lock', (route) => {
+  await page.route('**/api/v1/secret-diary/lock', (route) => {
     unlocked = false
     return route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({ data: { has_password: true, unlocked: false } }),
     })
   })
-  await page.route('**/api/secret-diary/notes**', (route) => route.fulfill({
+  await page.route('**/api/v1/secret-diary/notes**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [], meta: { current_page: 1, last_page: 1, total: 0 } }),
   }))
@@ -390,20 +390,20 @@ test('secret diary locks when reopened after five inactive minutes', async ({ pa
 
 test('kanban task form uses the custom clock selector', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/kanban/projects', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [] }),
   }))
-  await page.route('**/api/kanban/daily**', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/daily**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
-      columns: [{ id: 1, name: 'Da fare', color: '#d6a43a', tasks: [] }],
+      columns: [{ id: 1, title: 'Da fare', color: '#d6a43a', tasks: [] }],
       labels: [],
       date: '2026-06-07',
     }),
   }))
 
-  await page.goto('/kanban')
+  await page.goto('/bacheca')
   await page.locator('.kanban-hub-card--daily').click()
   await page.locator('.add-task-in-column').click()
 
@@ -432,7 +432,7 @@ test('profile timezone uses the custom searchable selector', async ({ page }) =>
 
 test('kanban project navigation uses the project slug', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/kanban/projects', async (route) => {
+  await page.route('**/api/v1/bacheca/projects', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -446,7 +446,7 @@ test('kanban project navigation uses the project slug', async ({ page }) => {
       }),
     })
   })
-  await page.route('**/api/kanban/project/progetto-di-lavoro', async (route) => {
+  await page.route('**/api/v1/bacheca/project/progetto-di-lavoro', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -462,21 +462,21 @@ test('kanban project navigation uses the project slug', async ({ page }) => {
     })
   })
 
-  await page.goto('/kanban')
+  await page.goto('/bacheca')
   await page.locator('.kanban-hub-project__open').filter({ hasText: 'Progetto di lavoro' }).click()
 
-  await expect(page).toHaveURL(/\/kanban\/project\/progetto-di-lavoro$/)
+  await expect(page).toHaveURL(/\/bacheca\/project\/progetto-di-lavoro$/)
   await expect(page.getByRole('heading', { name: 'Progetto di lavoro' })).toBeVisible()
 })
 
 test('kanban project activity badge shows only icon and count', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/kanban/projects', (route) => route.fulfill({
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [{ id: 22, name: 'Progetto test', slug: 'progetto-test', tasks_count: 4 }] }),
   }))
 
-  await page.goto('/kanban')
+  await page.goto('/bacheca')
 
   const badge = page.locator('.kanban-hub-project__task-count')
   await expect(badge).toContainText('4')
@@ -517,7 +517,7 @@ for (const viewport of [
 ]) {
   test(`kanban hub has no horizontal overflow at ${viewport.width}px`, async ({ page }) => {
     await mockAuthenticatedUser(page)
-    await page.route('**/api/kanban/projects', (route) => route.fulfill({
+    await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
         data: [{
@@ -530,38 +530,33 @@ for (const viewport of [
       }),
     }))
     await page.setViewportSize(viewport)
-    await page.goto('/kanban')
+    await page.goto('/bacheca')
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
 
     expect(overflow).toBeLessThanOrEqual(1)
     await expect(page.locator('.kanban-hub-intro')).toHaveCount(0)
-    await expect(page.locator('.product-walkthrough')).toBeVisible()
-    await expect(page.locator('.product-walkthrough__clip')).toBeVisible()
-    await expect(page.locator('.product-walkthrough__steps button')).toHaveCount(3)
-    await expect(page.locator('.product-walkthrough video')).toHaveCount(0)
+    await expect(page.locator('.home-feature-video--kanban')).toBeVisible()
+    await expect(page.locator('.home-feature-video__frame')).toBeVisible()
     await expect(page.locator('.kanban-hub-projects')).toBeVisible()
     await expect(page.locator('.kanban-hub-projects__count')).toContainText('1')
     await expect(page.locator('.kanban-hub-project__task-count')).toHaveText('7')
 
     if (viewport.width <= 390) {
-      await page.locator('.product-walkthrough__steps button').first().click()
-      const [projectBox, boardBox] = await Promise.all([
-        page.locator('.kanban-mini-project').boundingBox(),
-        page.locator('.kanban-mini-board').boundingBox(),
-      ])
-      const clipBox = await page.locator('.product-walkthrough__clip').boundingBox()
+      const frameFits = await page.locator('.home-feature-video__frame').first().evaluate((frame) => {
+        const hubBox = frame.closest('.kanban-hub').getBoundingClientRect()
+        const frameBox = frame.getBoundingClientRect()
 
-      expect(projectBox.y + projectBox.height).toBeLessThanOrEqual(boardBox.y)
-      expect(projectBox.x).toBeGreaterThanOrEqual(clipBox.x)
-      expect(projectBox.x + projectBox.width).toBeLessThanOrEqual(clipBox.x + clipBox.width)
+        return frameBox.left >= hubBox.left && frameBox.right <= hubBox.right
+      })
+      expect(frameFits).toBe(true)
     }
   })
 }
 
 test('diary mobile uses a clean reading surface without decorative ruled lines', async ({ page }) => {
   await mockAuthenticatedUser(page)
-  await page.route('**/api/diary-notes**', (route) => route.fulfill({
+  await page.route('**/api/v1/diary-notes**', (route) => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({ data: [], meta: { current_page: 1, last_page: 1, total: 0 } }),
   }))
