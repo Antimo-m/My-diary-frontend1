@@ -44,11 +44,11 @@
 
 .stats-dashboard__period button.active {
   background: #efe0c5;
-  color: #6f4b21;
+  color: var(--bronze-strong-ink);
 }
 
 .stats-dashboard__period button:focus-visible {
-  outline: 3px solid rgba(214, 164, 58, 0.25);
+  outline: 3px solid rgba(var(--gold-rgb), 0.25);
   outline-offset: 2px;
 }
 
@@ -57,9 +57,9 @@
   background:
     linear-gradient(180deg, rgba(255, 253, 247, 0.92), rgba(255, 246, 230, 0.78)),
     repeating-linear-gradient(0deg, rgba(117, 91, 56, 0.035) 0 1px, transparent 1px 18px);
-  border: 1px solid rgba(218, 202, 174, 0.72);
+  border: 1px solid rgba(var(--sand-rgb), 0.72);
   border-radius: 22px;
-  box-shadow: 0 20px 42px rgba(76, 59, 35, 0.1);
+  box-shadow: 0 20px 42px rgba(var(--umber-rgb), 0.1);
   padding: 1rem;
 }
 
@@ -96,7 +96,7 @@
 }
 
 .stats-card__metric {
-  color: #7b5423;
+  color: var(--bronze-ink);
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: clamp(2.4rem, 8vw, 4.4rem);
   line-height: 1;
@@ -112,9 +112,9 @@
 
 .stats-pills span {
   background: rgba(255, 255, 255, 0.66);
-  border: 1px solid rgba(123, 84, 35, 0.12);
+  border: 1px solid rgba(var(--bronze-rgb), 0.12);
   border-radius: 999px;
-  color: #6f4b21;
+  color: var(--bronze-strong-ink);
   font-weight: 900;
   padding: 0.46rem 0.68rem;
 }
@@ -122,7 +122,7 @@
 .stats-zero-state {
   align-items: center;
   background: rgba(255, 255, 255, 0.5);
-  border: 1px dashed rgba(123, 84, 35, 0.28);
+  border: 1px dashed rgba(var(--bronze-rgb), 0.28);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -134,7 +134,7 @@
 }
 
 .stats-zero-state strong {
-  color: #7b5423;
+  color: var(--bronze-ink);
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 3.25rem;
 }
@@ -152,8 +152,8 @@
 
 .stats-card--advice {
   background:
-    linear-gradient(135deg, rgba(214, 164, 58, 0.22), rgba(255, 249, 237, 0.96)),
-    repeating-linear-gradient(0deg, rgba(148, 96, 29, 0.05) 0 1px, transparent 1px 18px);
+    linear-gradient(135deg, rgba(var(--gold-rgb), 0.22), rgba(255, 249, 237, 0.96)),
+    repeating-linear-gradient(0deg, rgba(var(--khaki-rgb), 0.05) 0 1px, transparent 1px 18px);
   border-color: rgba(181, 129, 25, 0.32);
   position: relative;
 }
@@ -172,7 +172,7 @@
 .advice-toast__next {
   align-items: center;
   align-self: center;
-  background: #80521f;
+  background: var(--bronze-deep);
   border: 0;
   border-radius: 999px;
   color: #fffaf0;
@@ -272,7 +272,7 @@
 }
 
 :root[data-theme='dark'] .stats-dashboard__period button.active {
-  background: rgba(214, 164, 58, 0.18);
+  background: rgba(var(--gold-rgb), 0.18);
   color: #f0cf84;
 }
 

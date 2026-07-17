@@ -4,7 +4,7 @@
     repeating-linear-gradient(0deg, rgba(117, 91, 56, 0.04) 0 1px, transparent 1px 18px);
   border: 1px solid rgba(222, 207, 176, 0.82);
   border-radius: 18px;
-  box-shadow: 0 18px 38px rgba(76, 59, 35, 0.1);
+  box-shadow: 0 18px 38px rgba(var(--umber-rgb), 0.1);
   display: grid;
   gap: 0.75rem;
   padding: 0.85rem;
@@ -15,7 +15,7 @@
 }
 
 .journal-entry:hover {
-  box-shadow: 0 24px 48px rgba(76, 59, 35, 0.14);
+  box-shadow: 0 24px 48px rgba(var(--umber-rgb), 0.14);
   transform: translateY(-2px);
 }
 
@@ -38,9 +38,9 @@
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(239, 224, 197, 0.72)),
     radial-gradient(circle at 26% 22%, rgba(255, 255, 255, 0.8), transparent 44%);
-  border: 1px solid rgba(123, 84, 35, 0.14);
+  border: 1px solid rgba(var(--bronze-rgb), 0.14);
   border-radius: 14px;
-  color: #7b5423;
+  color: var(--bronze-ink);
   display: grid;
   font-weight: 900;
   overflow: hidden;
@@ -55,9 +55,9 @@
 
 .journal-entry time {
   background: rgba(215, 168, 124, 0.18);
-  border: 1px solid rgba(123, 84, 35, 0.14);
+  border: 1px solid rgba(var(--bronze-rgb), 0.14);
   border-radius: 14px;
-  color: #7b5423;
+  color: var(--bronze-ink);
   font-family: 'Iowan Old Style', Georgia, serif;
   font-size: 0.78rem;
   font-weight: 900;
@@ -127,6 +127,6 @@
 }
 
 :root[data-theme='dark'] .journal-entry time {
-  background: rgba(214, 164, 58, 0.14);
+  background: rgba(var(--gold-rgb), 0.14);
   color: #f0cf84;
 }

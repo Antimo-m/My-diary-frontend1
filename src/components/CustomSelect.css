@@ -59,7 +59,7 @@
   background: rgba(255, 253, 247, 0.98);
   border: 1px solid rgba(130, 102, 64, 0.18);
   border-radius: 16px;
-  box-shadow: 0 22px 52px rgba(76, 59, 35, 0.18);
+  box-shadow: 0 22px 52px rgba(var(--umber-rgb), 0.18);
   display: grid;
   gap: 0.5rem;
   left: 0;
@@ -174,6 +174,6 @@
 :root[data-theme='dark'] .custom-select__options button:hover,
 :root[data-theme='dark'] .custom-select__options button:focus-visible,
 :root[data-theme='dark'] .custom-select__options button.is-selected {
-  background: rgba(214, 164, 58, 0.16);
+  background: rgba(var(--gold-rgb), 0.16);
   color: var(--primary-dark);
 }

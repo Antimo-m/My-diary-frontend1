@@ -42,7 +42,7 @@
   background: linear-gradient(135deg, var(--coral), var(--amber));
   border: 0;
   border-radius: var(--radius-full);
-  box-shadow: 0 18px 36px rgba(214, 164, 58, 0.28);
+  box-shadow: 0 18px 36px rgba(var(--gold-rgb), 0.28);
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
@@ -56,12 +56,12 @@
 }
 
 .fab-action:hover {
-  box-shadow: 0 22px 42px rgba(214, 164, 58, 0.34);
+  box-shadow: 0 22px 42px rgba(var(--gold-rgb), 0.34);
   transform: translateY(-2px);
 }
 
 .fab-action:active {
-  box-shadow: 0 14px 28px rgba(214, 164, 58, 0.3);
+  box-shadow: 0 14px 28px rgba(var(--gold-rgb), 0.3);
   transform: translateY(0);
 }
 
@@ -137,12 +137,12 @@
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--coral));
-  box-shadow: 0 14px 30px rgba(214, 164, 58, 0.24);
+  box-shadow: 0 14px 30px rgba(var(--gold-rgb), 0.24);
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 20px 40px rgba(214, 164, 58, 0.34);
+  box-shadow: 0 20px 40px rgba(var(--gold-rgb), 0.34);
 }
 
 .btn-danger:hover {
@@ -151,8 +151,8 @@
 
 :root[data-theme='dark'] .btn-primary {
   background: linear-gradient(135deg, #d6a43a, #a87624);
-  border-color: rgba(214, 164, 58, 0.28);
-  box-shadow: 0 14px 30px rgba(214, 164, 58, 0.18);
+  border-color: rgba(var(--gold-rgb), 0.28);
+  box-shadow: 0 14px 30px rgba(var(--gold-rgb), 0.18);
 }
 
 .btn-danger {

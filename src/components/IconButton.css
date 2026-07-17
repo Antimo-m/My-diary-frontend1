@@ -39,7 +39,7 @@
 .icon-action--edit {
   background: #f1dfc5;
   border-color: rgba(128, 82, 38, 0.28);
-  color: #80521f;
+  color: var(--bronze-deep);
 }
 
 .icon-action--danger {
@@ -51,7 +51,7 @@
 .icon-action--gold {
   background: #fff4cf;
   border-color: rgba(181, 129, 25, 0.22);
-  color: #94601d;
+  color: var(--bronze-soft-ink);
 }
 
 .icon-action:disabled {

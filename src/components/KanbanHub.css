@@ -20,7 +20,7 @@
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.8), transparent 8rem);
   border: 1px solid var(--line);
   border-radius: 24px;
-  box-shadow: 0 20px 42px rgba(76, 59, 35, 0.1);
+  box-shadow: 0 20px 42px rgba(var(--umber-rgb), 0.1);
   color: var(--ink);
   min-width: 0;
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
@@ -50,9 +50,9 @@
 .kanban-hub-card__icon {
   align-items: center;
   background: rgba(215, 168, 124, 0.18);
-  border: 1px solid rgba(123, 84, 35, 0.14);
+  border: 1px solid rgba(var(--bronze-rgb), 0.14);
   border-radius: 18px;
-  color: #7b5423;
+  color: var(--bronze-ink);
   display: inline-flex;
   flex: 0 0 auto;
   height: 4.2rem;
@@ -114,15 +114,15 @@
 
 .kanban-hub-card--daily {
   background:
-    radial-gradient(circle at 86% 8%, rgba(29, 184, 116, 0.2), transparent 12rem),
+    radial-gradient(circle at 86% 8%, rgba(var(--bacheca-accent-rgb), 0.2), transparent 12rem),
     linear-gradient(135deg, rgba(245, 253, 251, 0.96), rgba(220, 245, 235, 0.88));
-  border-color: rgba(29, 184, 116, 0.18);
+  border-color: rgba(var(--bacheca-accent-rgb), 0.18);
 }
 
 .kanban-hub-card--daily .kanban-hub-card__icon {
-  background: rgba(29, 184, 116, 0.14);
-  border-color: rgba(29, 184, 116, 0.18);
-  color: #1DB874;
+  background: rgba(var(--bacheca-accent-rgb), 0.14);
+  border-color: rgba(var(--bacheca-accent-rgb), 0.18);
+  color: var(--bacheca-accent);
 }
 
 .kanban-hub-card small,
@@ -157,7 +157,7 @@
   align-items: center;
   background: linear-gradient(135deg, var(--coral), var(--amber));
   border-radius: 999px;
-  box-shadow: 0 18px 36px rgba(214, 164, 58, 0.28);
+  box-shadow: 0 18px 36px rgba(var(--gold-rgb), 0.28);
   color: #ffffff;
   display: inline-flex;
   font-size: 1.1rem;
@@ -201,17 +201,17 @@
 }
 
 :root[data-theme='dark'] .kanban-hub-card__trigger > svg {
-  background: rgba(214, 164, 58, 0.14);
+  background: rgba(var(--gold-rgb), 0.14);
   color: #f0cf84;
 }
 
 .kanban-hub-projects {
   background:
-    radial-gradient(circle at 8% 0%, rgba(214, 164, 58, 0.16), transparent 16rem),
+    radial-gradient(circle at 8% 0%, rgba(var(--gold-rgb), 0.16), transparent 16rem),
     linear-gradient(145deg, rgba(255, 249, 237, 0.92), rgba(246, 232, 205, 0.7));
-  border: 1px solid rgba(148, 96, 29, 0.18);
+  border: 1px solid rgba(var(--khaki-rgb), 0.18);
   border-radius: 28px;
-  box-shadow: 0 26px 58px rgba(76, 59, 35, 0.11);
+  box-shadow: 0 26px 58px rgba(var(--umber-rgb), 0.11);
   display: grid;
   gap: 1rem;
   padding: clamp(1rem, 3vw, 1.45rem);
@@ -235,9 +235,9 @@
 .kanban-hub-project__open > svg {
   align-items: center;
   background: rgba(215, 168, 124, 0.18);
-  border: 1px solid rgba(123, 84, 35, 0.14);
+  border: 1px solid rgba(var(--bronze-rgb), 0.14);
   border-radius: 14px;
-  color: #7b5423;
+  color: var(--bronze-ink);
   display: inline-flex;
   flex: 0 0 auto;
   height: 2.6rem;
@@ -262,7 +262,7 @@
 .kanban-hub-projects__count {
   align-items: center;
   background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(123, 84, 35, 0.16);
+  border: 1px solid rgba(var(--bronze-rgb), 0.16);
   border-radius: 999px;
   display: grid;
   justify-items: center;
@@ -318,8 +318,8 @@
 
 .kanban-hub-project__task-count {
   align-items: center;
-  background: rgba(123, 84, 35, 0.07);
-  border: 1px solid rgba(123, 84, 35, 0.1);
+  background: rgba(var(--bronze-rgb), 0.07);
+  border: 1px solid rgba(var(--bronze-rgb), 0.1);
   border-radius: 999px;
   display: inline-flex !important;
   gap: 0.4rem;
@@ -347,9 +347,9 @@
 .kanban-hub-project__actions button {
   align-items: center;
   background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(123, 84, 35, 0.12);
+  border: 1px solid rgba(var(--bronze-rgb), 0.12);
   border-radius: 999px;
-  color: #7b5423;
+  color: var(--bronze-ink);
   cursor: pointer;
   display: inline-flex;
   height: 2.15rem;
@@ -363,7 +363,7 @@
 
 .kanban-hub-projects__empty {
   align-items: center;
-  border: 1px dashed rgba(123, 84, 35, 0.24);
+  border: 1px dashed rgba(var(--bronze-rgb), 0.24);
   border-radius: 18px;
   display: grid;
   grid-column: 1 / -1;
@@ -374,7 +374,7 @@
 }
 
 .kanban-hub-projects__empty > svg {
-  color: #7b5423;
+  color: var(--bronze-ink);
   font-size: 1.8rem;
   margin-bottom: 0.35rem;
 }
@@ -415,9 +415,9 @@
 
 :root[data-theme='dark'] .kanban-hub-card--daily {
   background:
-    radial-gradient(circle at 86% 8%, rgba(29, 184, 116, 0.22), transparent 12rem),
+    radial-gradient(circle at 86% 8%, rgba(var(--bacheca-accent-rgb), 0.22), transparent 12rem),
     linear-gradient(145deg, rgba(15, 40, 30, 0.98), rgba(14, 26, 21, 0.96));
-  border-color: rgba(29, 184, 116, 0.3);
+  border-color: rgba(var(--bacheca-accent-rgb), 0.3);
 }
 
 :root[data-theme='dark'] .kanban-hub-projects__count,

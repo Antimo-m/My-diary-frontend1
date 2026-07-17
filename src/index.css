@@ -1,4 +1,18 @@
 :root {
+  /* Warm palette literals shared across components (same in both themes) */
+  --bronze-rgb: 123, 84, 35;
+  --bronze-deep-rgb: 128, 82, 31;
+  --gold-rgb: 214, 164, 58;
+  --umber-rgb: 76, 59, 35;
+  --khaki-rgb: 148, 96, 29;
+  --sand-rgb: 218, 202, 174;
+  --bronze-ink: #7b5423;
+  --bronze-deep: #80521f;
+  --bronze-soft-ink: #94601d;
+  --bronze-strong-ink: #6f4b21;
+  --bacheca-accent: #1db874;
+  --bacheca-accent-rgb: 29, 184, 116;
+
   --app-bg: #fff3df;
   --app-bg-cool: #dff8ff;
   --surface: rgba(255, 252, 245, 0.84);
@@ -13,7 +27,7 @@
   --muted: #66717d;
   --line: rgba(41, 49, 61, 0.12);
   --primary: #d6a43a;
-  --primary-dark: #7b5423;
+  --primary-dark: var(--bronze-ink);
   --primary-soft: #fff4cf;
   --coral: #a87624;
   --coral-soft: #f5e4bc;
@@ -25,9 +39,6 @@
   --amber: #f8c052;
   --paper: #fffaf0;
   --paper-edge: #e8ddc8;
-  --nav-bg: rgba(255, 255, 255, 0.78);
-  --nav-border: rgba(255, 255, 255, 0.74);
-  --nav-panel: #ffffff;
   --focus-ring: #b7791f;
   --radius-xs: 8px;
   --radius-sm: 12px;
@@ -110,9 +121,9 @@
   --line: rgba(216, 226, 235, 0.18);
   --primary: #d6a43a;
   --primary-dark: #f4d58d;
-  --primary-soft: rgba(214, 164, 58, 0.18);
+  --primary-soft: rgba(var(--gold-rgb), 0.18);
   --coral: #a87624;
-  --coral-soft: rgba(214, 164, 58, 0.14);
+  --coral-soft: rgba(var(--gold-rgb), 0.14);
   --lime: #b7ee63;
   --lime-soft: rgba(183, 238, 99, 0.14);
   --teal: #40d9bb;
@@ -121,9 +132,6 @@
   --amber: #f8c052;
   --paper: #29231d;
   --paper-edge: #66533a;
-  --nav-bg: rgba(8, 14, 21, 0.94);
-  --nav-border: rgba(216, 226, 235, 0.14);
-  --nav-panel: #121c26;
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.24);
   --shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.28), 0 14px 32px rgba(0, 0, 0, 0.34);
   --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.3), 0 20px 46px rgba(0, 0, 0, 0.4);
@@ -146,7 +154,7 @@
 
 body {
   background:
-    radial-gradient(circle at 12% 8%, rgba(214, 164, 58, 0.2), transparent 28rem),
+    radial-gradient(circle at 12% 8%, rgba(var(--gold-rgb), 0.2), transparent 28rem),
     radial-gradient(circle at 82% 12%, rgba(168, 118, 36, 0.18), transparent 26rem),
     radial-gradient(circle at 50% 90%, rgba(163, 230, 53, 0.18), transparent 28rem),
     linear-gradient(135deg, var(--app-bg) 0%, var(--app-bg-cool) 100%);
@@ -220,8 +228,7 @@ body {
   border-color: var(--paper-edge);
 }
 
-:root[data-theme='dark'] .photo-uploader,
-:root[data-theme='dark'] .diary-photo-frame {
+:root[data-theme='dark'] .photo-uploader {
   background: linear-gradient(180deg, #3a3025, #292119);
   border-color: rgba(255, 220, 164, 0.18);
   color: #f3cf93;

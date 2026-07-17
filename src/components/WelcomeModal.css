@@ -20,7 +20,7 @@
 }
 
 .welcome-progress {
-  background: rgba(123, 84, 35, 0.12);
+  background: rgba(var(--bronze-rgb), 0.12);
   border-radius: 999px;
   height: 0.55rem;
   overflow: hidden;
@@ -41,7 +41,7 @@
 .welcome-checklist button {
   align-items: center;
   background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(123, 84, 35, 0.13);
+  border: 1px solid rgba(var(--bronze-rgb), 0.13);
   border-radius: 14px;
   color: var(--ink);
   cursor: pointer;
