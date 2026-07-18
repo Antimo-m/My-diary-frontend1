@@ -5,6 +5,7 @@ import IconButton from '../ui/IconButton'
 import { useI18n } from '../../i18n/useI18n'
 
 function KanbanProjectModals({
+  isMutating = false,
   closeEditProject,
   onConfirmDeleteProject,
   onSubmitProjectEdit,
@@ -34,7 +35,7 @@ function KanbanProjectModals({
               />
             </label>
             <div className="dialog-actions">
-              <IconButton variant="confirm" type="submit" label={t('kanban.saveProject')}><FiCheck /></IconButton>
+              <IconButton variant="confirm" type="submit" disabled={isMutating} label={t('kanban.saveProject')}><FiCheck /></IconButton>
               <IconButton variant="danger" type="button" onClick={closeEditProject} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
@@ -49,7 +50,7 @@ function KanbanProjectModals({
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteProjectCopy')}</p></Dialog.Description>
           </div>
           <div className="dialog-actions">
-            <Button variant="danger" onClick={onConfirmDeleteProject}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="danger" disabled={isMutating} onClick={onConfirmDeleteProject}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
             <Button variant="cancel" onClick={() => setProjectDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
         </Dialog>

@@ -31,6 +31,35 @@ test('mobile drawer opens and exposes navigation actions', async ({ isMobile, pa
   await expect(page.getByRole('button', { name: 'Bacheca' }).last()).toBeVisible()
 })
 
+test('recent project shortcut on home opens the bacheca project board', async ({ page }) => {
+  await mockAuthenticatedUser(page)
+  await page.route('**/api/v1/home', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      stats: { notes: 3, today_tasks: 1, projects: 1 },
+      recent_projects: [{ id: 9, name: 'Progetto Viaggi', route_identifier: 'progetto-viaggi', tasks_count: 4 }],
+    }),
+  }))
+  await page.route('**/api/v1/bacheca/projects', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ data: [{ id: 9, name: 'Progetto Viaggi', route_identifier: 'progetto-viaggi' }] }),
+  }))
+  await page.route('**/api/v1/bacheca/project/progetto-viaggi', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      project: { id: 9, name: 'Progetto Viaggi', route_identifier: 'progetto-viaggi' },
+      columns: [],
+      labels: [],
+    }),
+  }))
+
+  await page.goto('/')
+  await page.getByRole('button', { name: /Progetto Viaggi/ }).click()
+
+  await expect(page).toHaveURL(/\/bacheca\/project\/progetto-viaggi/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Progetto Viaggi' })).toBeVisible()
+})
+
 test('dark mode applies a dark navbar surface', async ({ page }) => {
   await mockAuthenticatedUser(page)
   await page.addInitScript(() => {

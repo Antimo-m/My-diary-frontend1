@@ -19,7 +19,7 @@ function HomePage({ onNavigate }) {
   const recentProjects = overview.recent_projects ?? []
   const openProject = (project) => {
     const identifier = project.route_identifier ?? project.slug ?? project.id
-    onNavigate('kanban', `/kanban/project/${encodeURIComponent(identifier)}`)
+    onNavigate('kanban', `/bacheca/project/${encodeURIComponent(identifier)}`)
   }
 
   return (

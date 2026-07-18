@@ -1,10 +1,10 @@
 import { FiCalendar, FiEdit3, FiTrash2, FiX } from 'react-icons/fi'
 import { LabelPill } from '../KanbanBoardParts'
 import KanbanTaskForm from '../KanbanTaskForm'
-import Modal from '../Modal'
 import Button from '../ui/Button'
 import Dialog from '../ui/Dialog'
 import IconButton from '../ui/IconButton'
+import { defaultPaletteColor } from '../../data/colors'
 import { useI18n } from '../../i18n/useI18n'
 
 function clockPart(value) {
@@ -45,7 +45,7 @@ function KanbanTaskModals({
   return (
     <>
       {activeTaskColumnId ? (
-        <Modal labelledBy="task-form-title" onClose={closeTaskForm}>
+        <Dialog onOpenChange={(isOpen) => !isOpen && closeTaskForm()}>
           <KanbanTaskForm
             board={board}
             closeTaskForm={closeTaskForm}
@@ -55,15 +55,14 @@ function KanbanTaskModals({
             onToggleTaskLabel={onToggleTaskLabel}
             setTaskForm={setTaskForm}
             taskForm={taskForm}
-            titleId="task-form-title"
             updateTaskField={updateTaskField}
           />
-        </Modal>
+        </Dialog>
       ) : null}
 
       {taskDetailTarget ? (
         <Dialog onOpenChange={(isOpen) => !isOpen && setTaskDetailTarget(null)}>
-          <div className="task-detail-modal" style={{ '--task-color': taskDetailTarget.color ?? '#d6a43a' }}>
+          <div className="task-detail-modal" style={{ '--task-color': taskDetailTarget.color ?? defaultPaletteColor }}>
             <div className="task-detail-modal__header">
               <Dialog.Title asChild><h2>{taskDetailTarget.title}</h2></Dialog.Title>
             </div>
@@ -103,7 +102,7 @@ function KanbanTaskModals({
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.deleteTaskCopy')}</p></Dialog.Description>
           </div>
           <div className="dialog-actions">
-            <Button variant="danger" onClick={onConfirmDeleteTask}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="danger" disabled={loading} onClick={onConfirmDeleteTask}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
             <Button variant="cancel" onClick={() => setTaskDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
         </Dialog>

@@ -43,12 +43,14 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
         onUnlocked(nextStatus, { fromStatus: true })
       }
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a verificare il Diario Segreto.'))
+      setError(getApiError(requestError, t('secret.statusError')))
     } finally {
       setLoading(false)
     }
   }
 
+  // Verifica dello stato solo al mount: rieseguirla a ogni render creerebbe un
+  // loop con onUnlocked. Il microtask evita setState sincroni nell'effect.
   useEffect(() => {
     void Promise.resolve().then(() => loadStatus())
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +84,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
         onUnlocked(await secretDiaryApi.unlockSecretDiary(form.password))
       }
     } catch (requestError) {
-      setError(getApiError(requestError, 'Operazione Diario Segreto non riuscita.'))
+      setError(getApiError(requestError, t('secret.actionError')))
     } finally {
       setLoading(false)
     }
@@ -96,7 +98,7 @@ function SecretDiaryPasswordGate({ initialEmail, initialResetToken, notice, noti
       await secretDiaryApi.requestSecretDiaryPasswordReset(email)
       setSuccessToast(t('secret.emailSent'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a inviare il link di recupero.'))
+      setError(getApiError(requestError, t('secret.resetLinkError')))
     } finally {
       setLoading(false)
     }

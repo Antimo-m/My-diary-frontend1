@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useI18n } from '../../i18n/useI18n'
 import Popover from './Popover'
-import '../CustomDatePicker.css'
+import './DatePicker.css'
 
 function toDate(value) {
   if (!value) {
@@ -24,7 +24,7 @@ function DatePicker({ label = 'Data', onChange, value }) {
   const { localeTag, t, timeZone } = useI18n()
   const selectedDate = toDate(value)
   const [isOpen, setIsOpen] = useState(false)
-  const [visibleMonth, setVisibleMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
 
   const days = useMemo(() => {
     const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1)

@@ -1,9 +1,10 @@
 import { FiCalendar, FiCheck, FiX } from 'react-icons/fi'
 import ColorPaletteInput from './ColorPaletteInput'
-import CustomDatePicker from './CustomDatePicker'
 import CustomSelect from './CustomSelect'
-import CustomTimePicker from './CustomTimePicker'
+import DatePicker from './ui/DatePicker'
+import Dialog from './ui/Dialog'
 import IconButton from './ui/IconButton'
+import TimePicker from './ui/TimePicker'
 import { useI18n } from '../i18n/useI18n'
 
 function datePart(value) {
@@ -31,7 +32,6 @@ function KanbanTaskForm({
   onToggleTaskLabel,
   setTaskForm,
   taskForm,
-  titleId,
   updateTaskField,
 }) {
   const { t } = useI18n()
@@ -39,11 +39,12 @@ function KanbanTaskForm({
     { value: 'none', label: t('task.noReminder') },
     { value: 'custom', label: t('task.selectReminder') },
   ]
+  const selectedLabelIds = new Set(taskForm.label_ids)
 
   return (
     <form className="column-task-form task-composer" onSubmit={onSubmitTask}>
       <header className="task-composer__header">
-        <strong id={titleId}>{editingTask ? t('task.updateDetails') : t('task.newDetails')}</strong>
+        <Dialog.Title asChild><strong>{editingTask ? t('task.updateDetails') : t('task.newDetails')}</strong></Dialog.Title>
       </header>
 
       <section className="task-composer__section">
@@ -65,11 +66,11 @@ function KanbanTaskForm({
         <div className="task-schedule-grid">
           <label className="deadline-field">
             <span>{t('task.deadlineDate')}</span>
-            <CustomDatePicker label={t('task.deadlineDate')} value={taskForm.due_date} onChange={(value) => setTaskForm((current) => ({ ...current, due_date: value }))} />
+            <DatePicker label={t('task.deadlineDate')} value={taskForm.due_date} onChange={(value) => setTaskForm((current) => ({ ...current, due_date: value }))} />
           </label>
           <label className="deadline-field">
             <span>{t('task.deadlineTime')}</span>
-            <CustomTimePicker label={t('task.deadlineTime')} value={taskForm.due_time} onChange={(value) => setTaskForm((current) => ({ ...current, due_time: value }))} />
+            <TimePicker label={t('task.deadlineTime')} value={taskForm.due_time} onChange={(value) => setTaskForm((current) => ({ ...current, due_time: value }))} />
           </label>
         </div>
         <div className="task-reminder-group">
@@ -85,7 +86,7 @@ function KanbanTaskForm({
             <div className="reminder-datetime-row">
               <label className="deadline-field">
                 <span>{t('task.reminderDate')}</span>
-                <CustomDatePicker
+                <DatePicker
                   label={t('task.reminderDate')}
                   value={datePart(taskForm.custom_reminder_at)}
                   onChange={(value) => setTaskForm((current) => ({
@@ -96,7 +97,7 @@ function KanbanTaskForm({
               </label>
               <label className="deadline-field">
                 <span>{t('task.reminderTime')}</span>
-                <CustomTimePicker
+                <TimePicker
                   label={t('task.reminderTime')}
                   value={timePart(taskForm.custom_reminder_at)}
                   onChange={(value) => setTaskForm((current) => ({
@@ -120,7 +121,7 @@ function KanbanTaskForm({
                 <input
                   type="checkbox"
                   aria-label={label.name}
-                  checked={taskForm.label_ids.includes(label.id)}
+                  checked={selectedLabelIds.has(label.id)}
                   onChange={() => onToggleTaskLabel(label.id)}
                 />
                 <span className="label-pill">

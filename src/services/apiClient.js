@@ -21,6 +21,36 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+let sessionExpiredHandler = null
+
+/**
+ * Registra il gestore invocato quando il backend risponde 401/419: l'app lo
+ * usa per azzerare l'utente e tornare al login invece di accumulare errori.
+ * Restituisce la funzione di unsubscribe.
+ */
+export function onSessionExpired(handler) {
+  sessionExpiredHandler = handler
+
+  return () => {
+    if (sessionExpiredHandler === handler) {
+      sessionExpiredHandler = null
+    }
+  }
+}
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status
+
+    if (status === 401 || status === 419) {
+      sessionExpiredHandler?.()
+    }
+
+    return Promise.reject(error)
+  },
+)
+
 function readCookie(name) {
   return document.cookie
     .split('; ')

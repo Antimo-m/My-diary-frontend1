@@ -26,6 +26,8 @@ import {
   updateTask,
 } from '../services/kanbanApi'
 import useBachecaBoard from '../hooks/useBachecaBoard'
+import useBachecaMutations from '../hooks/useBachecaMutations'
+import { defaultPaletteColor } from '../data/colors'
 import { getApiError } from '../utils/apiErrors'
 import { clockPart, currentDateInTimeZone } from '../utils/dateTime'
 import './KanbanPage.css'
@@ -37,11 +39,11 @@ const emptyTaskForm = {
   due_time: '',
   reminder_option: 'none',
   custom_reminder_at: '',
-  color: '#d6a43a',
+  color: defaultPaletteColor,
   label_ids: [],
 }
-const emptyColumnForm = { title: '', color: '#d6a43a' }
-const emptyLabelForm = { name: '', color: '#d6a43a' }
+const emptyColumnForm = { title: '', color: defaultPaletteColor }
+const emptyLabelForm = { name: '', color: defaultPaletteColor }
 const emptyProjectForm = { name: '', icon: 'folder' }
 
 function kanbanRouteFromPathname(pathname) {
@@ -114,6 +116,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     enabled: Boolean(user),
     route: kanbanRoute,
   })
+  const { isMutating, mutateBacheca } = useBachecaMutations({ onSuccessMessage: setSuccessToast })
 
   const navigateKanban = (mode, projectIdentifier = null) => {
     const path = mode === 'project' ? `/bacheca/project/${encodeURIComponent(projectIdentifier)}` : mode === 'daily' ? '/bacheca/daily' : '/bacheca'
@@ -146,11 +149,9 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      const project = await createProject(projectForm)
+      const project = await mutateBacheca(() => createProject(projectForm), { successMessage: t('kanban.projectCreated') })
       setProjectForm(emptyProjectForm)
-      await invalidateBacheca()
       navigateKanban('project', project.route_identifier ?? project.slug ?? project.id)
-      setSuccessToast(t('kanban.projectCreated'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -176,10 +177,11 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      await updateProject(projectEditTarget.route_identifier ?? projectEditTarget.slug ?? projectEditTarget.id, projectEditForm)
-      await invalidateBacheca()
+      await mutateBacheca(
+        () => updateProject(projectEditTarget.route_identifier ?? projectEditTarget.slug ?? projectEditTarget.id, projectEditForm),
+        { successMessage: t('kanban.projectUpdated') },
+      )
       closeEditProject()
-      setSuccessToast(t('kanban.projectUpdated'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -193,13 +195,14 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     setError('')
 
     try {
-      await deleteProject(projectDeleteTarget.route_identifier ?? projectDeleteTarget.slug ?? projectDeleteTarget.id)
+      await mutateBacheca(
+        () => deleteProject(projectDeleteTarget.route_identifier ?? projectDeleteTarget.slug ?? projectDeleteTarget.id),
+        { successMessage: t('kanban.projectDeleted') },
+      )
       if (kanbanRoute.mode === 'project' && selectedProject?.id === projectDeleteTarget.id) {
         navigateKanban('home')
       }
-      await invalidateBacheca()
       setProjectDeleteTarget(null)
-      setSuccessToast(t('kanban.projectDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -213,7 +216,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
   const openEditColumn = (column) => {
     setColumnEditTarget(column)
-    setColumnForm({ title: column.title, color: column.color ?? '#d6a43a' })
+    setColumnForm({ title: column.title, color: column.color ?? defaultPaletteColor })
     setIsColumnModalOpen(true)
   }
 
@@ -229,18 +232,16 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
     try {
       if (columnEditTarget) {
-        await updateColumn(columnEditTarget.id, columnForm)
+        await mutateBacheca(() => updateColumn(columnEditTarget.id, columnForm), { successMessage: t('kanban.columnUpdated') })
       } else {
-        const createdColumn = await createColumn({
+        const createdColumn = await mutateBacheca(() => createColumn({
           ...columnForm,
           ...(kanbanRoute.mode === 'project' ? { project_id: selectedProject?.id } : { date }),
-        })
+        }), { successMessage: t('kanban.columnCreated') })
         setColumnToFocus(createdColumn.id)
       }
 
       closeColumnModal()
-      await invalidateBacheca()
-      setSuccessToast(columnEditTarget ? t('kanban.columnUpdated') : t('kanban.columnCreated'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -252,10 +253,8 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     }
 
     try {
-      await deleteColumn(columnDeleteTarget.id)
+      await mutateBacheca(() => deleteColumn(columnDeleteTarget.id), { successMessage: t('kanban.columnDeleted') })
       setColumnDeleteTarget(null)
-      await invalidateBacheca()
-      setSuccessToast(t('kanban.columnDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -272,11 +271,11 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       due_time: clockPart(task.due_time),
       reminder_option: task.reminder_option ?? 'none',
       custom_reminder_at: task.custom_reminder_at ?? '',
-      color: task.color ?? column.color ?? '#d6a43a',
+      color: task.color ?? column.color ?? defaultPaletteColor,
       label_ids: task.labels?.map((label) => label.id) ?? [],
     } : {
       ...emptyTaskForm,
-      color: column.color ?? '#d6a43a',
+      color: column.color ?? defaultPaletteColor,
     })
   }
 
@@ -338,14 +337,12 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       }
 
       if (editingTask) {
-        await updateTask(editingTask.id, payload)
+        await mutateBacheca(() => updateTask(editingTask.id, payload), { successMessage: t('kanban.taskUpdated') })
       } else {
-        await createTask(payload)
+        await mutateBacheca(() => createTask(payload), { successMessage: t('kanban.taskCreated') })
       }
 
       closeTaskForm()
-      await invalidateBacheca()
-      setSuccessToast(editingTask ? t('kanban.taskUpdated') : t('kanban.taskCreated'))
     } catch (requestError) {
       setValidationToast(getApiError(requestError))
     }
@@ -357,11 +354,9 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     }
 
     try {
-      await deleteTask(taskDeleteTarget.id)
+      await mutateBacheca(() => deleteTask(taskDeleteTarget.id), { successMessage: t('kanban.taskDeleted') })
       setTaskDeleteTarget(null)
       setTaskDetailTarget(null)
-      await invalidateBacheca()
-      setSuccessToast(t('kanban.taskDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -390,13 +385,11 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     }
 
     try {
-      await moveTask(task.id, {
+      await mutateBacheca(() => moveTask(task.id, {
         kanban_column_id: targetColumn.id,
         position: targetColumn.tasks.length,
         status: task.status,
-      })
-      await invalidateBacheca()
-      setSuccessToast(t('kanban.taskMoved'))
+      }), { successMessage: t('kanban.taskMoved') })
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -410,7 +403,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
   const openEditLabel = (label) => {
     setLabelEditTarget(label)
-    setLabelForm({ name: label.name, color: label.color ?? '#d6a43a' })
+    setLabelForm({ name: label.name, color: label.color ?? defaultPaletteColor })
     setIsLabelModalOpen(true)
   }
 
@@ -426,14 +419,12 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
     try {
       if (labelEditTarget) {
-        await updateLabel(labelEditTarget.id, labelForm)
+        await mutateBacheca(() => updateLabel(labelEditTarget.id, labelForm), { successMessage: t('kanban.labelUpdated') })
       } else {
-        await createLabel(labelForm)
+        await mutateBacheca(() => createLabel(labelForm), { successMessage: t('kanban.labelCreated') })
       }
 
       closeLabelModal()
-      await invalidateBacheca()
-      setSuccessToast(labelEditTarget ? t('kanban.labelUpdated') : t('kanban.labelCreated'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -445,10 +436,8 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
     }
 
     try {
-      await deleteLabel(labelDeleteTarget.id)
+      await mutateBacheca(() => deleteLabel(labelDeleteTarget.id), { successMessage: t('kanban.labelDeleted') })
       setLabelDeleteTarget(null)
-      await invalidateBacheca()
-      setSuccessToast(t('kanban.labelDeleted'))
     } catch (requestError) {
       setError(getApiError(requestError))
     }
@@ -498,6 +487,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
 
       {kanbanRoute.mode === 'home' ? (
         <KanbanHub
+          isMutating={isMutating}
           onCreateProject={submitProject}
           onDeleteProject={setProjectDeleteTarget}
           onEditProject={openEditProject}
@@ -540,7 +530,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
         board={board}
         closeTaskForm={closeTaskForm}
         editingTask={editingTask}
-        loading={boardLoading}
+        loading={isMutating}
         onConfirmDeleteTask={confirmDeleteTask}
         onEditTaskFromDetail={editTaskFromDetail}
         onSubmitTask={submitTask}
@@ -555,6 +545,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       />
 
       <KanbanStructureModals
+        isMutating={isMutating}
         columnDeleteTarget={columnDeleteTarget}
         columnEditTarget={columnEditTarget}
         columnForm={columnForm}
@@ -576,6 +567,7 @@ function KanbanPage({ authLoading, onForgotPassword, onLogin, onRegister, onRese
       />
 
       <KanbanProjectModals
+        isMutating={isMutating}
         closeEditProject={closeEditProject}
         onConfirmDeleteProject={confirmDeleteProject}
         onSubmitProjectEdit={submitProjectEdit}

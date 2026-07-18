@@ -92,6 +92,9 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
     }
   }, [coverPreviewUrl])
 
+  // Sincronizza la vista con l'URL (/diary/:identifier). Gli aggiornamenti di
+  // stato sono differiti in un microtask: la regola set-state-in-effect vieta
+  // i setState sincroni nel corpo dell'effect.
   useEffect(() => {
     if (!user) {
       return
@@ -242,7 +245,7 @@ function DiaryPage({ authLoading, copy, diaryApi = defaultDiaryApi, onForgotPass
       await invalidateNotes()
       setSuccessToast(t('diary.pageDeleted'))
     } catch (requestError) {
-      setError(getApiError(requestError, 'Non riesco a eliminare la pagina.'))
+      setError(getApiError(requestError, t('diary.deleteError')))
     } finally {
       setLoading(false)
     }

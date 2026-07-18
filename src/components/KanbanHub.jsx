@@ -7,7 +7,7 @@ import kanbanMobileVideo from '../assets/kanban-mobile.webm'
 import kanbanMobileVideoEn from '../assets/kanban-mobile-en.webm'
 import './KanbanHub.css'
 
-function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDaily, onOpenProject, projectForm, projects, setProjectForm, t }) {
+function KanbanHub({ isMutating = false, onCreateProject, onDeleteProject, onEditProject, onOpenDaily, onOpenProject, projectForm, projects, setProjectForm, t }) {
   const [isCreatingProject, setIsCreatingProject] = useState(false)
 
   const submitProject = async (event) => {
@@ -50,7 +50,7 @@ function KanbanHub({ onCreateProject, onDeleteProject, onEditProject, onOpenDail
                   required
                 />
               </label>
-              <button className="icon-action icon-action--confirm" type="submit" aria-label={t('kanban.createProject')}>
+              <button className="icon-action icon-action--confirm" type="submit" disabled={isMutating} aria-label={t('kanban.createProject')}>
                 <FiCheck aria-hidden="true" />
               </button>
               <button className="icon-action icon-action--danger" type="button" onClick={() => setIsCreatingProject(false)} aria-label={t('common.cancel')}>

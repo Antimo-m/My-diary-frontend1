@@ -18,7 +18,7 @@ const errorTranslations = {
     [/valid email address/i, 'Inserisci un indirizzo email valido.'],
     [/already been taken/i, 'Questo valore e gia stato utilizzato.'],
     [/confirmation.*does not match|conferma.*non coincide/i, 'La conferma non coincide.'],
-    [/at least (\d+) characters|almeno (\d+) caratteri/i, 'La password deve contenere almeno 12 caratteri.'],
+    [/at least (\d+) characters|almeno (\d+) caratteri/i, (match) => `La password deve contenere almeno ${match[1] ?? match[2]} caratteri.`],
     [/uppercase.*lowercase|maiuscola.*minuscola/i, 'La password deve contenere almeno una lettera maiuscola e una minuscola.'],
     [/at least one number|almeno un numero/i, 'La password deve contenere almeno un numero.'],
     [/at least one symbol|carattere speciale/i, 'La password deve contenere almeno un carattere speciale.'],
@@ -52,7 +52,7 @@ const errorTranslations = {
     [/valid email address/i, 'Enter a valid email address.'],
     [/already been taken/i, 'This value has already been used.'],
     [/confirmation.*does not match|conferma.*non coincide/i, 'The confirmation does not match.'],
-    [/at least (\d+) characters|almeno (\d+) caratteri/i, 'The password must contain at least 12 characters.'],
+    [/at least (\d+) characters|almeno (\d+) caratteri/i, (match) => `The password must contain at least ${match[1] ?? match[2]} characters.`],
     [/uppercase.*lowercase|maiuscola.*minuscola/i, 'The password must include uppercase and lowercase letters.'],
     [/at least one number|almeno un numero/i, 'The password must include at least one number.'],
     [/at least one symbol|carattere speciale/i, 'The password must include at least one special character.'],
@@ -79,9 +79,15 @@ function translateMessage(message, fallback) {
   }
 
   const normalized = String(message).trim()
-  const match = errorTranslations[currentLocale()].find(([pattern]) => pattern.test(normalized))
+  const entry = errorTranslations[currentLocale()].find(([pattern]) => pattern.test(normalized))
 
-  return match ? match[1] : normalized
+  if (!entry) {
+    return normalized
+  }
+
+  const [pattern, translation] = entry
+
+  return typeof translation === 'function' ? translation(normalized.match(pattern)) : translation
 }
 
 export function getApiError(error, fallback) {

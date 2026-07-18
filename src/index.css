@@ -208,11 +208,8 @@ body {
 :root[data-theme='dark'] .profile-form input,
 :root[data-theme='dark'] .profile-form select,
 :root[data-theme='dark'] .notification-panel select,
-:root[data-theme='dark'] .modal-form input:not([type='color']),
-:root[data-theme='dark'] .modal-form textarea,
 :root[data-theme='dark'] .diary-book input,
 :root[data-theme='dark'] .diary-book textarea,
-:root[data-theme='dark'] .label-modal-form input:not([type='color']),
 :root[data-theme='dark'] .column-task-form input:not([type='color']),
 :root[data-theme='dark'] .column-task-form select,
 :root[data-theme='dark'] .column-task-form textarea {

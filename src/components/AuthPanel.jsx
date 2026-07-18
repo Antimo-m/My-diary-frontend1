@@ -11,32 +11,6 @@ const emptyForm = {
   password_confirmation: '',
 }
 
-function getPasswordErrors(password, t) {
-  const errors = []
-
-  if (password.length < 8) {
-    errors.push(t('auth.passwordMin'))
-  }
-
-  if (!/^[A-Z]/.test(password)) {
-    errors.push(t('auth.passwordStartUpper'))
-  }
-
-  if (!/[a-z]/.test(password)) {
-    errors.push(t('auth.passwordLower'))
-  }
-
-  if (!/[0-9]/.test(password)) {
-    errors.push(t('auth.passwordNumber'))
-  }
-
-  if (!/[^A-Za-z0-9]/.test(password)) {
-    errors.push(t('auth.passwordSymbol'))
-  }
-
-  return errors
-}
-
 function AuthPanel({
   initialEmail = '',
   initialMode = 'login',
@@ -78,37 +52,13 @@ function AuthPanel({
       if (mode === 'login') {
         await onLogin({ email: normalizedEmail, password: form.password })
       } else if (mode === 'register') {
-        const passwordErrors = getPasswordErrors(form.password, t)
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-          passwordErrors.unshift(t('auth.emailInvalid'))
-        }
-
-        if (form.password !== form.password_confirmation) {
-          passwordErrors.push(t('auth.passwordConfirmMismatch'))
-        }
-
-        if (passwordErrors.length) {
-          setError(passwordErrors.join(' '))
-          return
-        }
-
+        // Le regole di robustezza della password vivono solo nel backend:
+        // qui mostriamo soltanto gli errori che restituisce.
         await onRegister({ ...form, email: normalizedEmail })
       } else if (mode === 'forgot') {
         await onForgotPassword(normalizedEmail)
         setSuccess(t('auth.linkSent'))
       } else if (mode === 'reset') {
-        const passwordErrors = getPasswordErrors(form.password, t)
-
-        if (form.password !== form.password_confirmation) {
-          passwordErrors.push(t('auth.passwordConfirmMismatch'))
-        }
-
-        if (passwordErrors.length) {
-          setError(passwordErrors.join(' '))
-          return
-        }
-
         await onResetPassword({
           email: normalizedEmail,
           password: form.password,

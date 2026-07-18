@@ -1,11 +1,13 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import AppLayout from './layout/AppLayout'
 import AuthPanel from './components/AuthPanel'
-import { getCurrentUser, login, logout, register, requestPasswordReset, resetPassword } from './services/authApi'
+import ErrorBoundary from './components/ErrorBoundary'
+import { login, logout, register, requestPasswordReset, resetPassword } from './services/authApi'
 import { updateProfile } from './services/profileApi'
 import WelcomeModal from './components/WelcomeModal'
 import { useI18n } from './i18n/useI18n'
+import useAuth from './hooks/useAuth'
 import usePageTitle from './hooks/usePageTitle'
 import useMediaQuery from './hooks/useMediaQuery'
 import './App.css'
@@ -50,8 +52,7 @@ function App() {
 
     return params
   }, [])
-  const [user, setUser] = useState(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { authLoading, setUser, user } = useAuth()
   const [welcomeDismissed, setWelcomeDismissed] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('my-diary-theme') ?? 'light')
   const [resetRequest, setResetRequest] = useState(() => {
@@ -71,19 +72,18 @@ function App() {
 
   usePageTitle(activePage, t)
 
-  useEffect(() => {
-    getCurrentUser()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setAuthLoading(false))
-  }, [])
+  // Il token di reset arriva nel fragment dell'URL: va rimosso una sola volta
+  // dalla barra degli indirizzi, dopo averlo già catturato nello stato.
+  const secretResetRedirectDone = useRef(false)
 
   useEffect(() => {
-    if (initialParams.get('secret_reset_token')) {
-      routerNavigate(window.location.pathname, { replace: true })
+    if (secretResetRedirectDone.current || !initialParams.get('secret_reset_token')) {
+      return
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialParams])
+
+    secretResetRedirectDone.current = true
+    routerNavigate(window.location.pathname, { replace: true })
+  }, [initialParams, routerNavigate])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -178,17 +178,19 @@ function App() {
 
   return (
     <AppLayout activePage={activePage} onNavigate={navigate} user={user} onLogout={handleLogout} setTheme={setTheme} theme={theme}>
-      <Suspense fallback={<section className="page-container loading-state">{t('auth.wait')}</section>}>
-        <Routes>
-          <Route path="/" element={<HomePage {...pageProps} />} />
-          <Route path="/diary/:identifier?" element={<DiaryPage {...pageProps} />} />
-          <Route path="/secret-diary/:identifier?" element={<SecretDiaryPage {...pageProps} />} />
-          <Route path="/bacheca/*" element={<KanbanPage {...pageProps} />} />
-          <Route path="/analysis" element={<AnalysisPage {...pageProps} />} />
-          <Route path="/profile" element={<ProfilePage {...pageProps} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<section className="page-container loading-state">{t('auth.wait')}</section>}>
+          <Routes>
+            <Route path="/" element={<HomePage {...pageProps} />} />
+            <Route path="/diary/:identifier?" element={<DiaryPage {...pageProps} />} />
+            <Route path="/secret-diary/:identifier?" element={<SecretDiaryPage {...pageProps} />} />
+            <Route path="/bacheca/*" element={<KanbanPage {...pageProps} />} />
+            <Route path="/analysis" element={<AnalysisPage {...pageProps} />} />
+            <Route path="/profile" element={<ProfilePage {...pageProps} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
       {user?.show_welcome_modal && !welcomeDismissed ? (
         <WelcomeModal onClose={closeWelcomeModal} />
       ) : null}

@@ -6,6 +6,7 @@ import IconButton from '../ui/IconButton'
 import { useI18n } from '../../i18n/useI18n'
 
 function KanbanStructureModals({
+  isMutating = false,
   columnDeleteTarget,
   columnEditTarget,
   columnForm,
@@ -46,7 +47,7 @@ function KanbanStructureModals({
             </label>
             <ColorPaletteInput label={t('kanban.columnColor')} value={columnForm.color} onChange={(value) => setColumnForm((current) => ({ ...current, color: value }))} />
             <div className="dialog-actions">
-              <IconButton variant="confirm" type="submit" label={columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}><FiCheck /></IconButton>
+              <IconButton variant="confirm" type="submit" disabled={isMutating} label={columnEditTarget ? t('kanban.saveColumn') : t('kanban.createColumn')}><FiCheck /></IconButton>
               <IconButton variant="danger" type="button" onClick={closeColumnModal} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
@@ -74,7 +75,7 @@ function KanbanStructureModals({
             </div>
             <ColorPaletteInput label={t('kanban.labels')} value={labelForm.color} onChange={(value) => setLabelForm((current) => ({ ...current, color: value }))} />
             <div className="dialog-actions">
-              <IconButton variant="confirm" type="submit" label={t('kanban.saveLabel')}><FiCheck /></IconButton>
+              <IconButton variant="confirm" type="submit" disabled={isMutating} label={t('kanban.saveLabel')}><FiCheck /></IconButton>
               <IconButton variant="danger" type="button" onClick={closeLabelModal} label={t('common.cancel')}><FiX /></IconButton>
             </div>
           </form>
@@ -89,7 +90,7 @@ function KanbanStructureModals({
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.columnDeleteCopy')}</p></Dialog.Description>
           </div>
           <div className="dialog-actions">
-            <Button variant="danger" onClick={onConfirmDeleteColumn}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="danger" disabled={isMutating} onClick={onConfirmDeleteColumn}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
             <Button variant="cancel" onClick={() => setColumnDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
         </Dialog>
@@ -103,7 +104,7 @@ function KanbanStructureModals({
             <Dialog.Description asChild><p className="dialog-copy">{t('kanban.labelDeleteCopy')}</p></Dialog.Description>
           </div>
           <div className="dialog-actions">
-            <Button variant="danger" onClick={onConfirmDeleteLabel}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
+            <Button variant="danger" disabled={isMutating} onClick={onConfirmDeleteLabel}><FiTrash2 aria-hidden="true" />{t('kanban.delete')}</Button>
             <Button variant="cancel" onClick={() => setLabelDeleteTarget(null)}>{t('common.cancel')}</Button>
           </div>
         </Dialog>

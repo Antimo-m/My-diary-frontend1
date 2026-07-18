@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { FiBarChart2, FiBookOpen, FiCheck, FiGrid, FiMail } from 'react-icons/fi'
 import { useI18n } from '../i18n/useI18n'
-import Modal from './Modal'
+import Dialog from './ui/Dialog'
 import './WelcomeModal.css'
 
 const checklist = [
@@ -32,11 +32,11 @@ function WelcomeModal({ onClose }) {
   }
 
   return (
-    <Modal labelledBy="welcome-modal-title" onClose={() => onClose(dontShowAgain)}>
+    <Dialog onOpenChange={(isOpen) => !isOpen && onClose(dontShowAgain)}>
       <div className="welcome-modal__icon" aria-hidden="true"><FiCheck /></div>
       <div>
-        <h2 id="welcome-modal-title">{t('onboarding.title')}</h2>
-        <p className="modal-copy">{t('onboarding.copy')}</p>
+        <Dialog.Title asChild><h2>{t('onboarding.title')}</h2></Dialog.Title>
+        <Dialog.Description asChild><p className="dialog-copy">{t('onboarding.copy')}</p></Dialog.Description>
       </div>
 
       <div className="welcome-progress" aria-label={t('onboarding.progress')}>
@@ -62,13 +62,13 @@ function WelcomeModal({ onClose }) {
         <input type="checkbox" checked={dontShowAgain} onChange={(event) => setDontShowAgain(event.target.checked)} />
         {t('onboarding.dontShow')}
       </label>
-      <div className="modal-actions">
+      <div className="dialog-actions">
         <button className="btn btn-primary" type="button" onClick={() => onClose(dontShowAgain)}>
           <FiCheck aria-hidden="true" />
           {t('common.continue')}
         </button>
       </div>
-    </Modal>
+    </Dialog>
   )
 }
 

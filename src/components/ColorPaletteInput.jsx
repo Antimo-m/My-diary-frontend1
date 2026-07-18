@@ -1,9 +1,10 @@
+import { defaultPaletteColor } from '../data/colors'
 import './ColorPaletteInput.css'
 
 const presetColors = [
   { name: 'Marrone', value: '#80521f' },
   { name: 'Beige', value: '#d8b98c' },
-  { name: 'Oro', value: '#d6a43a' },
+  { name: 'Oro', value: defaultPaletteColor },
   { name: 'Verde', value: '#22c55e' },
   { name: 'Blu', value: '#2563eb' },
   { name: 'Rosso', value: '#ef4444' },
@@ -14,7 +15,7 @@ const presetColors = [
 ]
 
 function ColorPaletteInput({ label = 'Colore', onChange, value }) {
-  const currentValue = value || '#d6a43a'
+  const currentValue = value || defaultPaletteColor
   const isPresetColor = presetColors.some((color) => color.value.toLowerCase() === currentValue.toLowerCase())
 
   return (

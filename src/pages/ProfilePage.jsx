@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FiAlertTriangle, FiTrash2 } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import CustomSelect from '../components/CustomSelect'
@@ -12,48 +12,22 @@ import { updateProfile } from '../services/profileApi'
 import { getApiError } from '../utils/apiErrors'
 import './ProfilePage.css'
 
-function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin, onRegister, onResetPassword, onUserUpdate, user }) {
-  const { locale, setLocale, setTimeZone, t, timeZone } = useI18n()
+// Montato solo quando l'utente è disponibile: il form parte dai dati reali e
+// non serve alcun effect di sincronizzazione.
+function ProfileSettings({ onAccountDeleted, onUserUpdate, user }) {
+  const { locale, setLocale, setTimeZone, t } = useI18n()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({
-    name: '',
-    locale,
-    timezone: user?.timezone ?? 'Europe/Rome',
-  })
+  const [form, setForm] = useState(() => ({
+    name: user.name ?? '',
+    locale: user.locale ?? locale,
+    timezone: user.timezone ?? 'Europe/Rome',
+  }))
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteError, setDeleteError] = useState('')
   const [deleting, setDeleting] = useState(false)
-
-  useEffect(() => {
-    if (!user) {
-      return
-    }
-
-    const syncForm = window.setTimeout(() => {
-      setForm({
-        name: user.name ?? '',
-        locale: user.locale ?? locale,
-        timezone: user.timezone ?? 'Europe/Rome',
-      })
-    }, 0)
-
-    return () => window.clearTimeout(syncForm)
-  }, [locale, timeZone, user])
-
-  if (authLoading) {
-    return <section className="page-container loading-state">{t('auth.wait')}</section>
-  }
-
-  if (!user) {
-    return (
-      <section className="page-container">
-        <AuthPanel onForgotPassword={onForgotPassword} onLogin={onLogin} onRegister={onRegister} onResetPassword={onResetPassword} />
-      </section>
-    )
-  }
 
   const updateField = (event) => {
     const { checked, name, type, value } = event.target
@@ -79,6 +53,11 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
       onUserUpdate?.(updatedUser)
       setLocale(updatedUser.locale ?? form.locale)
       setTimeZone(updatedUser.timezone ?? form.timezone)
+      setForm({
+        name: updatedUser.name ?? '',
+        locale: updatedUser.locale ?? form.locale,
+        timezone: updatedUser.timezone ?? form.timezone,
+      })
       setSuccess(t('profile.saved'))
     } catch (requestError) {
       setError(getApiError(requestError, t('profile.updateError')))
@@ -223,6 +202,24 @@ function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin,
       ) : null}
     </section>
   )
+}
+
+function ProfilePage({ authLoading, onAccountDeleted, onForgotPassword, onLogin, onRegister, onResetPassword, onUserUpdate, user }) {
+  const { t } = useI18n()
+
+  if (authLoading) {
+    return <section className="page-container loading-state">{t('auth.wait')}</section>
+  }
+
+  if (!user) {
+    return (
+      <section className="page-container">
+        <AuthPanel onForgotPassword={onForgotPassword} onLogin={onLogin} onRegister={onRegister} onResetPassword={onResetPassword} />
+      </section>
+    )
+  }
+
+  return <ProfileSettings onAccountDeleted={onAccountDeleted} onUserUpdate={onUserUpdate} user={user} />
 }
 
 export default ProfilePage
