@@ -20,6 +20,7 @@
     "@radix-ui/react-popover": "^1.1.18",
     "@radix-ui/react-select": "^2.3.2",
     "@radix-ui/react-toast": "^1.2.18",
+    "@sentry/react": "^10.66.0",
     "@tanstack/react-query": "^5.101.2",
     "axios": "^1.16.1",
     "react": "^19.2.6",

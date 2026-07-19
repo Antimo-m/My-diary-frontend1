@@ -6,6 +6,9 @@ import './index.css'
 import App from './App.jsx'
 import { I18nProvider } from './i18n/I18nProvider.jsx'
 import { registerServiceWorker } from './registerServiceWorker'
+import { addErrorTransport, installGlobalErrorHandlers } from './services/errorLogger'
+import { sendFrontendErrorReport } from './services/monitoringApi'
+import { initSentry } from './services/sentryClient'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,3 +32,9 @@ createRoot(document.getElementById('root')).render(
 )
 
 registerServiceWorker()
+
+// Monitoraggio errori: un solo imbuto (errorLogger) e due destinazioni,
+// il modulo Laravel Frontend Monitoring e Sentry (se configurato via env).
+installGlobalErrorHandlers()
+addErrorTransport(sendFrontendErrorReport)
+initSentry()
