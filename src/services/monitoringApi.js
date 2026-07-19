@@ -1,25 +1,8 @@
 import apiClient from './apiClient'
 
-/**
- * Transport verso il modulo Laravel "Frontend Monitoring": adatta il report
- * del logger al contratto snake_case di POST /frontend-errors. Endpoint
- * pubblico e best effort: gli errori di invio sono assorbiti dal logger.
- */
-export function sendFrontendErrorReport(report) {
-  return apiClient.post('/frontend-errors', {
-    message: report.message,
-    stack: report.stack,
-    component_stack: report.componentStack,
-    source: report.source,
-    url: report.url,
-    user_agent: report.userAgent,
-    browser: report.browser,
-    app_version: report.appVersion,
-    occurred_at: report.occurredAt,
-  })
-}
-
-// --- Dashboard amministrativa "Monitoraggio Errori" ---
+// API della dashboard amministrativa "Monitoraggio Errori". L'invio dei
+// report NON passa da qui: lo fa il laravelTransport del modulo
+// src/monitoring, che riceve apiClient per injection.
 
 export async function getMonitoringStats(days) {
   const response = await apiClient.get('/monitoring/errors/stats', { params: { days } })
@@ -31,4 +14,10 @@ export async function listMonitoringErrors(params = {}) {
   const response = await apiClient.get('/monitoring/errors', { params })
 
   return response.data
+}
+
+export async function getMonitoringError(id) {
+  const response = await apiClient.get(`/monitoring/errors/${id}`)
+
+  return response.data.data
 }

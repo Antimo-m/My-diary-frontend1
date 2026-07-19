@@ -6,9 +6,10 @@ import './index.css'
 import App from './App.jsx'
 import { I18nProvider } from './i18n/I18nProvider.jsx'
 import { registerServiceWorker } from './registerServiceWorker'
-import { addErrorTransport, installGlobalErrorHandlers } from './services/errorLogger'
-import { sendFrontendErrorReport } from './services/monitoringApi'
-import { initSentry } from './services/sentryClient'
+import { addTransport, createConsoleTransport, createLaravelTransport, createSentryTransport, initMonitoring } from './monitoring'
+import { features } from './config/features'
+import { monitoringConfig } from './config/monitoring'
+import apiClient from './services/apiClient'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,8 +34,18 @@ createRoot(document.getElementById('root')).render(
 
 registerServiceWorker()
 
-// Monitoraggio errori: un solo imbuto (errorLogger) e due destinazioni,
-// il modulo Laravel Frontend Monitoring e Sentry (se configurato via env).
-installGlobalErrorHandlers()
-addErrorTransport(sendFrontendErrorReport)
-initSentry()
+// Monitoraggio: un solo imbuto (src/monitoring) e piu destinazioni in
+// parallelo — console, modulo Laravel Frontend Monitoring e Sentry se
+// configurato via env. Tutto il setup vive in src/config/monitoring.js.
+if (features.monitoring) {
+  initMonitoring({
+    ...monitoringConfig,
+    transports: [
+      createConsoleTransport(),
+      createLaravelTransport({ client: apiClient }),
+    ],
+  })
+
+  createSentryTransport({ ...monitoringConfig.sentry, environment: monitoringConfig.environment, release: monitoringConfig.release })
+    .then((transport) => transport && addTransport(transport))
+}
