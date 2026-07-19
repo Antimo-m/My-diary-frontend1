@@ -246,3 +246,25 @@
     width: 100%;
   }
 }
+
+.error-fallback {
+  display: grid;
+  place-items: center;
+}
+
+.error-fallback__card {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: start;
+  max-width: 26rem;
+  padding: 1.5rem;
+}
+
+.error-fallback__card h2 {
+  margin: 0;
+}
+
+.error-fallback__card p {
+  color: var(--muted);
+  margin: 0;
+}
