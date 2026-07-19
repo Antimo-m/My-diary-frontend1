@@ -19,6 +19,8 @@ const KanbanPage = lazy(() => import('./pages/KanbanPage'))
 const MonitoringPage = lazy(() => import('./pages/MonitoringPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SecretDiaryPage = lazy(() => import('./pages/SecretDiaryPage'))
+// Solo build di sviluppo: in produzione il ramo e eliminato dal bundle.
+const DevMonitoringPage = import.meta.env.DEV ? lazy(() => import('./pages/DevMonitoringPage')) : null
 
 const pagePaths = {
   analysis: '/analysis',
@@ -190,6 +192,7 @@ function App() {
             <Route path="/bacheca/*" element={<KanbanPage {...pageProps} />} />
             <Route path="/analysis" element={<AnalysisPage {...pageProps} />} />
             <Route path="/monitoraggio" element={<MonitoringPage {...pageProps} />} />
+            {DevMonitoringPage ? <Route path="/dev/monitoring" element={<DevMonitoringPage />} /> : null}
             <Route path="/profile" element={<ProfilePage {...pageProps} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
