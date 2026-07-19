@@ -7,6 +7,7 @@ export const pageTitles = {
   diary: 'nav.diary',
   secretDiary: 'nav.secretDiary',
   kanban: 'nav.kanban',
+  monitoring: 'monitoring.title',
   profile: 'common.profile',
   analysis: 'nav.analysis',
 }

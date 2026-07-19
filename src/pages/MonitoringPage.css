@@ -1,0 +1,196 @@
+.monitoring-page {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.monitoring-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.monitoring-controls button {
+  background: var(--control-bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.45rem 0.95rem;
+}
+
+.monitoring-controls button.active {
+  border-color: var(--primary);
+  color: var(--ink);
+}
+
+.monitoring-tiles {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.monitoring-tile {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem 1.2rem;
+}
+
+.monitoring-tile strong {
+  font-size: 1.8rem;
+}
+
+.monitoring-tile span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.monitoring-trend,
+.monitoring-list,
+.monitoring-groups,
+.monitoring-reports {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.1rem 1.2rem;
+}
+
+.monitoring-trend h3,
+.monitoring-list h3,
+.monitoring-groups h3,
+.monitoring-reports h3 {
+  margin: 0;
+}
+
+.monitoring-columns {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.monitoring-list__row {
+  align-items: center;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: minmax(4rem, 1fr) 2fr auto;
+}
+
+.monitoring-list__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monitoring-list__meter {
+  background: var(--control-bg);
+  border-radius: 999px;
+  display: block;
+  height: 0.5rem;
+  overflow: hidden;
+}
+
+.monitoring-list__meter span {
+  background: #5d8746;
+  border-radius: 999px;
+  display: block;
+  height: 100%;
+  min-width: 4px;
+}
+
+.monitoring-table-wrap {
+  overflow-x: auto;
+}
+
+.monitoring-groups table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.monitoring-groups th,
+.monitoring-groups td {
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.monitoring-groups th {
+  color: var(--muted);
+}
+
+.monitoring-message {
+  max-width: 28rem;
+  overflow-wrap: anywhere;
+}
+
+.monitoring-reports__head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.monitoring-search {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.monitoring-search input {
+  background: var(--control-bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  min-width: 14rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.monitoring-report {
+  align-items: baseline;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+}
+
+.monitoring-report:last-of-type {
+  border-bottom: 0;
+}
+
+.monitoring-report__main {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.monitoring-report__main strong {
+  overflow-wrap: anywhere;
+}
+
+.monitoring-report__main small,
+.monitoring-report time {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.monitoring-empty {
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0;
+}
+
+.monitoring-denied {
+  align-items: center;
+  color: var(--muted);
+  display: grid;
+  font-weight: 800;
+  gap: 0.6rem;
+  justify-items: center;
+  padding-top: 4rem;
+}
+
+.monitoring-denied svg {
+  font-size: 2rem;
+}

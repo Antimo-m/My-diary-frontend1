@@ -16,6 +16,7 @@ const AnalysisPage = lazy(() => import('./pages/AnalysisPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
 const DiaryPage = lazy(() => import('./pages/DiaryPage'))
 const KanbanPage = lazy(() => import('./pages/KanbanPage'))
+const MonitoringPage = lazy(() => import('./pages/MonitoringPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SecretDiaryPage = lazy(() => import('./pages/SecretDiaryPage'))
 
@@ -24,6 +25,7 @@ const pagePaths = {
   diary: '/diary',
   home: '/',
   kanban: '/bacheca',
+  monitoring: '/monitoraggio',
   profile: '/profile',
   secretDiary: '/secret-diary',
 }
@@ -32,6 +34,7 @@ const sectionPages = {
   analysis: 'analysis',
   bacheca: 'kanban',
   diary: 'diary',
+  monitoraggio: 'monitoring',
   profile: 'profile',
   'secret-diary': 'secretDiary',
 }
@@ -186,6 +189,7 @@ function App() {
             <Route path="/secret-diary/:identifier?" element={<SecretDiaryPage {...pageProps} />} />
             <Route path="/bacheca/*" element={<KanbanPage {...pageProps} />} />
             <Route path="/analysis" element={<AnalysisPage {...pageProps} />} />
+            <Route path="/monitoraggio" element={<MonitoringPage {...pageProps} />} />
             <Route path="/profile" element={<ProfilePage {...pageProps} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

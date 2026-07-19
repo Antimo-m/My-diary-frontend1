@@ -68,6 +68,12 @@ function AppNavbar({ activePage, onLogout, onNavigate, setTheme, theme, user }) 
 
   const isDarkMode = theme === 'dark'
 
+  // La voce Monitoraggio esiste solo per gli amministratori: il backend
+  // protegge comunque le API con il middleware admin.
+  const visibleNavItems = user?.is_admin
+    ? [...navItems, { key: 'monitoring', labelKey: 'nav.monitoring' }]
+    : navItems
+
   const toggleTheme = () => {
     setTheme(isDarkMode ? 'light' : 'dark')
   }
@@ -96,7 +102,7 @@ function AppNavbar({ activePage, onLogout, onNavigate, setTheme, theme, user }) 
         </button>
 
         <div className="app-navbar__links">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <button
               key={item.key}
               className={`nav-link ${activePage === item.key ? 'active' : ''}`}
@@ -179,7 +185,7 @@ function AppNavbar({ activePage, onLogout, onNavigate, setTheme, theme, user }) 
               </div>
 
               <div className="mobile-drawer__links">
-                {navItems.map((item) => (
+                {visibleNavItems.map((item) => (
                   <button
                     key={`drawer-${item.key}`}
                     className={activePage === item.key ? 'active' : ''}
