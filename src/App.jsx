@@ -17,6 +17,8 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const DiaryPage = lazy(() => import('./pages/DiaryPage'))
 const KanbanPage = lazy(() => import('./pages/KanbanPage'))
 const MonitoringPage = lazy(() => import('./pages/MonitoringPage'))
+const ReportsPage = lazy(() => import('./pages/ReportsPage'))
+const AdminReportsPage = lazy(() => import('./pages/AdminReportsPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SecretDiaryPage = lazy(() => import('./pages/SecretDiaryPage'))
 // Solo build di sviluppo: in produzione il ramo e eliminato dal bundle.
@@ -29,6 +31,7 @@ const pagePaths = {
   kanban: '/bacheca',
   monitoring: '/monitoraggio',
   profile: '/profile',
+  reports: '/segnalazioni',
   secretDiary: '/secret-diary',
 }
 
@@ -38,6 +41,7 @@ const sectionPages = {
   diary: 'diary',
   monitoraggio: 'monitoring',
   profile: 'profile',
+  segnalazioni: 'reports',
   'secret-diary': 'secretDiary',
 }
 
@@ -192,6 +196,8 @@ function App() {
             <Route path="/bacheca/*" element={<KanbanPage {...pageProps} />} />
             <Route path="/analysis" element={<AnalysisPage {...pageProps} />} />
             <Route path="/monitoraggio" element={<MonitoringPage {...pageProps} />} />
+            <Route path="/segnalazioni" element={<ReportsPage {...pageProps} />} />
+            <Route path="/segnalazioni/gestione" element={<AdminReportsPage {...pageProps} />} />
             {DevMonitoringPage ? <Route path="/dev/monitoring" element={<DevMonitoringPage />} /> : null}
             <Route path="/profile" element={<ProfilePage {...pageProps} />} />
             <Route path="*" element={<Navigate to="/" replace />} />

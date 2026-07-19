@@ -9,6 +9,7 @@ export const pageTitles = {
   kanban: 'nav.kanban',
   monitoring: 'monitoring.title',
   profile: 'common.profile',
+  reports: 'reports.title',
   analysis: 'nav.analysis',
 }
 

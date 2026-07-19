@@ -9,6 +9,7 @@ const navItems = [
   { key: 'secretDiary', labelKey: 'nav.secretDiary' },
   { key: 'kanban', labelKey: 'nav.kanban' },
   { key: 'analysis', labelKey: 'nav.analysis' },
+  { key: 'reports', labelKey: 'nav.reports' },
 ]
 
 function LanguageSwitch({ className = '', locale, setLocale, t }) {
