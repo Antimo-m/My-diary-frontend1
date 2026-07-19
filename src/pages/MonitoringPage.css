@@ -194,3 +194,56 @@
 .monitoring-denied svg {
   font-size: 2rem;
 }
+
+button.monitoring-report {
+  background: none;
+  border-inline: 0;
+  border-top: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+button.monitoring-report:hover strong {
+  text-decoration: underline;
+}
+
+.monitoring-detail {
+  max-width: 42rem;
+}
+
+.monitoring-detail__grid {
+  display: grid;
+  gap: 0.5rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  margin: 0;
+}
+
+.monitoring-detail__grid dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.monitoring-detail__grid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.monitoring-detail pre {
+  background: var(--control-bg);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  max-height: 14rem;
+  overflow: auto;
+  padding: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.monitoring-detail summary {
+  cursor: pointer;
+  font-weight: 800;
+}

@@ -3,10 +3,11 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { FiActivity, FiSearch } from 'react-icons/fi'
 import AuthPanel from '../components/AuthPanel'
 import UserMessage from '../components/UserMessage'
+import Dialog from '../components/ui/Dialog'
 import Pagination from '../components/ui/Pagination'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useI18n } from '../i18n/useI18n'
-import { getMonitoringStats, listMonitoringErrors } from '../services/monitoringApi'
+import { getMonitoringError, getMonitoringStats, listMonitoringErrors } from '../services/monitoringApi'
 import { getApiError } from '../utils/apiErrors'
 import './MonitoringPage.css'
 
@@ -51,6 +52,7 @@ function MonitoringDashboard() {
   const [days, setDays] = useState(30)
   const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters] = useState({ q: '', page: 1 })
+  const [detailId, setDetailId] = useState(null)
 
   const statsQuery = useQuery({
     queryKey: ['monitoring', 'stats', days],
@@ -61,6 +63,12 @@ function MonitoringDashboard() {
     queryFn: () => listMonitoringErrors(filters),
     placeholderData: keepPreviousData,
   })
+  const detailQuery = useQuery({
+    queryKey: ['monitoring', 'error', detailId],
+    queryFn: () => getMonitoringError(detailId),
+    enabled: Boolean(detailId),
+  })
+  const detail = detailQuery.data
 
   const stats = statsQuery.data
   const errorRows = errorsQuery.data?.data ?? []
@@ -97,6 +105,8 @@ function MonitoringDashboard() {
       </div>
 
       <div className="monitoring-tiles">
+        <StatTile label={t('monitoring.today')} value={stats?.totals?.today ?? 0} />
+        <StatTile label={t('monitoring.week')} value={stats?.totals?.week ?? 0} />
         <StatTile label={t('monitoring.totalErrors')} value={stats?.totals?.errors ?? 0} />
         <StatTile label={t('monitoring.groups')} value={stats?.totals?.groups ?? 0} />
         <StatTile label={t('monitoring.affectedUsers')} value={stats?.totals?.affected_users ?? 0} />
@@ -134,6 +144,7 @@ function MonitoringDashboard() {
                 <th>{t('monitoring.totalErrors')}</th>
                 <th>{t('monitoring.source')}</th>
                 <th aria-hidden="true" />
+                <th>{t('monitoring.firstSeen')}</th>
                 <th>{t('monitoring.lastSeen')}</th>
               </tr>
             </thead>
@@ -143,6 +154,7 @@ function MonitoringDashboard() {
                   <td><strong>{group.total}</strong></td>
                   <td><code>{group.source}</code></td>
                   <td className="monitoring-message">{group.message}</td>
+                  <td>{group.first_seen ? new Date(group.first_seen).toLocaleString(localeTag) : '—'}</td>
                   <td>{group.last_seen ? new Date(group.last_seen).toLocaleString(localeTag) : '—'}</td>
                 </tr>
               ))}
@@ -168,7 +180,7 @@ function MonitoringDashboard() {
         </div>
 
         {errorRows.length ? errorRows.map((row) => (
-          <article className="monitoring-report" key={row.id}>
+          <button className="monitoring-report" key={row.id} type="button" onClick={() => setDetailId(row.id)}>
             <div className="monitoring-report__main">
               <strong>{row.message}</strong>
               <small>
@@ -176,7 +188,7 @@ function MonitoringDashboard() {
               </small>
             </div>
             <time dateTime={row.occurred_at}>{new Date(row.occurred_at).toLocaleString(localeTag)}</time>
-          </article>
+          </button>
         )) : (
           <p className="monitoring-empty">{errorsQuery.isPending ? t('auth.wait') : t('monitoring.empty')}</p>
         )}
@@ -192,6 +204,42 @@ function MonitoringDashboard() {
           total={errorsMeta.total ?? 0}
         />
       </section>
+
+      {detailId ? (
+        <Dialog className="monitoring-detail" onOpenChange={(isOpen) => !isOpen && setDetailId(null)}>
+          <div>
+            <Dialog.Title asChild><h2>{t('monitoring.detailTitle')}</h2></Dialog.Title>
+            <Dialog.Description asChild>
+              <p className="dialog-copy">{detail?.message ?? t('auth.wait')}</p>
+            </Dialog.Description>
+          </div>
+
+          {detail ? (
+            <>
+              <dl className="monitoring-detail__grid">
+                <div><dt>{t('monitoring.source')}</dt><dd><code>{detail.source}</code></dd></div>
+                <div><dt>URL</dt><dd>{detail.url}</dd></div>
+                <div><dt>{t('monitoring.byBrowser')}</dt><dd>{detail.browser ?? '—'} · {detail.os ?? '—'} · {detail.viewport ?? '—'}</dd></div>
+                <div><dt>{t('monitoring.byVersion')}</dt><dd>{detail.app_version ?? '—'} {detail.commit_sha ? `(${detail.commit_sha.slice(0, 7)})` : ''} · {detail.environment ?? '—'}</dd></div>
+                <div><dt>{t('monitoring.lastSeen')}</dt><dd>{new Date(detail.occurred_at).toLocaleString(localeTag)}</dd></div>
+                <div><dt>Utente</dt><dd>{detail.user?.email ?? t('monitoring.anonymousUser')}</dd></div>
+              </dl>
+              {detail.stack ? (
+                <details open>
+                  <summary>{t('monitoring.stack')}</summary>
+                  <pre>{detail.stack}</pre>
+                </details>
+              ) : null}
+              {detail.component_stack ? (
+                <details>
+                  <summary>{t('monitoring.componentStack')}</summary>
+                  <pre>{detail.component_stack}</pre>
+                </details>
+              ) : null}
+            </>
+          ) : null}
+        </Dialog>
+      ) : null}
     </section>
   )
 }
