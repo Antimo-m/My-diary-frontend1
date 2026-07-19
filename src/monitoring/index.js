@@ -21,7 +21,7 @@ import { addTransport } from './transportManager'
 
 export { reportError, reportEvent, installGlobalErrorHandlers } from './errorLogger'
 export { addTransport, clearTransports } from './transportManager'
-export { buildReport } from './reportBuilder'
+export { buildReport, collectEnvironment } from './reportBuilder'
 export { computeFingerprint } from './fingerprint'
 export { createConsoleTransport } from './transports/consoleTransport'
 export { createLaravelTransport } from './transports/laravelTransport'

@@ -26,6 +26,25 @@ function detectOs(userAgent) {
 }
 
 /**
+ * Fotografia dell'ambiente del client, riusabile anche fuori dai crash
+ * (es. contesto tecnico allegato alle segnalazioni utente).
+ */
+export function collectEnvironment() {
+  const userAgent = navigator.userAgent
+
+  return {
+    userAgent,
+    browser: detectBrowser(userAgent),
+    os: detectOs(userAgent),
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    language: navigator.language ?? null,
+    // Il fragment non lascia mai il client: e il canale dei token di reset.
+    url: window.location.href.split('#')[0],
+    route: window.location.pathname,
+  }
+}
+
+/**
  * Costruisce un report normalizzato.
  *
  * @param error   Error, stringa o valore qualsiasi lanciato.
@@ -36,7 +55,6 @@ export function buildReport(error, context = {}, config = {}) {
   const message = error instanceof Error ? error.message : String(error)
   const stack = error instanceof Error ? error.stack ?? null : null
   const source = context.source ?? 'unhandled'
-  const userAgent = navigator.userAgent
 
   return {
     kind: context.kind ?? 'error',
@@ -45,14 +63,7 @@ export function buildReport(error, context = {}, config = {}) {
     componentStack: context.componentStack ?? null,
     source,
     fingerprint: computeFingerprint({ message, source, stack }),
-    // Il fragment non lascia mai il client: e il canale dei token di reset.
-    url: window.location.href.split('#')[0],
-    route: window.location.pathname,
-    userAgent,
-    browser: detectBrowser(userAgent),
-    os: detectOs(userAgent),
-    viewport: `${window.innerWidth}x${window.innerHeight}`,
-    language: navigator.language ?? null,
+    ...collectEnvironment(),
     release: config.release ?? null,
     commitSha: config.commitSha ?? null,
     environment: config.environment ?? null,
