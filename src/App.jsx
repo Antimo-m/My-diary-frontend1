@@ -62,7 +62,9 @@ function App() {
     return params
   }, [])
   const { authLoading, setUser, user } = useAuth()
-  const [welcomeDismissed, setWelcomeDismissed] = useState(false)
+  // Chiusura ricordata per la sessione del browser: senza, il modal di
+  // benvenuto ricompariva a ogni reload finche non si spuntava "non mostrare".
+  const [welcomeDismissed, setWelcomeDismissed] = useState(() => sessionStorage.getItem('my-diary-welcome-dismissed') === '1')
   const [theme, setTheme] = useState(() => localStorage.getItem('my-diary-theme') ?? 'light')
   const [resetRequest, setResetRequest] = useState(() => {
     return {
@@ -121,16 +123,21 @@ function App() {
     routerNavigate(window.location.pathname, { replace: true })
   }
 
+  const resetWelcomeDismissal = () => {
+    sessionStorage.removeItem('my-diary-welcome-dismissed')
+    setWelcomeDismissed(false)
+  }
+
   const handleLogout = async () => {
     await logout()
     setUser(null)
-    setWelcomeDismissed(false)
+    resetWelcomeDismissal()
     routerNavigate('/')
   }
 
   const handleAccountDeleted = () => {
     setUser(null)
-    setWelcomeDismissed(false)
+    resetWelcomeDismissal()
     routerNavigate('/')
   }
 
@@ -140,6 +147,7 @@ function App() {
 
   const closeWelcomeModal = async (dontShowAgain) => {
     setWelcomeDismissed(true)
+    sessionStorage.setItem('my-diary-welcome-dismissed', '1')
 
     if (dontShowAgain) {
       setUser(await updateProfile({ show_welcome_modal: false }))
