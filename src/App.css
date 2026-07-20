@@ -88,7 +88,9 @@
 
 .mobile-auth-gate .auth-panel {
   box-sizing: border-box;
-  justify-self: start;
+  /* Il pannello resta centrato dal genitore a ogni larghezza: con
+     justify-self start restava incollato a sinistra sui tablet, dove il
+     max-width entra in gioco e la colonna e piu larga del pannello. */
   margin: 0;
   max-width: 26rem;
   width: calc(100vw - 2rem);

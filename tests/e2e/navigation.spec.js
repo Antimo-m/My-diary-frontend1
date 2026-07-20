@@ -583,6 +583,43 @@ for (const viewport of [
   })
 }
 
+for (const viewport of [{ width: 1440, height: 900 }, { width: 1112, height: 834 }]) {
+  test(`home demo video keeps its full frame without cropping at ${viewport.width}px`, async ({ page }) => {
+    await mockAuthenticatedUser(page)
+    await page.setViewportSize(viewport)
+    await page.goto('/')
+
+    const video = page.locator('.home-feature-video video').first()
+    await video.evaluate((element) => new Promise((resolve) => {
+      if (element.readyState >= 1) resolve()
+      else element.addEventListener('loadedmetadata', () => resolve(), { once: true })
+    }))
+
+    // object-fit: contain non deve introdurre bande ne, soprattutto, tagli:
+    // il rapporto del riquadro renderizzato deve combaciare con quello
+    // intrinseco del file registrato (scripts/record-home-videos.mjs).
+    const ratios = await video.evaluate((element) => {
+      const box = element.getBoundingClientRect()
+      return {
+        intrinsic: element.videoWidth / element.videoHeight,
+        rendered: box.width / box.height,
+      }
+    })
+    expect(Math.abs(ratios.rendered - ratios.intrinsic)).toBeLessThan(0.02)
+  })
+}
+
+test('login panel stays centered on tablet widths', async ({ page }) => {
+  for (const viewport of [{ width: 834, height: 1112 }, { width: 1112, height: 834 }, { width: 768, height: 1024 }]) {
+    await page.setViewportSize(viewport)
+    await page.goto('/diary')
+
+    const box = await page.locator('.auth-panel').boundingBox()
+    const centerOffset = Math.abs((box.x + box.width / 2) - viewport.width / 2)
+    expect(centerOffset).toBeLessThan(1)
+  }
+})
+
 test('diary mobile uses a clean reading surface without decorative ruled lines', async ({ page }) => {
   await mockAuthenticatedUser(page)
   await page.route('**/api/v1/diary-notes**', (route) => route.fulfill({

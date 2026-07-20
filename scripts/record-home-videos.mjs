@@ -16,7 +16,11 @@ const recordingsDir = '/private/tmp/my-diary-home-recordings'
 const password = 'Password!234'
 
 const devices = [
-  { name: 'desktop', viewport: { width: 1280, height: 800 }, video: { width: 1280, height: 800 } },
+  // 1280x960 (4:3): con 800px di altezza il compositore del diario e le
+  // colonne della bacheca finivano sotto la piega e i video risultavano
+  // tagliati in basso. L'aspect-ratio del frame in HomeFeatureVideo.css
+  // deve restare allineato a queste proporzioni.
+  { name: 'desktop', viewport: { width: 1280, height: 960 }, video: { width: 1280, height: 960 } },
   { name: 'mobile', viewport: { width: 390, height: 844 }, video: { width: 390, height: 844 }, isMobile: true },
 ]
 
@@ -66,7 +70,9 @@ const locales = {
       taskTitlePlaceholder: 'E.g. Prepare the meeting',
       taskNotesPlaceholder: 'Add useful details, links, or quick notes',
       addTask: 'Add task',
-      presetColumn: 'Cose da fare',
+      // Il backend traduce le colonne preset (bacheca.default_columns.todo):
+      // in inglese e "To do", non l'italiano "Cose da fare".
+      presetColumn: 'To do',
     },
     diaryNote: {
       title: 'A thought worth keeping',
